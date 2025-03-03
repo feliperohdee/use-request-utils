@@ -16,12 +16,14 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.]-compatible collec
   - [JWT Tokens](#jwt-tokens)
   - [Cryptography](#cryptography)
   - [Request Builder](#request-builder)
+  - [Router](#router)
 - [Usage Examples](#usage-examples)
   - [Basic Authentication](#basic-authentication)
   - [Bearer Authentication](#bearer-authentication)
   - [JWT Authentication](#jwt-authentication)
   - [Cookie Management](#cookie-management)
   - [Request Builder](#request-builder-usage)
+  - [Router](#router-usage)
 - [API Reference](#api-reference)
 - [Testing](#testing)
 - [Author](#author)
@@ -46,6 +48,7 @@ yarn add use-request-utils
 - 🔑 JWT token generation, verification, and management
 - 🔒 Cryptographic utilities including SHA-1 and SHA-256 hashing
 - 🛠️ Request builder for simplified HTTP request creation
+- 🧭 Fast and flexible routing with path parameter support
 - 🧩 Modular architecture for easy integration
 - ⚡ Browser-compatible implementation using Web Crypto API
 - 📦 TypeScript support with comprehensive type definitions
@@ -77,6 +80,10 @@ yarn add use-request-utils
 ### Request Builder
 
 - **request-builder**: Utility for building HTTP requests with support for various data formats, headers, cookies, and query parameters
+
+### Router
+
+- **Router**: Fast and flexible routing implementation with support for path parameters, patterns, and wildcards
 
 ## Usage Examples
 
@@ -238,6 +245,38 @@ fetch(getRequest)
 	.then(data => console.log(data));
 ```
 
+### Router Usage
+
+```typescript
+import Router from 'use-request-utils/router';
+
+// Create a router instance
+const router = new Router<YourHandlerType>();
+
+// Add routes
+router.add('GET', '/users', handleGetUsers);
+router.add('POST', '/users', handleCreateUser);
+router.add('GET', '/users/:id', handleGetUserById);
+router.add('PUT', '/users/:id', handleUpdateUser);
+router.add('DELETE', '/users/:id', handleDeleteUser);
+
+// Add route with pattern matching
+router.add('GET', '/articles/:slug{[a-z0-9-]+}', handleGetArticle);
+
+// Add route with optional parameter
+router.add('GET', '/products/:category?', handleGetProducts);
+
+// Add catch-all route
+router.add('ALL', '*', handleNotFound);
+
+// Match a path
+const handlers = router.match('GET', '/users/123');
+// Returns: [{ handler: handleGetUserById, pathParams: { id: 123 }, rawPath: '/users/:id' }]
+
+// Path parameters are automatically inferred to the correct type
+// Numbers are converted to numbers, booleans to booleans, etc.
+```
+
 ## API Reference
 
 ### Auth Classes
@@ -393,6 +432,42 @@ type Options = {
   signal?: AbortSignal;
 };
 ```
+
+### Router
+
+```typescript
+// Create a router
+const router = new Router<T>();
+
+// Add a route
+router.add(method: string, path: string, handler: T): void
+
+// Match a path, returns array of matches
+router.match(method: string, path: string): Array<{
+  handler: T;
+  pathParams: Record<string, unknown>;
+  rawPath: string;
+}>
+
+// Path patterns:
+// - Static paths: '/users', '/articles'
+// - Path parameters: '/users/:id', '/articles/:category/:slug'
+// - Pattern matching: '/users/:id{\\d+}', '/articles/:slug{[a-z0-9-]+}'
+// - Optional parameters: '/products/:category?'
+// - Wildcard: '/*', '*'
+```
+
+### Path Parameter Features
+
+- **Automatic type inference**: Path parameters are automatically converted to their corresponding JavaScript types
+  - Numbers: `/users/123` → `{ id: 123 }`
+  - Booleans: `/settings/true` → `{ enabled: true }`
+  - Strings: `/users/john` → `{ username: "john" }`
+- **Pattern matching**: Define patterns for path parameters using regular expressions
+  - `'/users/:id{\\d+}'` - Only matches numeric IDs
+  - `'/articles/:slug{[a-z0-9-]+}'` - Only matches slugs with lowercase letters, numbers, and hyphens
+- **Optional parameters**: Make path parameters optional with the `?` suffix
+  - `'/products/:category?'` - Matches both `/products` and `/products/electronics`
 
 ## Testing
 

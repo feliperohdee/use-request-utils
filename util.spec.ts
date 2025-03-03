@@ -15,4 +15,14 @@ describe('/util', () => {
 			expect(date.getTime()).toBeGreaterThan(now.getTime());
 		});
 	});
+
+	describe('pathJoin', () => {
+		it('should join paths', () => {
+			expect(util.pathJoin('a', 'b', 'c')).toEqual('a/b/c');
+		});
+
+		it('should trim slashes', () => {
+			expect(util.pathJoin('/a/', '/b/', '/c/')).toEqual('a/b/c');
+		});
+	});
 });

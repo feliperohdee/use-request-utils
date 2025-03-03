@@ -918,6 +918,14 @@ use-http-error@^1.0.5:
   resolved "https://registry.yarnpkg.com/use-http-error/-/use-http-error-1.0.5.tgz#a37a54e9717b371a28ab70f07c3c9ded5aa9d2ef"
   integrity sha512-CtHR2mqrfh6jUmJvHx0b7HvO0vZmTkEbp1DxEuJi6tdGkRdnSKh8ZmC68jBrnCSsKgybsEqev/nmCZd2u+NRkg==
 
+use-infer@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/use-infer/-/use-infer-1.0.5.tgz#236d4636adefff6e309c1fe6750ae1fd8104b36f"
+  integrity sha512-VXHOOXAZMpVxlrv5AAxuL1jLnR9HTJ1Z7AeXgs+XQ4n6WqiXbO75/jpCss+dMqJeOmmBv+3hs3ALXT4fneSKaA==
+  dependencies:
+    "@types/lodash" "^4.17.14"
+    lodash "^4.17.21"
+
 use-json@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/use-json/-/use-json-1.0.0.tgz#bc52d060aa442b1ad5d292e777e2a784b7a5dc45"

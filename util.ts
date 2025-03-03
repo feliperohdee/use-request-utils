@@ -28,6 +28,15 @@ const parseDate = (input: Date | { days?: number; hours?: number; minutes?: numb
 	return now;
 };
 
+const pathJoin = (...args: string[]) => {
+	return _.map(args, token => {
+		return _.trim(token, '/');
+	})
+		.filter(Boolean)
+		.join('/');
+};
+
 export default {
-	parseDate
+	parseDate,
+	pathJoin
 };
