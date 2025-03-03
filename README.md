@@ -15,6 +15,7 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collec
   - [Cookies](#cookies)
   - [JWT Tokens](#jwt-tokens)
   - [Cryptography](#cryptography)
+  - [Headers](#headers)
   - [Request Builder](#request-builder)
   - [Router](#router)
 - [Usage Examples](#usage-examples)
@@ -22,6 +23,7 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collec
   - [Bearer Authentication](#bearer-authentication)
   - [JWT Authentication](#jwt-authentication)
   - [Cookie Management](#cookie-management)
+  - [Headers Management](#headers-management)
   - [Request Builder](#request-builder-usage)
   - [Router](#router-usage)
 - [API Reference](#api-reference)
@@ -47,6 +49,7 @@ yarn add use-request-utils
 - 🍪 Comprehensive cookie handling with support for signed cookies
 - 🔑 JWT token generation, verification, and management
 - 🔒 Cryptographic utilities including SHA-1 and SHA-256 hashing
+- 📋 Headers manipulation, merging, and conversion utilities
 - 🛠️ Request builder for simplified HTTP request creation
 - 🧭 Fast and flexible routing with path parameter support
 - 🧩 Modular architecture for easy integration
@@ -76,6 +79,10 @@ yarn add use-request-utils
 
 - **crypto**: Cryptographic functions like SHA-1 and SHA-256 hashing
 - **buffer**: Buffer manipulation and timing-safe comparison
+
+### Headers
+
+- **headers**: Utilities for managing HTTP headers, including creation from JSON, merging multiple headers, and converting to JSON format
 
 ### Request Builder
 
@@ -185,6 +192,28 @@ headers = await cookies.setSigned(headers, 'cookie-name', 'value', 'signing-secr
 
 // Delete a cookie
 headers = cookies.del(headers, 'cookie-name');
+```
+
+### Headers Management
+
+```typescript
+import headers from 'use-request-utils/headers';
+
+// Create Headers from a JSON object
+const myHeaders = headers.fromJson({
+	'content-type': 'application/json',
+	'x-api-key': 'your-api-key'
+});
+
+// Merge multiple headers together
+const mergedHeaders = headers.merge({ authorization: 'Bearer token123' }, new Headers({ 'content-type': 'application/json' }), {
+	'x-custom-header': 'custom-value'
+});
+// Result combines all headers, with later values overriding earlier ones
+
+// Convert Headers instance to a plain JavaScript object
+const headersObj = headers.toJson(myHeaders);
+// Result: { 'content-type': 'application/json', 'x-api-key': 'your-api-key' }
 ```
 
 ### Request Builder Usage
@@ -385,6 +414,19 @@ setSigned(headers: Headers, name: string, value: string, secret: string, options
 
 // Delete cookies
 del(headers: Headers, name: string, options?: CookieOptions): Headers
+```
+
+### Headers Utilities
+
+```typescript
+// Create Headers from a JSON object
+fromJson(json: HeadersInit): Headers
+
+// Merge multiple headers
+merge(...sources: (HeadersInit | null | undefined)[]): Headers
+
+// Convert Headers to a JSON object
+toJson(headers: Headers): Record<string, string>
 ```
 
 ### JWT Utilities
