@@ -1,6 +1,6 @@
 # use-request-utils
 
-A lightweight, browser-compatible collection of utilities for handling web request authentication, cookies, JWT tokens, and cryptographic operations.
+A lightweight, [browser, cloudflare workers, node, deno, etc.]-compatible collection of utilities for handling web request authentication, cookies, JWT tokens, and cryptographic operations.
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vitest](https://img.shields.io/badge/-Vitest-729B1B?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
@@ -15,11 +15,13 @@ A lightweight, browser-compatible collection of utilities for handling web reque
   - [Cookies](#cookies)
   - [JWT Tokens](#jwt-tokens)
   - [Cryptography](#cryptography)
+  - [Request Builder](#request-builder)
 - [Usage Examples](#usage-examples)
   - [Basic Authentication](#basic-authentication)
   - [Bearer Authentication](#bearer-authentication)
   - [JWT Authentication](#jwt-authentication)
   - [Cookie Management](#cookie-management)
+  - [Request Builder](#request-builder-usage)
 - [API Reference](#api-reference)
 - [Testing](#testing)
 - [Author](#author)
@@ -43,6 +45,7 @@ yarn add use-request-utils
 - 🍪 Comprehensive cookie handling with support for signed cookies
 - 🔑 JWT token generation, verification, and management
 - 🔒 Cryptographic utilities including SHA-1 and SHA-256 hashing
+- 🛠️ Request builder for simplified HTTP request creation
 - 🧩 Modular architecture for easy integration
 - ⚡ Browser-compatible implementation using Web Crypto API
 - 📦 TypeScript support with comprehensive type definitions
@@ -70,6 +73,10 @@ yarn add use-request-utils
 
 - **crypto**: Cryptographic functions like SHA-1 and SHA-256 hashing
 - **buffer**: Buffer manipulation and timing-safe comparison
+
+### Request Builder
+
+- **request-builder**: Utility for building HTTP requests with support for various data formats, headers, cookies, and query parameters
 
 ## Usage Examples
 
@@ -171,6 +178,64 @@ headers = await cookies.setSigned(headers, 'cookie-name', 'value', 'signing-secr
 
 // Delete a cookie
 headers = cookies.del(headers, 'cookie-name');
+```
+
+### Request Builder Usage
+
+```typescript
+import requestBuilder from 'use-request-utils/request-builder';
+
+// Simple GET request with query parameters
+const getRequest = requestBuilder('https://api.example.com/users', {
+	query: {
+		page: '1',
+		limit: '10',
+		tags: ['active', 'verified'] // Array parameters are supported
+	}
+});
+// Result: https://api.example.com/users?page=1&limit=10&tags=active&tags=verified
+
+// POST request with JSON body
+const jsonRequest = requestBuilder('https://api.example.com/users', {
+	method: 'POST',
+	json: {
+		name: 'John Doe',
+		email: 'john@example.com'
+	}
+});
+// Sets content-type: application/json automatically
+
+// POST request with form data
+const formRequest = requestBuilder('https://api.example.com/upload', {
+	method: 'POST',
+	form: {
+		username: 'johndoe',
+		files: ['file1.jpg', 'file2.jpg'] // Multiple values for the same field
+	}
+});
+
+// Request with cookies
+const cookieRequest = requestBuilder('https://api.example.com/dashboard', {
+	cookies: {
+		session: 'abc123',
+		preference: 'darkmode'
+	}
+});
+
+// Request with custom headers and abort controller
+const controller = new AbortController();
+const requestWithHeaders = requestBuilder('https://api.example.com/protected', {
+	headers: {
+		'api-key': 'secret-key',
+		'accept-language': 'en-US'
+	},
+	signal: controller.signal
+});
+
+// Fetch with the created request
+fetch(getRequest)
+	.then(response => response.json())
+	.then(data => console.log(data));
 ```
 
 ## API Reference
@@ -296,51 +361,37 @@ verify<P = any, H = any>(token: string, secret: string | JsonWebKey | CryptoKey,
 decode<P = any, H = any>(token: string): Jwt.Data<P, H>
 ```
 
-#### JWT Options
+### Request Builder
 
 ```typescript
-// Standard JWT payload properties
-type Payload<T = any> = {
-	iss?: string; // Issuer
-	sub?: string; // Subject
-	aud?: string | string[]; // Audience
-	exp?: number; // Expiration Time
-	nbf?: number; // Not Before
-	iat?: number; // Issued At
-	jti?: string; // JWT ID
-} & T; // Custom claims
+requestBuilder(input: string, options?: RequestBuilder.Options): Request
 
-// Algorithms supported
-type Algorithm = 'ES256' | 'ES384' | 'ES512' | 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512';
+// Options type
+type Options = {
+  // Raw body (string, FormData, or plain object that will be JSON-serialized)
+  body?: BodyInit | Record<string, unknown>;
 
-// Sign options
-type SignOptions<T> = {
-	alg?: Algorithm; // Algorithm to use (default: 'HS256')
-	encrypt?: boolean | { enc: 'A128GCM' | 'A192GCM' | 'A256GCM' }; // Enable encryption
-	header?: {
-		// Custom header claims
-		type?: string; // Token type (default: 'JWT')
-		[key: string]: any;
-	};
+  // Cookies to include in the request as cookie header
+  cookies?: Record<string, string>;
+
+  // Form data (FormData instance or record of field values)
+  form?: FormData | Record<string, string | string[]>;
+
+  // Request headers
+  headers?: HeadersInit | null | undefined;
+
+  // JSON body (automatically sets content-type: application/json)
+  json?: Record<string, unknown>;
+
+  // HTTP method (default: 'GET')
+  method?: string;
+
+  // Query parameters to append to the URL
+  query?: Record<string, string | string[]>;
+
+  // AbortSignal for cancellation
+  signal?: AbortSignal;
 };
-
-// Verify options
-type VerifyOptions = {
-	alg?: Algorithm; // Expected algorithm (default: 'HS256')
-	clockTolerance?: number; // Seconds to tolerate for clock skew
-	decrypt?: boolean; // Whether to decrypt the token
-};
-```
-
-### Cryptographic Utilities
-
-```typescript
-// Hashing
-sha256(data: string | boolean | number | object | ArrayBufferView | ArrayBuffer | ReadableStream): Promise<string | null>
-sha1(data: string | boolean | number | object | ArrayBufferView | ArrayBuffer | ReadableStream): Promise<string | null>
-
-// Timing-safe comparison
-timingSafeEqual(a: string | object | boolean, b: string | object | boolean, hashFunction?: (a: any) => Promise<string | null>): Promise<boolean>
 ```
 
 ## Testing
