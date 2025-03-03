@@ -1,6 +1,6 @@
 # use-request-utils
 
-A lightweight, [browser, cloudflare workers, node, deno, etc.]-compatible collection of utilities for handling web request authentication, cookies, JWT tokens, and cryptographic operations.
+A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collection of utilities for handling web request authentication, cookies, JWT tokens, and cryptographic operations.
 
 [![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vitest](https://img.shields.io/badge/-Vitest-729B1B?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
