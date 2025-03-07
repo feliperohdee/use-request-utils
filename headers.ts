@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import isNil from 'lodash/isNil';
+import isObject from 'lodash/isObject';
 
 const fromJson = (json: HeadersInit) => {
 	return new Headers(json);
@@ -8,18 +9,18 @@ const merge = (...sources: (HeadersInit | null | undefined)[]) => {
 	const result: Record<string, string> = {};
 
 	for (const source of sources) {
-		if (_.isNil(source)) {
+		if (isNil(source)) {
 			continue;
 		}
 
-		if (!_.isObject(source)) {
+		if (!isObject(source)) {
 			throw new TypeError('All arguments must be of type object');
 		}
 
 		const headers = new Headers(source);
 
 		for (const [key, value] of headers.entries()) {
-			if (_.isNil(value)) {
+			if (isNil(value)) {
 				delete result[key];
 			} else {
 				result[key] = value;

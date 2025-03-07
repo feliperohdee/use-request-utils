@@ -1,13 +1,16 @@
-import _ from 'lodash';
+import isDate from 'lodash/isDate';
+import isPlainObject from 'lodash/isPlainObject';
+import map from 'lodash/map';
+import trim from 'lodash/trim';
 
 const parseDate = (input: Date | { days?: number; hours?: number; minutes?: number }): Date => {
 	const now = new Date();
 
-	if (_.isDate(input)) {
+	if (isDate(input)) {
 		return input;
 	}
 
-	if (_.isPlainObject(input)) {
+	if (isPlainObject(input)) {
 		let ms = 0;
 
 		if (input.days) {
@@ -29,8 +32,8 @@ const parseDate = (input: Date | { days?: number; hours?: number; minutes?: numb
 };
 
 const pathJoin = (...args: string[]) => {
-	return _.map(args, token => {
-		return _.trim(token, '/');
+	return map(args, token => {
+		return trim(token, '/');
 	})
 		.filter(Boolean)
 		.join('/');

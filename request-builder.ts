@@ -1,5 +1,10 @@
-import _ from 'lodash';
+import forEach from 'lodash/forEach';
+import includes from 'lodash/includes';
+import isArray from 'lodash/isArray';
+import isNil from 'lodash/isNil';
+import isPlainObject from 'lodash/isPlainObject';
 import JSON from 'use-json';
+import upperCase from 'lodash/upperCase';
 
 import cookieSerializer from './cookie-serializer';
 
@@ -28,9 +33,9 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 	let url = new URL(input);
 
 	if (query) {
-		_.forEach(query, (value, key) => {
-			if (_.isArray(value)) {
-				_.forEach(value, v => {
+		forEach(query, (value, key) => {
+			if (isArray(value)) {
+				forEach(value, v => {
 					url.searchParams.append(key, v);
 				});
 			} else {
@@ -44,20 +49,20 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 
 	if (form instanceof FormData) {
 		requestBody = form;
-	} else if (_.isPlainObject(form)) {
+	} else if (isPlainObject(form)) {
 		const formData = new FormData();
 
-		_.forEach(form, (value, key) => {
-			if (_.isArray(value)) {
-				_.forEach(value, v => {
-					if (_.isNil(v)) {
+		forEach(form, (value, key) => {
+			if (isArray(value)) {
+				forEach(value, v => {
+					if (isNil(v)) {
 						return;
 					}
 
 					formData.append(key, v);
 				});
 			} else {
-				if (_.isNil(value)) {
+				if (isNil(value)) {
 					return;
 				}
 
@@ -68,7 +73,7 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 		requestBody = formData;
 	}
 
-	if (_.isPlainObject(json)) {
+	if (isPlainObject(json)) {
 		requestBody = JSON.stringify(json);
 		requestHeaders.set('content-type', 'application/json');
 	}
@@ -76,7 +81,7 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 	if (body) {
 		if (body instanceof FormData) {
 			requestBody = body;
-		} else if (_.isPlainObject(body)) {
+		} else if (isPlainObject(body)) {
 			requestBody = JSON.stringify(body);
 			requestHeaders.set('content-type', 'application/json');
 		} else {
@@ -87,7 +92,7 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 	if (cookies) {
 		let requestCookies: string[] = [];
 
-		_.forEach(cookies, (value, key) => {
+		forEach(cookies, (value, key) => {
 			requestCookies = requestCookies.concat(cookieSerializer.serialize(key, value, { path: '/' }));
 		});
 
@@ -107,7 +112,7 @@ const requestBuilder = (input: string, options: RequestBuilder.Options = {}): Re
 		headers: requestHeaders
 	};
 
-	const setBody = !_.includes(['GET', 'HEAD', 'OPTIONS'], _.upperCase(method));
+	const setBody = !includes(['GET', 'HEAD', 'OPTIONS'], upperCase(method));
 
 	if (requestBody && setBody) {
 		requestInit.body = requestBody;

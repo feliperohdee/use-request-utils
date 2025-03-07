@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import isString from 'lodash/isString';
 import JSON from 'use-json';
 
 import { SubtleCryptoImportKeyAlgorithm } from './jwt';
@@ -62,7 +62,7 @@ const decodePayload = <T = any>(raw: string): T | undefined => {
 };
 
 const deriveKey = async (secret: string | JsonWebKey | CryptoKey, enc: string): Promise<CryptoKey> => {
-	const keyData = (_.isString(secret) ? new TextEncoder().encode(secret) : secret) as BufferSource;
+	const keyData = (isString(secret) ? new TextEncoder().encode(secret) : secret) as BufferSource;
 	const rawKey =
 		secret instanceof CryptoKey
 			? secret

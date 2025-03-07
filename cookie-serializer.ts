@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import isNumber from 'lodash/isNumber';
 
 namespace CookieSerializer {
 	export type PartitionConstraint = { partition: true; secure: true } | { partition?: boolean; secure?: boolean }; // reset to default
@@ -51,7 +51,7 @@ const _serialize = (name: string, value: string, options: CookieSerializer.Optio
 		}
 	}
 
-	if (options && _.isNumber(options.maxAge) && options.maxAge >= 0) {
+	if (options && isNumber(options.maxAge) && options.maxAge >= 0) {
 		if (options.maxAge > 34560000) {
 			// FIXME: replace link to RFC
 			// https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-13#section-4.1.2.2

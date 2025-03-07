@@ -1,5 +1,10 @@
-import _ from 'lodash';
+import floor from 'lodash/floor';
+import isObject from 'lodash/isObject';
+import isPlainObject from 'lodash/isPlainObject';
+import isString from 'lodash/isString';
 import JSON from 'use-json';
+import now from 'lodash/now';
+import size from 'lodash/size';
 
 import util from './jwt-util';
 
@@ -81,7 +86,7 @@ const sign = async <P = any, H = any>(
 	secret: string | JsonWebKey | CryptoKey,
 	options: Jwt.SignOptions<H> | Jwt.Algorithm = 'HS256'
 ): Promise<string> => {
-	if (_.isString(options)) {
+	if (isString(options)) {
 		options = { alg: options };
 	}
 
@@ -91,15 +96,15 @@ const sign = async <P = any, H = any>(
 		...options
 	};
 
-	if (!_.isPlainObject(payload)) {
+	if (!isPlainObject(payload)) {
 		throw new Error('Payload must be an object');
 	}
 
-	if (!_.isString(secret) && !_.isObject(secret)) {
+	if (!isString(secret) && !isObject(secret)) {
 		throw new Error('Secret must be a string, a JWK object or a CryptoKey object');
 	}
 
-	if (!_.isString(options.alg)) {
+	if (!isString(options.alg)) {
 		throw new Error('Options.alg must be a string');
 	}
 
@@ -109,7 +114,7 @@ const sign = async <P = any, H = any>(
 		throw new Error('Algorithm not found');
 	}
 
-	payload.iat = _.floor(_.now() / 1000);
+	payload.iat = floor(now() / 1000);
 
 	const partialToken = `${util.textToBase64Url(
 		JSON.stringify({
@@ -158,7 +163,7 @@ const verify = async <P = any, H = any>(
 	secret: string | JsonWebKey | CryptoKey,
 	options: Jwt.VerifyOptions | Jwt.Algorithm = 'HS256'
 ): Promise<Jwt.Data<P, H>> => {
-	if (_.isString(options)) {
+	if (isString(options)) {
 		options = { alg: options };
 	}
 
@@ -168,15 +173,15 @@ const verify = async <P = any, H = any>(
 		...options
 	};
 
-	if (!_.isString(token)) {
+	if (!isString(token)) {
 		throw new Error('Token must be a string');
 	}
 
-	if (!_.isString(secret) && !_.isObject(secret)) {
+	if (!isString(secret) && !isObject(secret)) {
 		throw new Error('Secret must be a string, a JWK object or a CryptoKey object');
 	}
 
-	if (!_.isString(options.alg)) {
+	if (!isString(options.alg)) {
 		throw new Error('Options.alg must be a string');
 	}
 
@@ -221,17 +226,16 @@ const verify = async <P = any, H = any>(
 		throw new Error('ALG_MISMATCH');
 	}
 
-	if (!payload || !_.size(payload)) {
+	if (!payload || !size(payload)) {
 		throw new Error('INVALID_PAYLOAD');
 	}
 
-	const now = _.floor(_.now() / 1000);
-
-	if (payload.nbf && payload.nbf > now && payload.nbf - now > (options.clockTolerance ?? 0)) {
+	const nowSeconds = floor(now() / 1000);
+	if (payload.nbf && payload.nbf > nowSeconds && payload.nbf - nowSeconds > (options.clockTolerance ?? 0)) {
 		throw new Error('NBF');
 	}
 
-	if (payload.exp && payload.exp <= now && now - payload.exp > (options.clockTolerance ?? 0)) {
+	if (payload.exp && payload.exp <= nowSeconds && nowSeconds - payload.exp > (options.clockTolerance ?? 0)) {
 		throw new Error('EXP');
 	}
 

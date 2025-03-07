@@ -1,5 +1,7 @@
-import _ from 'lodash';
 import HttpError from 'use-http-error';
+import isArray from 'lodash/isArray';
+import isFunction from 'lodash/isFunction';
+import isString from 'lodash/isString';
 
 import buffer from './buffer';
 
@@ -17,7 +19,7 @@ class AuthBearer {
 	private options: AuthBearer.Options;
 
 	constructor(options: AuthBearer.Options) {
-		if (!options.token && !_.isFunction(options.token)) {
+		if (!options.token && !isFunction(options.token)) {
 			throw new Error('Bearer auth requires options for "token"');
 		}
 
@@ -47,11 +49,11 @@ class AuthBearer {
 
 		let equal = false;
 
-		if (_.isFunction(this.options.token)) {
+		if (isFunction(this.options.token)) {
 			equal = await this.options.token(match[1]);
-		} else if (_.isString(this.options.token)) {
+		} else if (isString(this.options.token)) {
 			equal = await buffer.timingSafeEqual(this.options.token, match[1], this.options.hashFunction);
-		} else if (_.isArray(this.options.token) && this.options.token.length > 0) {
+		} else if (isArray(this.options.token) && this.options.token.length > 0) {
 			for (const token of this.options.token) {
 				if (await buffer.timingSafeEqual(token, match[1], this.options.hashFunction)) {
 					equal = true;

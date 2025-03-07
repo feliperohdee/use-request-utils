@@ -1,5 +1,10 @@
-import _ from 'lodash';
+import floor from 'lodash/floor';
 import HttpError from 'use-http-error';
+import isString from 'lodash/isString';
+import isUndefined from 'lodash/isUndefined';
+import last from 'lodash/last';
+import now from 'lodash/now';
+import size from 'lodash/size';
 
 import { CookieSerializer } from './cookie-serializer';
 import cookies from './cookies';
@@ -40,7 +45,7 @@ class AuthJwt {
 		if (this.options.cookie && input instanceof Headers) {
 			const headers = input;
 
-			if (_.isString(this.options.cookie)) {
+			if (isString(this.options.cookie)) {
 				token = cookies.get(headers, this.options.cookie);
 			} else if (this.options.cookie.secret) {
 				token = await cookies.getSigned(headers, this.options.cookie.name, this.options.cookie.secret, this.options.cookie.options?.prefix);
@@ -60,17 +65,17 @@ class AuthJwt {
 
 			const parts = token.split(/\s+/);
 
-			if (input instanceof Headers && _.size(parts) !== 2) {
+			if (input instanceof Headers && size(parts) !== 2) {
 				throw await this.unauthorizedError('Bearer error="invalid_credentials"');
 			}
 
-			token = _.last(parts) as string;
+			token = last(parts) as string;
 		}
 
 		try {
 			const { payload } = await jwt.verify<P>(token, this.options.secret, {
 				alg: this.options.alg || 'HS256',
-				decrypt: !_.isUndefined(this.options.encrypt)
+				decrypt: !isUndefined(this.options.encrypt)
 			});
 
 			if (payload && revalidate) {
@@ -78,7 +83,7 @@ class AuthJwt {
 					const currentTtl = payload.exp - payload.iat;
 
 					if (currentTtl > 0) {
-						return this.sign(payload, new Date(_.now() + currentTtl * 1000));
+						return this.sign(payload, new Date(now() + currentTtl * 1000));
 					}
 				}
 
@@ -119,7 +124,7 @@ class AuthJwt {
 		let headers = new Headers();
 
 		if (this.options.cookie) {
-			if (_.isString(this.options.cookie)) {
+			if (isString(this.options.cookie)) {
 				headers = cookies.set(headers, this.options.cookie, '', { expires: new Date(0), maxAge: 0, path: '/' });
 			} else if (this.options.cookie.secret) {
 				headers = await cookies.setSigned(headers, this.options.cookie.name, '', this.options.cookie.secret, {
@@ -139,11 +144,11 @@ class AuthJwt {
 		const exp = revalidateExpires || this.options.expires;
 
 		if (exp) {
-			payload.exp = _.floor(util.parseDate(exp).getTime() / 1000);
+			payload.exp = floor(util.parseDate(exp).getTime() / 1000);
 		}
 
 		if (this.options.notBefore) {
-			payload.nbf = _.floor(util.parseDate(this.options.notBefore).getTime() / 1000);
+			payload.nbf = floor(util.parseDate(this.options.notBefore).getTime() / 1000);
 		}
 
 		const token = await jwt.sign(payload, this.options.secret, {
@@ -152,7 +157,7 @@ class AuthJwt {
 		});
 
 		if (this.options.cookie) {
-			if (_.isString(this.options.cookie)) {
+			if (isString(this.options.cookie)) {
 				headers = cookies.set(headers, this.options.cookie, token);
 			} else if (this.options.cookie.secret) {
 				headers = await cookies.setSigned(

@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import { afterEach, beforeEach, describe, it, expect, vi, beforeAll } from 'vitest';
+import floor from 'lodash/floor';
 import HttpError from 'use-http-error';
 
 import AuthJwt from './auth-jwt';
@@ -448,7 +448,7 @@ describe('/authJwt', () => {
 				expect(headers.has('authorization')).toBeTruthy();
 				expect(payload).toEqual({
 					a: 1,
-					exp: _.floor(now.getTime() / 1000),
+					exp: floor(now.getTime() / 1000),
 					iat: payload?.iat
 				});
 				expect(token).toBeTypeOf('string');
@@ -456,7 +456,7 @@ describe('/authJwt', () => {
 				const { payload: payload2 } = await auth.authenticate(headers);
 				expect(payload2).toEqual({
 					a: 1,
-					exp: _.floor(now.getTime() / 1000),
+					exp: floor(now.getTime() / 1000),
 					iat: payload2.iat
 				});
 			});

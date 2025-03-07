@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import isString from 'lodash/isString';
+import reduce from 'lodash/reduce';
 
 namespace CookieParser {
 	export type Cookies = Record<string, string>;
@@ -11,7 +12,7 @@ const alg = {
 };
 
 const getCryptoKey = async (secret: string | BufferSource): Promise<CryptoKey> => {
-	const secretBuf = _.isString(secret) ? new TextEncoder().encode(secret) : secret;
+	const secretBuf = isString(secret) ? new TextEncoder().encode(secret) : secret;
 
 	return crypto.subtle.importKey('raw', secretBuf, alg, false, ['sign', 'verify']);
 };
@@ -38,7 +39,7 @@ const validCookieValueRegEx = /^[ !#-:<-[\]-~]*$/;
 const parse = (cookie: string, name?: string): CookieParser.Cookies => {
 	const pairs = cookie.trim().split(';');
 
-	return _.reduce<string, CookieParser.Cookies>(
+	return reduce<string, CookieParser.Cookies>(
 		pairs,
 		(parsedCookie, pairStr) => {
 			pairStr = pairStr.trim();
