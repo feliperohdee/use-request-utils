@@ -4,7 +4,7 @@ import util from './util';
 
 const emptyPathParams = Object.create(null);
 const splitPathRe = /\/(:\w+(?:{(?:(?:{[\d,]+})|[^}])+})?)|\/[^\/\?]+|(\?)/g;
-const splitByStarRe = /\*/;
+const splitByWildcardRe = /\*/;
 
 namespace Router {
 	export interface Instance<T> {
@@ -105,10 +105,10 @@ class Router<T> implements Router.Instance<T> {
 				continue;
 			}
 
-			const hasStar = routePath.indexOf('*') !== -1;
+			const hasWildcard = routePath.indexOf('*') !== -1;
 			const hasLabel = routePath.indexOf(':') !== -1;
 
-			if (!hasStar && !hasLabel) {
+			if (!hasWildcard && !hasLabel) {
 				if (routePath === path || routePath + '/' === path) {
 					handlers = [
 						...handlers,
@@ -119,9 +119,9 @@ class Router<T> implements Router.Instance<T> {
 						}
 					];
 				}
-			} else if (hasStar && !hasLabel) {
-				const endsWithStar = routePath.charCodeAt(routePath.length - 1) === 42;
-				const parts = (endsWithStar ? routePath.slice(0, -2) : routePath).split(splitByStarRe);
+			} else if (hasWildcard && !hasLabel) {
+				const endsWithWildcard = routePath.charCodeAt(routePath.length - 1) === 42;
+				const parts = (endsWithWildcard ? routePath.slice(0, -2) : routePath).split(splitByWildcardRe);
 				const lastIndex = parts.length - 1;
 
 				for (let j = 0, pos = 0, len = parts.length; j < len; j++) {
@@ -135,7 +135,7 @@ class Router<T> implements Router.Instance<T> {
 					pos += part.length;
 
 					if (j === lastIndex) {
-						if (!endsWithStar && pos !== path.length && !(pos === path.length - 1 && path.charCodeAt(pos) === 47)) {
+						if (!endsWithWildcard && pos !== path.length && !(pos === path.length - 1 && path.charCodeAt(pos) === 47)) {
 							continue ROUTES_LOOP;
 						}
 					} else {
@@ -157,7 +157,7 @@ class Router<T> implements Router.Instance<T> {
 						rawPath: routeRawPath
 					}
 				];
-			} else if (hasLabel && !hasStar) {
+			} else if (hasLabel && !hasWildcard) {
 				const pathParams: Record<string, unknown> = Object.create(null);
 				const parts = routePath.match(splitPathRe) as string[];
 				const lastIndex = parts.length - 1;
@@ -227,8 +227,8 @@ class Router<T> implements Router.Instance<T> {
 						rawPath: routeRawPath
 					}
 				];
-			} else if (hasLabel && hasStar) {
-				throw new UnsupportedError();
+			} else if (hasLabel && hasWildcard) {
+				throw new Error(`Unsupported route pattern "${routeMethod} ${routePath}" because it contains both a label and wildcard.`);
 			}
 		}
 
@@ -236,7 +236,4 @@ class Router<T> implements Router.Instance<T> {
 	}
 }
 
-class UnsupportedError extends Error {}
-
-export { UnsupportedError };
 export default Router;

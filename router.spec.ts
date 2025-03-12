@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import Router, { UnsupportedError } from './router';
+import Router from './router';
 
 describe('/router', () => {
 	let router: Router<string>;
@@ -50,7 +50,7 @@ describe('/router', () => {
 
 				throw new Error('Expected to throw');
 			} catch (err) {
-				expect(err).toBeInstanceOf(UnsupportedError);
+				expect((err as Error).message).toBe('Unsupported route pattern "GET /entry/:id/*" because it contains both a label and wildcard.');
 			}
 		});
 	});
