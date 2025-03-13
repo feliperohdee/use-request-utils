@@ -77,6 +77,9 @@ const getAllSigned = async (headers: Headers, secret: string) => {
 };
 
 const set = (headers: Headers, name: string, value: string, options?: CookieSerializer.Options): Headers => {
+	// clone the headers object to avoid mutating the original
+	headers = new Headers(headers);
+
 	// Cookie names prefixed with __Secure- can be used only if they are set with the secure attribute.
 	// Cookie names prefixed with __Host- can be used only if they are set with the secure attribute, must have a path of / (meaning any path at the host)
 	// and must not have a Domain attribute.
@@ -108,6 +111,8 @@ const setSigned = async (
 	secret: string,
 	options?: CookieSerializer.Options
 ): Promise<Headers> => {
+	// clone the headers object to avoid mutating the original
+
 	let cookie;
 	let signature = await cookieParser.makeSignature(value, secret);
 

@@ -26,7 +26,7 @@
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"dependencies": {
 		"lodash": "^4.17.21",
 		"use-http-error": "^1.0.5",
