@@ -1,5 +1,8 @@
-import _ from 'lodash';
 import headers from 'use-request-utils/headers';
+import includes from 'lodash/includes';
+import now from 'lodash/now';
+import startsWith from 'lodash/startsWith';
+import trim from 'lodash/trim';
 
 import { BROWSER } from './constants';
 import util from './util';
@@ -21,7 +24,7 @@ const CACHEABLE_CONTENT_TYPES = ['application/javascript', 'application/json', '
 const MAX_TTL_SECONDS = 15; // 15 seconds
 
 const getAgeSeconds = (ts: number) => {
-	return (_.now() - ts) / 1000;
+	return (now() - ts) / 1000;
 };
 
 class EphemeralCache {
@@ -43,7 +46,7 @@ class EphemeralCache {
 	}
 
 	get(key: string, ttlSeconds: number = 0): Response | null {
-		key = _.trim(key);
+		key = trim(key);
 
 		if (!key) {
 			return null;
@@ -107,12 +110,12 @@ class EphemeralCache {
 		const cached = this.cache.get(key);
 
 		if (cached) {
-			cached.ts = _.now();
+			cached.ts = now();
 		}
 	}
 
 	async set(key: string, response: Response, ttlSeconds: number = 0): Promise<void> {
-		key = _.trim(key);
+		key = trim(key);
 		ttlSeconds = Math.min(ttlSeconds, MAX_TTL_SECONDS);
 
 		if (!key) {
@@ -123,17 +126,17 @@ class EphemeralCache {
 			return;
 		}
 
-		const now = _.now();
+		const ts = now();
 
 		this.cache.set(key, {
 			body: await util.readStreamToArrayBuffer(response.body),
 			headers: headers.merge(response.headers, {
-				'ephemeral-cache-ts': `${now}`,
+				'ephemeral-cache-ts': `${ts}`,
 				'ephemeral-cache-ttl': `${ttlSeconds}`
 			}),
 			status: response.status,
 			statusText: response.statusText,
-			ts: now,
+			ts,
 			ttlSeconds
 		});
 
@@ -148,7 +151,7 @@ class EphemeralCache {
 	async wrap(key: string, fn: () => Promise<Response>, options: { refreshTtl?: boolean; ttlSeconds: number }): Promise<Response> {
 		const { refreshTtl = false, ttlSeconds = 0 } = options;
 
-		key = _.trim(key);
+		key = trim(key);
 
 		if (key && ttlSeconds > 0) {
 			const cached = this.get(key);
@@ -178,9 +181,9 @@ class EphemeralCache {
 				const res = await promise;
 				const contentType = res.headers.get('content-type') || '';
 				const cacheable =
-					!_.includes(contentType, 'stream') &&
+					!includes(contentType, 'stream') &&
 					CACHEABLE_CONTENT_TYPES.some(type => {
-						return _.startsWith(contentType, type);
+						return startsWith(contentType, type);
 					});
 
 				if (cacheable && res.body) {

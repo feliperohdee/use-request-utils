@@ -64,6 +64,18 @@ describe('/util', () => {
 		});
 	});
 
+	describe('safeParse', () => {
+		it('should parse JSON', () => {
+			const obj = { foo: 'bar' };
+			const str = JSON.stringify(obj);
+			expect(util.safeParse(str)).toEqual(obj);
+		});
+
+		it('should return string for invalid JSON', () => {
+			expect(util.safeParse('{')).toEqual('{');
+		});
+	});
+
 	describe('stringToStreamWithDelay', () => {
 		it('should convert strings to a stream with delay', async () => {
 			vi.useFakeTimers();

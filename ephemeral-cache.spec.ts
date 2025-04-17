@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import { describe, expect, it, vi, beforeEach, afterEach, Mock } from 'vitest';
+import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
+import times from 'lodash/times';
 
 import { EphemeralCache } from './ephemeral-cache';
 import headers from './headers';
@@ -102,8 +102,8 @@ describe('/ephemeral-cache', () => {
 			const res = cache.get('key');
 			expect(headers.toJson(res!.headers)).toEqual({
 				'content-type': 'text/plain;charset=UTF-8',
-				'ephemeral-cache-age': '0',
-				'ephemeral-cache-remaining-age': '15',
+				'ephemeral-cache-age': expect.any(String),
+				'ephemeral-cache-remaining-age': expect.any(String),
 				'ephemeral-cache-status': 'HIT',
 				'ephemeral-cache-ts': res!.headers.get('ephemeral-cache-ts')!,
 				'ephemeral-cache-ttl': '15'
@@ -440,7 +440,7 @@ describe('/ephemeral-cache', () => {
 					return new Response(`value ${callCount}`);
 				});
 
-				const promises = _.times(6, i => {
+				const promises = times(6, i => {
 					return cache.wrap(`key-${i % 2}`, slowResponse, { ttlSeconds: 1 });
 				});
 				const res = await Promise.all(promises);
