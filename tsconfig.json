@@ -6,8 +6,9 @@
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"outDir": "./dist",
+		"rootDir": "./",
 		"strict": true,
 		"target": "ESNext"
 	},
-	"exclude": ["coverage", "dist", "node_modules", "**/*.spec.ts"]
+	"exclude": ["./coverage", "./dist", "./node_modules", "./**/*.spec.ts"]
 }

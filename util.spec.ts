@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import util from './util';
 
@@ -23,6 +23,99 @@ describe('/util', () => {
 
 		it('should trim slashes', () => {
 			expect(util.pathJoin('/a/', '/b/', '/c/')).toEqual('a/b/c');
+		});
+	});
+
+	describe('readStream', () => {
+		it('should convert null to empty string', async () => {
+			const res = await util.readStream(null);
+			expect(res).toEqual('');
+		});
+
+		it('should convert a readable stream to a string', async () => {
+			const stream = util.stringToStream('Hello, world!');
+			const res = await util.readStream(stream);
+			expect(res).toEqual('Hello, world!');
+		});
+
+		it('should call onRead callback for each chunk', async () => {
+			const stream = util.stringToStream('Hello,', ' world!');
+			const onRead = vi.fn();
+			const res = await util.readStream(stream, onRead);
+
+			expect(res).toEqual('Hello, world!');
+			expect(onRead).toHaveBeenCalledTimes(2);
+			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), 'Hello,');
+			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), ' world!');
+		});
+	});
+
+	describe('readStreamToArrayBuffer', () => {
+		it('should convert a readable stream to an array buffer', async () => {
+			const stream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new Uint8Array([1, 2, 3]));
+					controller.close();
+				}
+			});
+
+			const arrayBuffer = await util.readStreamToArrayBuffer(stream);
+			expect(new Uint8Array(arrayBuffer)).toEqual(new Uint8Array([1, 2, 3]));
+		});
+	});
+
+	describe('stringToStreamWithDelay', () => {
+		it('should convert strings to a stream with delay', async () => {
+			vi.useFakeTimers();
+			const delay = 100;
+			const stream = util.stringToStreamWithDelay(delay, 'Hello,', ' world!');
+
+			const readStreamPromise = util.readStream(stream);
+
+			await vi.advanceTimersByTimeAsync(delay);
+			await vi.advanceTimersByTimeAsync(delay);
+
+			const res = await readStreamPromise;
+
+			expect(res).toEqual('Hello, world!');
+			vi.useRealTimers();
+		});
+
+		it('should not delay when delay is 0', async () => {
+			const stream = util.stringToStreamWithDelay(0, 'Hello,', ' world!');
+			const res = await util.readStream(stream);
+
+			expect(res).toEqual('Hello, world!');
+		});
+	});
+
+	describe('stringToStream', () => {
+		it('should convert a string to a stream', async () => {
+			const stream = util.stringToStream('Hello, world!\n', 'Hello, world!');
+			const res = await util.readStream(stream);
+
+			expect(res).toEqual('Hello, world!\nHello, world!');
+		});
+
+		it('should call onRead callback for each chunk', async () => {
+			const stream = util.stringToStream('Hello,', ' world!');
+			const onRead = vi.fn();
+			const res = await util.readStream(stream, onRead);
+
+			expect(res).toEqual('Hello, world!');
+			expect(onRead).toHaveBeenCalledTimes(2);
+			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), 'Hello,');
+			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), ' world!');
+		});
+	});
+
+	describe('wait', () => {
+		it('should wait for a specified amount of time', async () => {
+			const startTime = Date.now();
+			await util.wait(100);
+			const endTime = Date.now();
+
+			expect(endTime - startTime).toBeGreaterThanOrEqual(100);
 		});
 	});
 });

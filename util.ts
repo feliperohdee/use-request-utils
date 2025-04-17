@@ -39,7 +39,96 @@ const pathJoin = (...args: string[]) => {
 		.join('/');
 };
 
+const readStream = async (stream: ReadableStream | null, onRead?: (chunk: Uint8Array, decoded: string) => void) => {
+	if (!stream) {
+		return '';
+	}
+
+	let reader = stream.getReader();
+	let textDecoder = new TextDecoder();
+	let result = '';
+
+	const read = async () => {
+		const { done, value } = await reader.read();
+
+		if (done) {
+			return result;
+		}
+
+		const decoded = textDecoder.decode(value);
+
+		if (onRead) {
+			onRead(value, decoded);
+		}
+
+		result += decoded;
+		return read();
+	};
+
+	return read();
+};
+
+const readStreamToArrayBuffer = async (stream: ReadableStream): Promise<ArrayBuffer> => {
+	const reader = stream.getReader();
+	const chunks: Uint8Array[] = [];
+	let totalLength = 0;
+
+	while (true) {
+		const { done, value } = await reader.read();
+
+		if (done) {
+			break;
+		}
+
+		chunks.push(value);
+		totalLength += value.length;
+	}
+
+	const result = new Uint8Array(totalLength);
+	let offset = 0;
+
+	for (const chunk of chunks) {
+		result.set(chunk, offset);
+		offset += chunk.length;
+	}
+
+	return result.buffer;
+};
+
+const stringToStream = (...str: string[]) => {
+	return stringToStreamWithDelay(0, ...str);
+};
+
+const stringToStreamWithDelay = (delay: number = 0, ...str: string[]) => {
+	const encoder = new TextEncoder();
+
+	return new ReadableStream({
+		async start(controller) {
+			for (const s of str) {
+				const uint8Array = encoder.encode(s);
+				controller.enqueue(uint8Array);
+
+				if (delay > 0) {
+					await wait(delay);
+				}
+			}
+			controller.close();
+		}
+	});
+};
+
+const wait = (ms: number) => {
+	return new Promise(resolve => {
+		setTimeout(resolve, ms);
+	});
+};
+
 export default {
 	parseDate,
-	pathJoin
+	pathJoin,
+	readStream,
+	readStreamToArrayBuffer,
+	stringToStream,
+	stringToStreamWithDelay,
+	wait
 };

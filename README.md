@@ -18,6 +18,7 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collec
   - [Headers](#headers)
   - [Request Builder](#request-builder)
   - [Router](#router)
+  - [Ephemeral Cache](#ephemeral-cache)
 - [Usage Examples](#usage-examples)
   - [Basic Authentication](#basic-authentication)
   - [Bearer Authentication](#bearer-authentication)
@@ -26,6 +27,7 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collec
   - [Headers Management](#headers-management)
   - [Request Builder](#request-builder-usage)
   - [Router](#router-usage)
+  - [Ephemeral Cache](#ephemeral-cache-usage)
 - [API Reference](#api-reference)
 - [Testing](#testing)
 - [Author](#author)
@@ -91,6 +93,10 @@ yarn add use-request-utils
 ### Router
 
 - **Router**: Fast and flexible routing implementation with support for path parameters, patterns, and wildcards
+
+### Ephemeral Cache
+
+- **ephemeral-cache**: Lightweight in-memory caching system for HTTP responses with automatic expiration
 
 ## Usage Examples
 
@@ -306,6 +312,34 @@ const handlers = router.match('GET', '/users/123');
 // Numbers are converted to numbers, booleans to booleans, etc.
 ```
 
+### Ephemeral Cache Usage
+
+```typescript
+import ephemeralCache from 'use-request-utils/ephemeral-cache';
+
+// Simple caching of responses
+const response = await fetch('https://api.example.com/data');
+await ephemeralCache.set('api-data', response, 5); // Cache for 5 seconds
+
+// Retrieving from cache
+const cachedResponse = ephemeralCache.get('api-data');
+if (cachedResponse) {
+	const data = await cachedResponse.json();
+	console.log('Using cached data:', data);
+}
+
+// Wrapping requests with automatic caching
+const response = await ephemeralCache.wrap('api-data', () => fetch('https://api.example.com/data'), { ttlSeconds: 5 });
+const data = await response.json();
+
+// Cache management
+ephemeralCache.has('api-data'); // Check if key exists
+ephemeralCache.delete('api-data'); // Remove specific item
+ephemeralCache.clear(); // Clear all cached items
+ephemeralCache.clearExpired(); // Clear only expired items
+ephemeralCache.refreshTtl('api-data'); // Reset expiration time
+```
+
 ## API Reference
 
 ### Auth Classes
@@ -510,6 +544,37 @@ router.match(method: string, path: string): Array<{
   - `'/articles/:slug{[a-z0-9-]+}'` - Only matches slugs with lowercase letters, numbers, and hyphens
 - **Optional parameters**: Make path parameters optional with the `?` suffix
   - `'/products/:category?'` - Matches both `/products` and `/products/electronics`
+
+### Ephemeral Cache
+
+```typescript
+// Create a new cache instance
+new EphemeralCache(options?: { autoCleanExpired?: boolean })
+
+// Methods
+get(key: string, ttlSeconds?: number): Response | null
+set(key: string, response: Response, ttlSeconds?: number): Promise<void>
+has(key: string): boolean
+delete(key: string): boolean
+clear(): void
+clearExpired(): void
+refreshTtl(key: string): void
+size(): number
+wrap(key: string, fn: () => Promise<Response>, options: { refreshTtl?: boolean, ttlSeconds: number }): Promise<Response>
+
+// Default instance
+import ephemeralCache from 'use-request-utils/ephemeral-cache';
+```
+
+### Key features:
+
+- Automatic expiration with configurable TTL (Time-To-Live)
+- Request deduplication for concurrent requests to the same resource
+- Cache refresh capabilities to extend expiration time
+- Automatic cleaning of expired items
+- Smart caching based on content type
+  Maximum TTL limits to prevent memory issues
+  Cache hit/miss tracking in response headers
 
 ## Testing
 
