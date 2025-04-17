@@ -14,6 +14,7 @@ import trim from 'lodash/trim';
 import headers from 'use-request-utils/headers';
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
+import type { CfProperties } from '@cloudflare/workers-types';
 
 import Request from './request';
 import RpcResponse from './rpc-response';
@@ -266,7 +267,7 @@ const createResponse = async <T>(input: Response) => {
 
 	// handle batch responses
 	if (responseBatch) {
-		const res = await input.json<Rpc.ResponseBatch[]>();
+		const res: Rpc.ResponseBatch[] = await input.json();
 		// transform each response
 		const body = map(res, res => {
 			if (res.responseType === 'response') {

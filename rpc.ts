@@ -21,6 +21,7 @@ import headers from 'use-request-utils/headers';
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
 
+import Request from './request';
 import RpcContext from './rpc-context';
 import RpcResponse from './rpc-response';
 import util from './util';
@@ -101,12 +102,14 @@ namespace Rpc {
 const DEFAULT_CACHE_TTL_SECONDS = 86400; // 1 day
 const requestStorage = new AsyncLocalStorage<{ context: RpcContext }>();
 
+const defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
+	return HttpError.wrap(err);
+};
+
 class Rpc {
-	static errorTransformer: (rpc: Rpc.Request, err: Error) => HttpError;
+	static errorTransformer = defaultErrorTransformer;
 	static restoreErrorTransformer() {
-		Rpc.errorTransformer = (rpc: Rpc.Request, err: Error) => {
-			return HttpError.wrap(err);
-		};
+		Rpc.errorTransformer = defaultErrorTransformer;
 	}
 
 	static setErrorTransformer(transformError: (rpc: Rpc.Request, err: Error) => HttpError) {

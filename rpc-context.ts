@@ -1,3 +1,4 @@
+import type { CfProperties } from '@cloudflare/workers-types';
 import headers from 'use-request-utils/headers';
 
 import MapStore from './map-store';
