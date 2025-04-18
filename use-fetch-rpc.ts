@@ -78,7 +78,7 @@ const useFetchRpc = <R extends Rpc, T, Mapped = T>(
 		});
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const { useFetchHook } = createFetchHook<R, UseFetchRpcFn<R, T>>(() => {
+	const useFetchHook = createFetchHook<R, UseFetchRpcFn<R, T>>(() => {
 		return rpc as R;
 	});
 

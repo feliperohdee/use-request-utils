@@ -14,6 +14,14 @@ type ShouldFetch =
 	| boolean
 	| ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean; worker: boolean }) => boolean);
 
+type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
+	abort: () => void;
+	fetch: (...args: any[]) => Promise<Mapped | null>;
+	reset: () => void;
+	stopInterval: () => void;
+	startInterval: (interval?: number) => void;
+};
+
 type UseFetchState<T> = {
 	data: T | null;
 	error: HttpError | null;
@@ -22,14 +30,6 @@ type UseFetchState<T> = {
 	loading: boolean;
 	resetted: boolean;
 	runningInterval: number;
-};
-
-type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
-	abort: () => void;
-	fetch: (...args: any[]) => Promise<Mapped | null>;
-	reset: () => void;
-	stopInterval: () => void;
-	startInterval: (interval?: number) => void;
 };
 
 type UseFetchOptions<T, Mapped> = {
@@ -102,7 +102,6 @@ const getUniqueKey = (promise: Promise<any> | null): string => {
 const createFetchHook = <ClientType, FnType extends (client: ClientType, ...args: any[]) => Promise<any> | null>(
 	clientFactory: () => ClientType
 ) => {
-	// The main hook implementation
 	const useFetchHook = <T, Mapped = T>(fn: FnType, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
 		try {
 			validateOptions<T, Mapped>(options);
@@ -137,7 +136,6 @@ const createFetchHook = <ClientType, FnType extends (client: ClientType, ...args
 			runningInterval: 0
 		});
 
-		// Create client only once
 		const client = useRef<ClientType | null>(null);
 		if (client.current === null) {
 			client.current = clientFactory();
@@ -386,27 +384,7 @@ const createFetchHook = <ClientType, FnType extends (client: ClientType, ...args
 		};
 	};
 
-	const useLazyFetchHook = <T, Mapped = T>(
-		fn: FnType,
-		options?: {
-			ignoreAbort?: boolean;
-			mapper?: (data: T) => Mapped;
-		}
-	): UseFetchResponse<Mapped> => {
-		return useFetchHook(fn, {
-			ignoreAbort: options?.ignoreAbort || false,
-			mapper: options?.mapper,
-			shouldFetch: ({ initial }) => {
-				return !initial;
-			},
-			triggerDeps: []
-		});
-	};
-
-	return {
-		useFetchHook,
-		useLazyFetchHook
-	};
+	return useFetchHook;
 };
 
 export type { UseFetchResponse, UseFetchOptions };
