@@ -50,7 +50,7 @@ type UseFetchClientOptions<T, Mapped> = {
 	triggerInterval?: number;
 };
 
-const proxyToWorker = (
+const proxyClientToWorker = (
 	rpc: Rpc.Request,
 	options: RpcProxyRequestOptions,
 	requestOptions?: {
@@ -199,7 +199,7 @@ const useFetch = <R extends Rpc, T, Mapped = T>(
 
 	const rpc = useMemo(() => {
 		return rpcProxy.create<R, true>((rpc, options) => {
-			return proxyToWorker(rpc, options /*, requestOptions */);
+			return proxyClientToWorker(rpc, options /*, requestOptions */);
 		});
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
