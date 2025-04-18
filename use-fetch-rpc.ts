@@ -110,4 +110,4 @@ const useLazyFetchRpc = <R extends Rpc, T, Mapped = T>(
 	);
 };
 
-export { useFetchRpc, useLazyFetchRpc };
+export { proxyClientToWorker, useFetchRpc, useLazyFetchRpc };

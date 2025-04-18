@@ -16,7 +16,7 @@ class RpcSpec extends Rpc {
 			},
 			{
 				headers: new Headers({
-					'edge-rpc-a': 'a'
+					'rpc-a': 'a'
 				}),
 				status: 200
 			}
@@ -147,8 +147,8 @@ describe('/app/rpc-proxy', () => {
 				body: { a: 123 },
 				headers: {
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'object'
+					'rpc-a': 'a',
+					'rpc-response-type': 'object'
 				},
 				ok: true,
 				status: 200
@@ -177,8 +177,8 @@ describe('/app/rpc-proxy', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'response'
+					'rpc-a': 'a',
+					'rpc-response-type': 'response'
 				})
 			);
 		});
@@ -192,7 +192,7 @@ describe('/app/rpc-proxy', () => {
 				rpc.options({
 					ephemeralCacheTtlSeconds: 0,
 					headers: new Headers({
-						'edge-rpc-a': 'a'
+						'rpc-a': 'a'
 					}),
 					signal: controller.signal
 				})
@@ -202,12 +202,12 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-a': 'a'
+					'rpc-a': 'a'
 				},
 				options: new RpcProxyRequestOptions({
 					ephemeralCacheTtlSeconds: 0,
 					headers: new Headers({
-						'edge-rpc-a': 'a'
+						'rpc-a': 'a'
 					}),
 					signal: controller.signal
 				}),
@@ -240,7 +240,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -261,8 +261,8 @@ describe('/app/rpc-proxy', () => {
 				body: { a: 456 },
 				headers: {
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'object'
+					'rpc-a': 'a',
+					'rpc-response-type': 'object'
 				},
 				ok: true,
 				status: 200
@@ -272,8 +272,8 @@ describe('/app/rpc-proxy', () => {
 			expect(res[2].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'response'
+					'rpc-a': 'a',
+					'rpc-response-type': 'response'
 				})
 			);
 		});
@@ -285,7 +285,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -306,7 +306,7 @@ describe('/app/rpc-proxy', () => {
 				body: [789, 101112],
 				headers: {
 					'content-type': 'application/json',
-					'edge-rpc-response-type': 'object'
+					'rpc-response-type': 'object'
 				},
 				ok: true,
 				status: 200
@@ -316,7 +316,7 @@ describe('/app/rpc-proxy', () => {
 			expect(res[2].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-rpc-response-type': 'response'
+					'rpc-response-type': 'response'
 				})
 			);
 		});
@@ -338,7 +338,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -359,8 +359,8 @@ describe('/app/rpc-proxy', () => {
 				body: { a: 456 },
 				headers: {
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'object'
+					'rpc-a': 'a',
+					'rpc-response-type': 'object'
 				},
 				ok: true,
 				status: 200
@@ -370,8 +370,8 @@ describe('/app/rpc-proxy', () => {
 			expect(res.body[2].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'response'
+					'rpc-a': 'a',
+					'rpc-response-type': 'response'
 				})
 			);
 		});
@@ -393,7 +393,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -415,8 +415,8 @@ describe('/app/rpc-proxy', () => {
 					body: { a: 456 },
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-a': 'a',
-						'edge-rpc-response-type': 'object'
+						'rpc-a': 'a',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -425,8 +425,8 @@ describe('/app/rpc-proxy', () => {
 					body: { a: 789 },
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-a': 'a',
-						'edge-rpc-response-type': 'response'
+						'rpc-a': 'a',
+						'rpc-response-type': 'response'
 					},
 					ok: true,
 					status: 200
@@ -436,8 +436,8 @@ describe('/app/rpc-proxy', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-rpc-response-batch': 'true',
-					'edge-rpc-response-type': 'response'
+					'rpc-response-batch': 'true',
+					'rpc-response-type': 'response'
 				})
 			);
 		});
@@ -452,8 +452,8 @@ describe('/app/rpc-proxy', () => {
 						},
 						rpc.options({
 							headers: new Headers({
-								'edge-rpc-a': '1',
-								'edge-rpc-b': '1'
+								'rpc-a': '1',
+								'rpc-b': '1'
 							})
 						})
 					),
@@ -466,8 +466,8 @@ describe('/app/rpc-proxy', () => {
 						},
 						rpc.options({
 							headers: new Headers({
-								'edge-rpc-b': '2',
-								'edge-rpc-c': '2'
+								'rpc-b': '2',
+								'rpc-c': '2'
 							})
 						})
 					)
@@ -475,8 +475,8 @@ describe('/app/rpc-proxy', () => {
 				rpc.options({
 					ephemeralCacheTtlSeconds: 0.5,
 					headers: new Headers({
-						'edge-rpc-request-batch': 'true',
-						'edge-rpc-c': 'batch'
+						'rpc-request-batch': 'true',
+						'rpc-c': 'batch'
 					}),
 					signal: controller.signal
 				})
@@ -486,18 +486,18 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true',
-					'edge-rpc-a': '1',
-					'edge-rpc-b': '2',
-					'edge-rpc-c': 'batch'
+					'rpc-request-batch': 'true',
+					'rpc-a': '1',
+					'rpc-b': '2',
+					'rpc-c': 'batch'
 				},
 				options: new RpcProxyRequestOptions({
 					ephemeralCacheTtlSeconds: 0.5,
 					headers: new Headers({
-						'edge-rpc-request-batch': 'true',
-						'edge-rpc-a': '1',
-						'edge-rpc-b': '2',
-						'edge-rpc-c': 'batch'
+						'rpc-request-batch': 'true',
+						'rpc-a': '1',
+						'rpc-b': '2',
+						'rpc-c': 'batch'
 					}),
 					signal: controller.signal
 				}),
@@ -572,7 +572,7 @@ describe('/app/rpc-proxy', () => {
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
 					'edge-batch-1': 'true',
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions({
 					ephemeralCacheTtlSeconds: 1,
@@ -598,7 +598,7 @@ describe('/app/rpc-proxy', () => {
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
 					'edge-batch-2': 'true',
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions({
 					ephemeralCacheTtlSeconds: 1,
@@ -623,7 +623,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -642,7 +642,7 @@ describe('/app/rpc-proxy', () => {
 				cf: {},
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-request-batch': 'true'
+					'rpc-request-batch': 'true'
 				},
 				options: new RpcProxyRequestOptions(),
 				rpc: {
@@ -771,8 +771,8 @@ describe('/app/rpc-proxy', () => {
 				cf: { country: 'US' },
 				headers: new Headers({
 					'content-type': 'text/plain', // must be overriden
-					'edge-rpc-1': 'true',
-					'edge-rpc-2': 'true'
+					'rpc-1': 'true',
+					'rpc-2': 'true'
 				}),
 				origin: 'http://test',
 				pathname: '/test-rpc',
@@ -790,8 +790,8 @@ describe('/app/rpc-proxy', () => {
 			expect(req.headers).toEqual(
 				new Headers({
 					'content-type': req.headers.get('content-type') || '',
-					'edge-rpc-1': 'true',
-					'edge-rpc-2': 'true'
+					'rpc-1': 'true',
+					'rpc-2': 'true'
 				})
 			);
 		});
@@ -860,7 +860,7 @@ describe('/app/rpc-proxy', () => {
 				res = new RpcResponse(
 					{ a: 1 },
 					{
-						headers: new Headers({ 'edge-rpc-response-type': 'object' })
+						headers: new Headers({ 'rpc-response-type': 'object' })
 					}
 				);
 
@@ -868,7 +868,7 @@ describe('/app/rpc-proxy', () => {
 					body: { a: 1 },
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -877,14 +877,14 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as object with boolean', async () => {
 				res = new RpcResponse(false, {
-					headers: new Headers({ 'edge-rpc-response-type': 'object' })
+					headers: new Headers({ 'rpc-response-type': 'object' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toEqual({
 					body: false,
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -893,14 +893,14 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as object with null', async () => {
 				res = new RpcResponse(null, {
-					headers: new Headers({ 'edge-rpc-response-type': 'object' })
+					headers: new Headers({ 'rpc-response-type': 'object' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toEqual({
 					body: null,
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -909,14 +909,14 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as object with number', async () => {
 				res = new RpcResponse(15, {
-					headers: new Headers({ 'edge-rpc-response-type': 'object' })
+					headers: new Headers({ 'rpc-response-type': 'object' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toEqual({
 					body: 15,
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -925,14 +925,14 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as object with empty string', async () => {
 				res = new RpcResponse('', {
-					headers: new Headers({ 'edge-rpc-response-type': 'object' })
+					headers: new Headers({ 'rpc-response-type': 'object' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toEqual({
 					body: '',
 					headers: {
 						'content-type': 'text/plain;charset=UTF-8',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -943,7 +943,7 @@ describe('/app/rpc-proxy', () => {
 				res = new RpcResponse(
 					{ a: 1 },
 					{
-						headers: new Headers({ 'edge-rpc-response-type': 'response' })
+						headers: new Headers({ 'rpc-response-type': 'response' })
 					}
 				);
 
@@ -952,7 +952,7 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as response with boolean', async () => {
 				res = new RpcResponse(false, {
-					headers: new Headers({ 'edge-rpc-response-type': 'response' })
+					headers: new Headers({ 'rpc-response-type': 'response' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toBe(res);
@@ -960,7 +960,7 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as response with null', async () => {
 				res = new RpcResponse(null, {
-					headers: new Headers({ 'edge-rpc-response-type': 'response' })
+					headers: new Headers({ 'rpc-response-type': 'response' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toBe(res);
@@ -968,7 +968,7 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as response with number', async () => {
 				res = new RpcResponse(15, {
-					headers: new Headers({ 'edge-rpc-response-type': 'response' })
+					headers: new Headers({ 'rpc-response-type': 'response' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toBe(res);
@@ -976,7 +976,7 @@ describe('/app/rpc-proxy', () => {
 
 			it('should works as response with empty string', async () => {
 				res = new RpcResponse('', {
-					headers: new Headers({ 'edge-rpc-response-type': 'response' })
+					headers: new Headers({ 'rpc-response-type': 'response' })
 				});
 
 				expect(await rpcProxy.createResponse(res)).toBe(res);
@@ -1013,7 +1013,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1067,7 +1067,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1136,7 +1136,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1200,7 +1200,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1254,7 +1254,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1308,7 +1308,7 @@ describe('/app/rpc-proxy', () => {
 				];
 
 				res = new RpcResponse(input, {
-					headers: new Headers({ 'edge-rpc-response-batch': 'true' })
+					headers: new Headers({ 'rpc-response-batch': 'true' })
 				});
 
 				expect(await inspectResponse(await rpcProxy.createResponse(res))).toEqual([
@@ -1363,8 +1363,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					})
 				});
 
@@ -1401,8 +1401,8 @@ describe('/app/rpc-proxy', () => {
 					],
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -1439,8 +1439,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					})
 				});
 
@@ -1477,8 +1477,8 @@ describe('/app/rpc-proxy', () => {
 					],
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -1515,8 +1515,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					})
 				});
 
@@ -1553,8 +1553,8 @@ describe('/app/rpc-proxy', () => {
 					],
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -1591,8 +1591,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					})
 				});
 
@@ -1629,8 +1629,8 @@ describe('/app/rpc-proxy', () => {
 					],
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -1667,8 +1667,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					})
 				});
 
@@ -1705,8 +1705,8 @@ describe('/app/rpc-proxy', () => {
 					],
 					headers: {
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'object'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'object'
 					},
 					ok: true,
 					status: 200
@@ -1743,8 +1743,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				});
 
@@ -1773,8 +1773,8 @@ describe('/app/rpc-proxy', () => {
 				expect(body.headers).toEqual(
 					new Headers({
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				);
 			});
@@ -1809,8 +1809,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				});
 
@@ -1839,8 +1839,8 @@ describe('/app/rpc-proxy', () => {
 				expect(body.headers).toEqual(
 					new Headers({
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				);
 			});
@@ -1875,8 +1875,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				});
 
@@ -1905,8 +1905,8 @@ describe('/app/rpc-proxy', () => {
 				expect(body.headers).toEqual(
 					new Headers({
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				);
 			});
@@ -1941,8 +1941,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				});
 
@@ -1971,8 +1971,8 @@ describe('/app/rpc-proxy', () => {
 				expect(body.headers).toEqual(
 					new Headers({
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				);
 			});
@@ -2007,8 +2007,8 @@ describe('/app/rpc-proxy', () => {
 
 				res = new RpcResponse(input, {
 					headers: new Headers({
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				});
 
@@ -2037,8 +2037,8 @@ describe('/app/rpc-proxy', () => {
 				expect(body.headers).toEqual(
 					new Headers({
 						'content-type': 'application/json',
-						'edge-rpc-response-batch': 'true',
-						'edge-rpc-response-type': 'response'
+						'rpc-response-batch': 'true',
+						'rpc-response-type': 'response'
 					})
 				);
 			});
@@ -2112,7 +2112,7 @@ describe('/app/rpc-proxy', () => {
 				{ value: 123 },
 				rpc.options({
 					ephemeralCacheTtlSeconds: 0.5,
-					headers: new Headers({ 'edge-rpc-a': 'a' }),
+					headers: new Headers({ 'rpc-a': 'a' }),
 					signal: controller.signal
 				})
 			);
@@ -2121,13 +2121,13 @@ describe('/app/rpc-proxy', () => {
 				cf: { country: 'US' },
 				headers: {
 					'content-type': expect.stringContaining('multipart/form-data'),
-					'edge-rpc-a': 'a',
+					'rpc-a': 'a',
 					'edge-test-caller': 'true'
 				},
 				options: new RpcProxyRequestOptions({
 					ephemeralCacheTtlSeconds: 0.5,
 					headers: new Headers({
-						'edge-rpc-a': 'a'
+						'rpc-a': 'a'
 					}),
 					signal: controller.signal
 				}),
@@ -2144,8 +2144,8 @@ describe('/app/rpc-proxy', () => {
 				body: { a: 123 },
 				headers: {
 					'content-type': 'application/json',
-					'edge-rpc-a': 'a',
-					'edge-rpc-response-type': 'object'
+					'rpc-a': 'a',
+					'rpc-response-type': 'object'
 				},
 				ok: true,
 				status: 200
@@ -2286,10 +2286,10 @@ describe('/app/rpc-proxy', () => {
 			expect(res).toBeNull();
 		});
 
-		it('should do nothing if edge-rpc-response-type = "object"', async () => {
+		it('should do nothing if rpc-response-type = "object"', async () => {
 			const res = await rpcProxy.throwError(
 				new Response('error', {
-					headers: { 'edge-rpc-response-type': 'object' },
+					headers: { 'rpc-response-type': 'object' },
 					status: 500
 				})
 			);
@@ -2297,10 +2297,10 @@ describe('/app/rpc-proxy', () => {
 			expect(res).toBeNull();
 		});
 
-		it('should do nothing if edge-rpc-response-type = "response"', async () => {
+		it('should do nothing if rpc-response-type = "response"', async () => {
 			const res = await rpcProxy.throwError(
 				new Response('error', {
-					headers: { 'edge-rpc-response-type': 'response' },
+					headers: { 'rpc-response-type': 'response' },
 					status: 500
 				})
 			);

@@ -241,7 +241,7 @@ const createRequest = (
 	requestHeaders.delete('content-type');
 
 	if (rpc.batch) {
-		requestHeaders.set('edge-rpc-request-batch', 'true');
+		requestHeaders.set('rpc-request-batch', 'true');
 
 		if (options?.body) {
 			throw new HttpError(400, 'Batch requests does not support body');
@@ -262,8 +262,8 @@ const createRequest = (
 };
 
 const createResponse = async <T>(input: Response) => {
-	const responseBatch = input.headers.get('edge-rpc-response-batch') === 'true';
-	const responseType = input.headers.get('edge-rpc-response-type') || '';
+	const responseBatch = input.headers.get('rpc-response-batch') === 'true';
+	const responseType = input.headers.get('rpc-response-type') || '';
 
 	// handle batch responses
 	if (responseBatch) {
@@ -451,7 +451,7 @@ const payloadToRequest = (payload: RpcProxy.Payload): Rpc.Request => {
 const throwError = async (input: Response) => {
 	// object: returns error as error property
 	// response: returns error as body
-	if (!input.ok && !input.headers.get('edge-rpc-response-type')) {
+	if (!input.ok && !input.headers.get('rpc-response-type')) {
 		const body = util.safeParse(await util.readStream(input.body));
 
 		if (isPlainObject(body)) {

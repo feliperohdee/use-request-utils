@@ -64,14 +64,14 @@ describe('/RpcResponse', () => {
 		it('should works with init', () => {
 			res = new RpcResponse('string', {
 				cache: true,
-				headers: new Headers({ 'edge-rpc-string': 'string' })
+				headers: new Headers({ 'rpc-string': 'string' })
 			});
 
 			expect(res.cache).toBeTruthy();
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'text/plain;charset=UTF-8',
-					'edge-rpc-string': 'string'
+					'rpc-string': 'string'
 				})
 			);
 		});

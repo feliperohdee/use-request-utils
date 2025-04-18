@@ -195,7 +195,7 @@ class Rpc {
 		});
 
 		if (rpc.responseType) {
-			res.headers.set('edge-rpc-response-type', rpc.responseType);
+			res.headers.set('rpc-response-type', rpc.responseType);
 		}
 
 		return res;
@@ -266,7 +266,7 @@ class Rpc {
 				const { responseType = '' } = requests[index].rpc;
 
 				if (responseType) {
-					res.headers.set('edge-rpc-response-type', responseType);
+					res.headers.set('rpc-response-type', responseType);
 				}
 
 				return {
@@ -281,11 +281,11 @@ class Rpc {
 		);
 
 		const res = Response.json(result, {
-			headers: { 'edge-rpc-response-batch': 'true' }
+			headers: { 'rpc-response-batch': 'true' }
 		});
 
 		if (rpc.responseType !== '') {
-			res.headers.set('edge-rpc-response-type', rpc.responseType);
+			res.headers.set('rpc-response-type', rpc.responseType);
 		}
 
 		return res;
