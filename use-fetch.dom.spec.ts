@@ -1,7 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import HttpError from 'use-http-error';
-import MapStore from 'use-request-utils/map-store';
 
 import { useFetch, useLazyFetch } from './use-fetch';
 
@@ -51,7 +50,7 @@ describe('/use-fetch', () => {
 		try {
 			renderHook(() => {
 				// @ts-expect-error
-				useFetch(mock, { deps: 'not-an-array', key: 'PERSISTED_STATE_KEY' });
+				useFetch(mock, { deps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -64,7 +63,7 @@ describe('/use-fetch', () => {
 		try {
 			renderHook(() => {
 				// @ts-expect-error
-				useFetch(mock, { depsDebounce: 'not-a-number', key: 'PERSISTED_STATE_KEY' });
+				useFetch(mock, { depsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
