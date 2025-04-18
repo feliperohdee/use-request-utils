@@ -4,6 +4,7 @@ import isNumber from 'lodash/isNumber';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
 
+import Request from './request';
 import util from './util';
 
 namespace Fetch {
@@ -13,7 +14,7 @@ namespace Fetch {
 
 	export type HttpOptions = {
 		init?: RequestInit | null;
-		ttlSeconds?: number;
+		ephemeralCacheTtlSeconds?: number;
 	};
 
 	export interface Http {
@@ -75,7 +76,10 @@ http.asResponse = (info: RequestInfo, options?: Fetch.HttpOptions) => {
 	const promise = (async () => {
 		try {
 			const httpOptions = new HttpOptions(options);
-			const req = new Request(info, { signal: controller.signal, ...httpOptions.init });
+			const req = new Request(info, {
+				signal: controller.signal,
+				...httpOptions.init
+			});
 
 			if (req.method === 'GET' || req.method === 'HEAD') {
 				return await ephemeralCache.wrap(
@@ -85,7 +89,7 @@ http.asResponse = (info: RequestInfo, options?: Fetch.HttpOptions) => {
 					},
 					{
 						refreshTtl: true,
-						ttlSeconds: httpOptions.ttlSeconds
+						ttlSeconds: httpOptions.ephemeralCacheTtlSeconds
 					}
 				);
 			}
@@ -104,12 +108,12 @@ http.asResponse = (info: RequestInfo, options?: Fetch.HttpOptions) => {
 };
 
 class HttpOptions implements Fetch.HttpOptions {
+	public ephemeralCacheTtlSeconds: number;
 	public init: RequestInit | null;
-	public ttlSeconds: number;
 
 	constructor(options?: Fetch.HttpOptions) {
+		this.ephemeralCacheTtlSeconds = isNumber(options?.ephemeralCacheTtlSeconds) ? options.ephemeralCacheTtlSeconds : 1;
 		this.init = options?.init || null;
-		this.ttlSeconds = isNumber(options?.ttlSeconds) ? options.ttlSeconds : 1;
 	}
 }
 

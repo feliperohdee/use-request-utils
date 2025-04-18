@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, Mock, vi } from 
 import HttpError from 'use-http-error';
 import z, { ZodError } from 'zod';
 
+import Request from './request';
 import Rpc, { DEFAULT_CACHE_TTL_SECONDS } from './rpc';
 import rpcProxy from './rpc-proxy';
 import RpcContext from './rpc-context';
@@ -211,7 +212,11 @@ describe('/rpc', () => {
 				});
 			}
 
-			return HttpError.wrap(err);
+			const httpError = HttpError.wrap(err);
+
+			httpError.setContext({ rpc });
+
+			return httpError;
 		});
 	});
 
@@ -233,7 +238,9 @@ describe('/rpc', () => {
 			wrap: vi.fn(cacheWrapMissImplementation)
 		};
 
-		req = new Request('http://localhost', { headers: { 'content-type': 'application/json' } });
+		req = new Request('http://localhost', {
+			headers: { 'content-type': 'application/json' }
+		});
 		root = new RpcSpec({ cache });
 
 		vi.spyOn(root, '$onAfterResponse');
@@ -274,7 +281,10 @@ describe('/rpc', () => {
 			const res = await root.call('', req);
 			const body = await rpcProxy.createResponse(res);
 
-			expect(body).toEqual(HttpError.json(400));
+			expect(body).toEqual({
+				...HttpError.json(400),
+				context: { rpc: '' }
+			});
 			expect(res.status).toEqual(400);
 			expect(res.headers).toEqual(
 				new Headers({
@@ -297,7 +307,14 @@ describe('/rpc', () => {
 				const body = await rpcProxy.createResponse(res);
 
 				expect(body).toEqual({
-					context: {},
+					context: {
+						rpc: {
+							args: [],
+							batch: false,
+							resource,
+							responseType: ''
+						}
+					},
 					message: 'Resource not found',
 					stack: [],
 					status: 404
@@ -324,7 +341,14 @@ describe('/rpc', () => {
 			const body = await rpcProxy.createResponse(res);
 
 			expect(body).toEqual({
-				context: {},
+				context: {
+					rpc: {
+						args: [],
+						batch: false,
+						resource: 'nonExistentResource',
+						responseType: ''
+					}
+				},
 				message: 'Resource not found',
 				stack: [],
 				status: 404
@@ -510,7 +534,10 @@ describe('/rpc', () => {
 			const res = await root.call(rpc, req);
 			const body = await rpcProxy.createResponse(res);
 
-			expect(body).toEqual(HttpError.json(500));
+			expect(body).toEqual({
+				...HttpError.json(500),
+				context: { rpc }
+			});
 			expect(res.status).toEqual(500);
 			expect(res.headers).toEqual(
 				new Headers({
@@ -532,7 +559,15 @@ describe('/rpc', () => {
 			const body = await rpcProxy.createResponse(res);
 
 			expect(body).toEqual({
-				context: { 'edge-resource-http-error': 'true' },
+				context: {
+					'edge-resource-http-error': 'true',
+					rpc: {
+						args: [],
+						batch: false,
+						resource: 'resourceHttpError',
+						responseType: ''
+					}
+				},
 				message: 'Not Found',
 				stack: [],
 				status: 404
@@ -1046,7 +1081,17 @@ describe('/rpc', () => {
 
 			// { args: [], batch: false, resource: 'resourceError', responseType: 'object' }
 			expect(body[16]).toEqual({
-				body: HttpError.json(500),
+				body: {
+					...HttpError.json(500),
+					context: {
+						rpc: {
+							args: [],
+							batch: false,
+							resource: 'resourceError',
+							responseType: ''
+						}
+					}
+				},
 				headers: {
 					'content-type': 'application/json',
 					'edge-rpc-response-type': 'object'
@@ -1056,7 +1101,17 @@ describe('/rpc', () => {
 			});
 
 			// { args: [], batch: false, resource: 'resourceError', responseType: 'response' }
-			expect(await body[17].json()).toEqual(HttpError.json(500));
+			expect(await body[17].json()).toEqual({
+				...HttpError.json(500),
+				context: {
+					rpc: {
+						args: [],
+						batch: false,
+						resource: 'resourceError',
+						responseType: ''
+					}
+				}
+			});
 			expect(body[17].status).toEqual(500);
 			expect(body[17].headers).toEqual(
 				new Headers({
@@ -1071,7 +1126,15 @@ describe('/rpc', () => {
 			// { args: [], batch: false, resource: 'resourceHttpError', responseType: 'object' }
 			expect(body[19]).toEqual({
 				body: {
-					context: { 'edge-resource-http-error': 'true' },
+					context: {
+						'edge-resource-http-error': 'true',
+						rpc: {
+							args: [],
+							batch: false,
+							resource: 'resourceHttpError',
+							responseType: ''
+						}
+					},
 					message: 'Not Found',
 					stack: [],
 					status: 404

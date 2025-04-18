@@ -7,7 +7,8 @@ const viteConfig = defineConfig(() => {
 			coverage: {
 				exclude: ['**/*.spec.*', 'dist', 'vitest.config.mts', 'vitest.config.dom.mts', 'vitest.workspace.mts']
 			},
-			include: ['**/*.spec.*']
+			include: ['**/*.spec.*'],
+			exclude: ['**/*.dom.spec.*']
 		}
 	};
 });

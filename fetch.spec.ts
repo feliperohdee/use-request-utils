@@ -3,6 +3,7 @@ import ephemeralCache from 'use-request-utils/ephemeral-cache';
 import HttpError from 'use-http-error';
 
 import fetch, { HttpOptions } from './fetch';
+import Request from './request';
 import util from './util';
 
 describe('/fetch', () => {
@@ -42,7 +43,9 @@ describe('/fetch', () => {
 		it('should works with ttl = 500', async () => {
 			vi.spyOn(global, 'fetch').mockResolvedValueOnce(Response.json({ a: 1 }));
 
-			await fetch.http<{ a: number }>('https://api/rest', { ttlSeconds: 0.5 });
+			await fetch.http<{ a: number }>('https://api/rest', {
+				ephemeralCacheTtlSeconds: 0.5
+			});
 
 			expect(ephemeralCache.wrap).toHaveBeenCalledWith('https://api/rest', expect.any(Function), {
 				refreshTtl: true,
@@ -154,12 +157,12 @@ describe('/fetch', () => {
 					})
 				}),
 				{
+					ephemeralCacheTtlSeconds: 0,
 					init: {
 						headers: {
 							'edge-api-key': 'edge-api-key-1'
 						}
-					},
-					ttlSeconds: 0
+					}
 				}
 			);
 
@@ -259,8 +262,8 @@ describe('/fetch', () => {
 	describe('HttpOptions', () => {
 		it('should works', () => {
 			expect(new HttpOptions({})).toEqual({
-				init: null,
-				ttlSeconds: 1
+				ephemeralCacheTtlSeconds: 1,
+				init: null
 			});
 		});
 
@@ -276,14 +279,14 @@ describe('/fetch', () => {
 						headers,
 						signal: controller.signal
 					},
-					ttlSeconds: 0
+					ephemeralCacheTtlSeconds: 0
 				})
 			).toEqual({
 				init: {
 					headers,
 					signal: controller.signal
 				},
-				ttlSeconds: 0
+				ephemeralCacheTtlSeconds: 0
 			});
 		});
 	});

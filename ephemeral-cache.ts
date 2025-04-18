@@ -148,7 +148,14 @@ class EphemeralCache {
 		return this.cache.size;
 	}
 
-	async wrap(key: string, fn: () => Promise<Response>, options: { refreshTtl?: boolean; ttlSeconds: number }): Promise<Response> {
+	async wrap(
+		key: string,
+		fn: () => Promise<Response>,
+		options: {
+			refreshTtl?: boolean;
+			ttlSeconds: number;
+		}
+	): Promise<Response> {
 		const { refreshTtl = false, ttlSeconds = 0 } = options;
 
 		key = trim(key);

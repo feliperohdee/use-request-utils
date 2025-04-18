@@ -76,6 +76,16 @@ describe('/util', () => {
 		});
 	});
 
+	describe('stringHash', () => {
+		it('should return a hash for a string', () => {
+			expect(util.stringHash('Hello, world!')).toEqual('mmtl9ghu2aee');
+		});
+
+		it('should return 0 for an empty string', () => {
+			expect(util.stringHash('')).toEqual('7h0j2bi90v2v');
+		});
+	});
+
 	describe('stringToStreamWithDelay', () => {
 		it('should convert strings to a stream with delay', async () => {
 			vi.useFakeTimers();

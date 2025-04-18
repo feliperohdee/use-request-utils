@@ -103,7 +103,11 @@ const DEFAULT_CACHE_TTL_SECONDS = 86400; // 1 day
 const requestStorage = new AsyncLocalStorage<{ context: RpcContext }>();
 
 const defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
-	return HttpError.wrap(err);
+	const httpError = HttpError.wrap(err);
+
+	httpError.setContext({ rpc });
+
+	return httpError;
 };
 
 class Rpc {

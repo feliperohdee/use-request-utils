@@ -8,7 +8,8 @@ const viteConfig = defineConfig(() => {
 				exclude: ['**/*.spec.*', 'dist', 'vitest.config.mts', 'vitest.config.dom.mts', 'vitest.workspace.mts']
 			},
 			environment: 'jsdom',
-			include: ['**/*.dom.spec.*']
+			include: ['**/*.dom.spec.*'],
+			setupFiles: ['./vitest.setup.dom.ts']
 		}
 	};
 });
