@@ -162,7 +162,11 @@ const getUniqueKey = (promise: Promise<any> | null): string => {
 
 const useFetch = <R extends Rpc, T, Mapped = T>(
 	fn: UseFetchFn<R, T>,
-	options: UseFetchClientOptions<T, Mapped> = {}
+	options: UseFetchClientOptions<T, Mapped> = {},
+	requestOptions?: {
+		headers?: Headers;
+		pathname?: string;
+	}
 ): UseFetchResponse<Mapped> => {
 	try {
 		validateOptions<T, Mapped>(options);
@@ -199,7 +203,7 @@ const useFetch = <R extends Rpc, T, Mapped = T>(
 
 	const rpc = useMemo(() => {
 		return rpcProxy.create<R, true>((rpc, options) => {
-			return proxyClientToWorker(rpc, options /*, requestOptions */);
+			return proxyClientToWorker(rpc, options, requestOptions);
 		});
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
