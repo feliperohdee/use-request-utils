@@ -31,8 +31,8 @@ class EphemeralCache {
 	private cache: Map<string, EphemeralCache.Item> = new Map();
 	private pendingPromises: Map<string, EphemeralCache.PendingPromise> = new Map();
 
-	constructor(options?: { autoCleanExpired?: boolean }) {
-		if (options?.autoCleanExpired ?? true) {
+	constructor() {
+		if (BROWSER) {
 			// clear expired cache every 15 seconds
 			setInterval(() => {
 				this.clearExpired();
