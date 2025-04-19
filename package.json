@@ -37,7 +37,7 @@
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
-	"version": "1.0.19",
+	"version": "1.0.20",
 	"dependencies": {
 		"lodash": "^4.17.21",
 		"use-good-hooks": "^1.0.10",

@@ -103,18 +103,18 @@ namespace Rpc {
 const DEFAULT_CACHE_TTL_SECONDS = 86400; // 1 day
 const requestStorage = new AsyncLocalStorage<{ context: RpcContext }>();
 
-const defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
-	const httpError = HttpError.wrap(err);
-
-	httpError.setContext({ rpc });
-
-	return httpError;
-};
-
 class Rpc {
-	static errorTransformer = defaultErrorTransformer;
+	static defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
+		const httpError = HttpError.wrap(err);
+
+		httpError.setContext({ rpc });
+
+		return httpError;
+	};
+
+	static errorTransformer = Rpc.defaultErrorTransformer;
 	static restoreErrorTransformer() {
-		Rpc.errorTransformer = defaultErrorTransformer;
+		Rpc.errorTransformer = Rpc.defaultErrorTransformer;
 	}
 
 	static setErrorTransformer(transformError: (rpc: Rpc.Request, err: Error) => HttpError) {
