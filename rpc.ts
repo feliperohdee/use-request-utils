@@ -27,6 +27,7 @@ import RpcResponse from './rpc-response';
 import util from './util';
 
 type HttpRequest = Request;
+type HttpResponse = Response;
 
 namespace Rpc {
 	export type CacheInterface = {
@@ -38,10 +39,10 @@ namespace Rpc {
 				tags?: string[];
 				ttlSeconds?: number;
 			}
-		) => Promise<Response>;
+		) => Promise<HttpResponse>;
 		set: (
 			key: string,
-			response: Response,
+			response: HttpResponse,
 			setOptions: {
 				tags?: string[];
 				ttlSeconds?: number;
@@ -49,7 +50,7 @@ namespace Rpc {
 		) => void;
 	};
 	export type CacheRevalidateFunction = (key: string) => Promise<{
-		response: Response;
+		response: HttpResponse;
 		setOptions: {
 			tags?: string[];
 			ttlSeconds?: number;
