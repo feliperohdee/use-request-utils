@@ -1,12 +1,11 @@
 import createFetchHook, { UseFetchOptions, UseFetchResponse } from './use-fetch-hook-factory';
 
 import fetch, { Fetch } from './fetch';
-import type Rpc from './rpc';
 
 type UseFetchHttpFn<T> = (fetch: Fetch.Http, ...args: any[]) => Promise<T> | null;
 
 const useFetchHttp = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
-	const useFetchHook = createFetchHook<Fetch.Http, UseFetchHttpFn<T>>(() => {
+	const useFetchHook = createFetchHook<Fetch.Http>(() => {
 		return fetch.http;
 	});
 

@@ -2,10 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import HttpError from 'use-http-error';
 
-import Request from './request';
-import Rpc from './rpc';
-import { RpcProxyRequestOptions } from './rpc-proxy';
-import { proxyClientToWorker, useFetchRpc, useLazyFetchRpc } from './use-fetch-rpc';
+import { useFetchRpc, useLazyFetchRpc } from './use-fetch-rpc';
 
 const createAbortableMock = (uniqueKey: string = '') => {
 	const abort = vi.fn();
@@ -38,7 +35,7 @@ const createAbortableMock = (uniqueKey: string = '') => {
 	return { abort, fn };
 };
 
-describe('/use-rpc', () => {
+describe('/use-fetch-rpc', () => {
 	let mock: Mock<(...args: any[]) => Promise<{ a: number; args: any[] }>>;
 
 	beforeEach(() => {
@@ -830,80 +827,6 @@ describe('/use-rpc', () => {
 
 		await waitFor(() => {
 			expect(result.current.runningInterval).toEqual(0);
-		});
-	});
-
-	describe('proxyClientToWorker', () => {
-		beforeEach(() => {
-			class TestRpc extends Rpc {
-				async error(...args: any[]) {
-					throw new Error('Error');
-				}
-
-				async success(...args: any[]) {
-					return { a: 1, args };
-				}
-			}
-
-			vi.spyOn(global, 'fetch').mockImplementation(async req => {
-				if (req instanceof Request) {
-					const form = await req.formData();
-					const rpc = new TestRpc();
-					const rpcRequest = JSON.parse(form.get('rpc') as string) as Rpc.Request;
-
-					return rpc.fetch(rpcRequest, req);
-				}
-
-				return {
-					json: async () => {
-						return {};
-					}
-				} as Response;
-			});
-		});
-
-		it('should works', async () => {
-			const res = await proxyClientToWorker(
-				{
-					args: ['test1', 'test2'],
-					batch: false,
-					resource: 'success',
-					responseType: 'default'
-				},
-				new RpcProxyRequestOptions()
-			);
-
-			expect(res).toEqual({ a: 1, args: ['test1', 'test2'] });
-		});
-
-		it('should works with error', async () => {
-			try {
-				await proxyClientToWorker(
-					{
-						args: ['test1', 'test2'],
-						batch: false,
-						resource: 'error',
-						responseType: 'default'
-					},
-					new RpcProxyRequestOptions()
-				);
-
-				throw new Error('Expected to throw');
-			} catch (err) {
-				expect((err as HttpError).toJson()).toEqual({
-					context: {
-						rpc: {
-							args: ['test1', 'test2'],
-							batch: false,
-							resource: 'error',
-							responseType: 'default'
-						}
-					},
-					message: 'Error',
-					stack: expect.any(Array),
-					status: 500
-				});
-			}
 		});
 	});
 });
