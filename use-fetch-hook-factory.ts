@@ -18,12 +18,13 @@ type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
 	abort: () => void;
 	fetch: (...args: any[]) => Promise<Mapped | null>;
 	reset: () => void;
+	setData: (update: Mapped | ((data: Mapped) => Mapped)) => void;
 	stopInterval: () => void;
 	startInterval: (interval?: number) => void;
 };
 
-type UseFetchState<T> = {
-	data: T | null;
+type UseFetchState<Mapped> = {
+	data: Mapped | null;
 	error: HttpError | null;
 	loaded: boolean;
 	loadedTimes: number;
@@ -250,6 +251,15 @@ const createFetchHook = <ClientType, FnType extends (client: ClientType, ...args
 			});
 		}, [abort]);
 
+		const setData = useCallback((update: Mapped | ((data: Mapped) => Mapped)) => {
+			setState(state => {
+				return {
+					...state,
+					data: isFunction(update) ? update(state.data!) : update
+				};
+			});
+		}, []);
+
 		const stopInterval = useCallback(() => {
 			if (intervalRef.current) {
 				setState(state => {
@@ -379,6 +389,7 @@ const createFetchHook = <ClientType, FnType extends (client: ClientType, ...args
 			abort,
 			fetch,
 			reset,
+			setData,
 			stopInterval,
 			startInterval
 		};

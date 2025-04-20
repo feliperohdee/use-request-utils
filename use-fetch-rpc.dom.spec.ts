@@ -39,7 +39,7 @@ const createAbortableMock = (uniqueKey: string = '') => {
 };
 
 describe('/use-rpc', () => {
-	let mock: Mock<(...args: any[]) => Promise<{ a: number }>>;
+	let mock: Mock<(...args: any[]) => Promise<{ a: number; args: any[] }>>;
 
 	beforeEach(() => {
 		let i = 0;
@@ -744,6 +744,32 @@ describe('/use-rpc', () => {
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
+		});
+	});
+
+	it('should works with setData', async () => {
+		const { result } = renderHook(() => {
+			return useFetchRpc(mock);
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		result.current.setData({ a: 2, args: [] });
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 2, args: [] });
+		});
+
+		result.current.setData(data => {
+			data.a += 1;
+
+			return data;
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 3, args: [] });
 		});
 	});
 

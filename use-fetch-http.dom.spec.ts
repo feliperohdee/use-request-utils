@@ -36,8 +36,8 @@ const createAbortableMock = (uniqueKey: string = '') => {
 	return { abort, fn };
 };
 
-describe('/use-fetch', () => {
-	let mock: Mock<(...args: any[]) => Promise<{ a: number }>>;
+describe('/use-fetch-http', () => {
+	let mock: Mock<(...args: any[]) => Promise<{ a: number; args: any[] }>>;
 
 	beforeEach(() => {
 		let i = 0;
@@ -716,7 +716,7 @@ describe('/use-fetch', () => {
 		});
 	});
 
-	it('should works with useLazyFetch with additional arguments', async () => {
+	it('should works with useLazyFetchHttp with additional arguments', async () => {
 		const { result } = renderHook(() => {
 			return useLazyFetchHttp((context, arg1, arg2) => {
 				return mock(context, arg1, arg2);
@@ -742,6 +742,32 @@ describe('/use-fetch', () => {
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
+		});
+	});
+
+	it('should works with setData', async () => {
+		const { result } = renderHook(() => {
+			return useFetchHttp(mock);
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		result.current.setData({ a: 2, args: [] });
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 2, args: [] });
+		});
+
+		result.current.setData(data => {
+			data.a += 1;
+
+			return data;
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 3, args: [] });
 		});
 	});
 
