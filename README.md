@@ -2321,21 +2321,32 @@ The foundation for creating RPC (Remote Procedure Call) services. Extend this cl
 ##### Constructor
 
 ```typescript
-new Rpc(options?: Rpc.Options)
+new Rpc();
 ```
 
-**Parameters:**
+Creates a new RPC service instance. All configuration (caching, error handling, default headers) is done through static methods.
 
-- `options` (`Rpc.Options`, optional):
-  - `cache` (`Rpc.CacheInterface | null`, optional): An object implementing the cache interface (`{ wrap, set }`). If provided, GET-like RPC calls returning cacheable responses can be cached. Defaults to `null`.
-  - `defaultResponseHeaders` (`Headers`, optional): Headers to be added to every response _unless_ overridden by the specific RPC method or an `HttpError`. Defaults to empty `Headers`.
-  - `transformError` (`(rpc: Rpc.Request, err: Error) => HttpError`, optional): **Deprecated**. Use `Rpc.setErrorTransformer` instead.
+##### Static Properties and Methods
 
-##### Static Methods
+###### Static Properties
+
+- `cache` (`Rpc.CacheInterface | null`): The cache instance used across all RPC instances.
+- `defaultResponseHeaders` (`Headers`): Default headers added to every response unless overridden by the specific RPC method or an `HttpError`.
+- `errorTransformer` (`(rpc: Rpc.Request, err: Error) => HttpError`): Function used to transform errors caught during RPC execution into `HttpError` objects.
+
+###### Static Methods
+
+###### `setCache(cache: Rpc.CacheInterface)`
+
+Sets the cache instance to be used across all RPC instances.
+
+###### `setDefaultResponseHeaders(headers: Headers)`
+
+Sets the default headers to be added to every response.
 
 ###### `setErrorTransformer(transformError: (rpc: Rpc.Request, err: Error) => HttpError)`
 
-Sets a global function to transform errors caught during RPC execution into `HttpError` objects. This allows customizing error responses (e.g., handling validation errors differently).
+Sets the global function to transform errors caught during RPC execution into `HttpError` objects. This allows customizing error responses (e.g., handling validation errors differently).
 
 ###### `restoreErrorTransformer()`
 
@@ -2343,8 +2354,6 @@ Restores the default error transformer.
 
 ##### Protected Properties
 
-- `cache` (`Rpc.CacheInterface | null`): The cache instance provided in the constructor.
-- `defaultResponseHeaders` (`Headers`): Default headers provided in the constructor.
 - `context` (`RpcContext`): **Getter**. Provides access to the `RpcContext` for the current request lifecycle. This context holds request details (headers, body, cf properties) and allows setting default response metadata. Accessible within RPC methods via `this.context`.
 
 ##### Public Methods
@@ -2823,7 +2832,7 @@ describe('MyRpcService', () => {
         resource: 'someResource.action',
         args: [{ value: 1 }],
         batch: false,
-        responseType: ''
+        responseType: 'default'
       },
       url: 'http://localhost/rpc' // Default URL for testing
     }));

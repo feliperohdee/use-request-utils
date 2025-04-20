@@ -14,14 +14,6 @@ const schema = z.object({
 });
 
 class RpcSpec2 extends Rpc {
-	constructor() {
-		super({
-			defaultResponseHeaders: new Headers({
-				'rpc-init-2': 'true'
-			})
-		});
-	}
-
 	resource1() {
 		return { a: 1 };
 	}
@@ -37,15 +29,6 @@ class RpcSpec2 extends Rpc {
 
 class RpcSpec1 extends Rpc {
 	public child = new RpcSpec2();
-
-	constructor(options: Rpc.Options) {
-		super({
-			cache: options.cache,
-			defaultResponseHeaders: new Headers({
-				'rpc-init-1': 'true'
-			})
-		});
-	}
 
 	resource1() {
 		return { a: 1 };
@@ -63,12 +46,9 @@ class NonRpc {
 }
 
 class RpcSpec extends Rpc {
+	public child = new RpcSpec1();
 	public nonRpcFn = nonRpcFn;
 	public nonRpc = new NonRpc();
-
-	public child = new RpcSpec1({
-		cache: this.cache
-	});
 
 	resource1(string: string, array: number[], object: { a: number }) {
 		this.context.set('args', {
@@ -82,9 +62,7 @@ class RpcSpec extends Rpc {
 
 	resource2() {
 		this.context.defaultResponseMeta = {
-			headers: new Headers({
-				'edge-resource-2': 'true'
-			}),
+			headers: new Headers({ 'edge-resource-2': 'true' }),
 			status: 201
 		};
 
@@ -191,7 +169,6 @@ class RpcSpec extends Rpc {
 }
 
 describe('/rpc', () => {
-	let cache: Rpc.CacheInterface;
 	let cacheWrapMissImplementation: (
 		key: string,
 		revalidateFunction: Rpc.CacheRevalidateFunction,
@@ -233,15 +210,16 @@ describe('/rpc', () => {
 			return response;
 		};
 
-		cache = {
+		Rpc.setCache({
 			set: cacheSet,
 			wrap: vi.fn(cacheWrapMissImplementation)
-		};
+		});
+		Rpc.setDefaultResponseHeaders(new Headers({ 'rpc-init-1': 'true' }));
 
 		req = new Request('http://localhost', {
 			headers: { 'content-type': 'application/json' }
 		});
-		root = new RpcSpec({ cache });
+		root = new RpcSpec();
 
 		vi.spyOn(root, '$onAfterResponse');
 		vi.spyOn(root, '$onBeforeRequest');
@@ -288,7 +266,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(400);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -299,7 +279,7 @@ describe('/rpc', () => {
 					args: [],
 					batch: false,
 					resource,
-					responseType: ''
+					responseType: 'default'
 				};
 
 				// @ts-expect-error
@@ -312,7 +292,7 @@ describe('/rpc', () => {
 							args: [],
 							batch: false,
 							resource,
-							responseType: ''
+							responseType: 'default'
 						}
 					},
 					message: 'Resource not found',
@@ -322,7 +302,9 @@ describe('/rpc', () => {
 				expect(res.status).toEqual(404);
 				expect(res.headers).toEqual(
 					new Headers({
-						'content-type': 'application/json'
+						'content-type': 'application/json',
+						'rpc-init-1': 'true',
+						'rpc-response-type': 'default'
 					})
 				);
 			}
@@ -333,7 +315,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'nonExistentResource',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -346,7 +328,7 @@ describe('/rpc', () => {
 						args: [],
 						batch: false,
 						resource: 'nonExistentResource',
-						responseType: ''
+						responseType: 'default'
 					}
 				},
 				message: 'Resource not found',
@@ -356,7 +338,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(404);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -366,7 +350,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceZod',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -380,7 +364,7 @@ describe('/rpc', () => {
 							args: [],
 							batch: false,
 							resource: 'resourceZod',
-							responseType: ''
+							responseType: 'default'
 						},
 						errors: [
 							{
@@ -397,7 +381,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(400);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -407,7 +393,7 @@ describe('/rpc', () => {
 				args: ['a', [1, 2], { a: 1 }],
 				batch: false,
 				resource: 'resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -428,7 +414,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -438,7 +426,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resource2',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -450,7 +438,9 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-resource-2': 'true'
+					'edge-resource-2': 'true',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -460,7 +450,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resource3',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -473,7 +463,9 @@ describe('/rpc', () => {
 				new Headers({
 					'content-type': 'application/json',
 					'edge-resource-3': 'true',
-					'edge-resource-33': 'true'
+					'edge-resource-33': 'true',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -483,7 +475,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resource4',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -496,7 +488,9 @@ describe('/rpc', () => {
 				new Headers({
 					'content-type': 'application/json',
 					'edge-resource-4': 'true',
-					'edge-resource-44': 'true'
+					'edge-resource-44': 'true',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -506,7 +500,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceBoolean',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -517,7 +511,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -527,7 +523,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceError',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -541,7 +537,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(500);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -551,7 +549,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceHttpError',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -565,7 +563,7 @@ describe('/rpc', () => {
 						args: [],
 						batch: false,
 						resource: 'resourceHttpError',
-						responseType: ''
+						responseType: 'default'
 					}
 				},
 				message: 'Not Found',
@@ -576,7 +574,9 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'edge-resource-http-error': 'true'
+					'edge-resource-http-error': 'true',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -586,7 +586,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceHttpErrorResponse',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -602,7 +602,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(404);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -612,7 +614,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceNull',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -623,7 +625,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -633,7 +637,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceNumber',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -644,7 +648,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -665,6 +671,7 @@ describe('/rpc', () => {
 				body: { a: 1 },
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -674,6 +681,7 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				})
 			);
@@ -696,6 +704,7 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
@@ -706,7 +715,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceString',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -715,7 +724,13 @@ describe('/rpc', () => {
 
 			expect(body).toEqual('string');
 			expect(res.status).toEqual(200);
-			expect(res.headers).toEqual(new Headers({ 'content-type': 'text/plain;charset=UTF-8' }));
+			expect(res.headers).toEqual(
+				new Headers({
+					'content-type': 'text/plain;charset=UTF-8',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
+				})
+			);
 		});
 
 		it('should works with stream', async () => {
@@ -723,7 +738,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resourceStream',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -732,7 +747,13 @@ describe('/rpc', () => {
 
 			expect(body).toEqual('stream');
 			expect(res.status).toEqual(200);
-			expect(res.headers).toEqual(new Headers({ 'content-type': 'application/octet-stream' }));
+			expect(res.headers).toEqual(
+				new Headers({
+					'content-type': 'application/octet-stream',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
+				})
+			);
 		});
 
 		it('should works with child', async () => {
@@ -740,7 +761,7 @@ describe('/rpc', () => {
 				args: ['a', [1, 2], { a: 1 }],
 				batch: false,
 				resource: 'child.resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -759,7 +780,8 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-init-1': 'true'
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -769,7 +791,7 @@ describe('/rpc', () => {
 				args: ['a', [1, 2], { a: 1 }],
 				batch: false,
 				resource: 'child.child.resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -788,7 +810,8 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-init-2': 'true'
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -798,7 +821,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -813,7 +836,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'child.child.resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -836,7 +859,8 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(400);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true'
 				})
 			);
 		});
@@ -848,7 +872,7 @@ describe('/rpc', () => {
 					args: [],
 					batch: false,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				req
 			);
@@ -858,7 +882,8 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(400);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true'
 				})
 			);
 		});
@@ -866,51 +891,51 @@ describe('/rpc', () => {
 		it('should works', async () => {
 			const rpc: Rpc.Request = {
 				args: [
-					{ args: [], batch: false, resource: 'resource1', responseType: '' },
+					{ args: [], batch: false, resource: 'resource1', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resource2', responseType: '' },
+					{ args: [], batch: false, resource: 'resource2', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resource2', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resource2', responseType: 'response' },
-					{ args: [], batch: false, resource: 'child.resource1', responseType: '' },
+					{ args: [], batch: false, resource: 'child.resource1', responseType: 'default' },
 					{ args: [], batch: false, resource: 'child.resource1', responseType: 'object' },
 					{ args: [], batch: false, resource: 'child.resource1', responseType: 'response' },
-					{ args: [], batch: false, resource: 'child.child.resource1', responseType: '' },
+					{ args: [], batch: false, resource: 'child.child.resource1', responseType: 'default' },
 					{ args: [], batch: false, resource: 'child.child.resource1', responseType: 'object' },
 					{ args: [], batch: false, resource: 'child.child.resource1', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceBoolean', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceBoolean', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceBoolean', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceBoolean', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceError', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceError', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceError', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceError', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceHttpError', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceHttpError', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceHttpError', responseType: 'object' },
-					{ args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceNull', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceNull', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceNull', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceNull', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceNumber', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceNumber', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceNumber', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceNumber', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceResponse', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceResponse', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceResponse', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceResponse', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceString', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceString', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceString', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceString', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceStream', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceStream', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceStream', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceStream', responseType: 'response' },
-					{ args: [], batch: false, resource: 'resourceZod', responseType: '' },
+					{ args: [], batch: false, resource: 'resourceZod', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resourceZod', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resourceZod', responseType: 'response' }
 				],
 				batch: true,
 				resource: 'batch',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -932,7 +957,7 @@ describe('/rpc', () => {
 			expect(root.resourceStream).toHaveBeenCalledTimes(1);
 			expect(root.resourceZod).toHaveBeenCalledTimes(1);
 
-			// { args: [], batch: false, resource: 'resource1', responseType: '' }
+			// { args: [], batch: false, resource: 'resource1', responseType: 'default' }
 			expect(body[0]).toEqual({
 				cf: {},
 				data: { args: {} },
@@ -952,6 +977,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -970,11 +996,12 @@ describe('/rpc', () => {
 			expect(body[2].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resource2', responseType: '' }
+			// { args: [], batch: false, resource: 'resource2', responseType: 'default' }
 			expect(body[3]).toEqual({ a: 2 });
 
 			// { args: [], batch: false, resource: 'resource2', responseType: 'object' }
@@ -983,6 +1010,7 @@ describe('/rpc', () => {
 				headers: {
 					'content-type': 'application/json',
 					'edge-resource-2': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -996,11 +1024,12 @@ describe('/rpc', () => {
 				new Headers({
 					'content-type': 'application/json',
 					'edge-resource-2': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'child.resource1', responseType: '' }
+			// { args: [], batch: false, resource: 'child.resource1', responseType: 'default' }
 			expect(body[6]).toEqual({ a: 1 });
 
 			// { args: [], batch: false, resource: 'child.resource1', responseType: 'object' }
@@ -1026,7 +1055,7 @@ describe('/rpc', () => {
 				})
 			);
 
-			// { args: [], batch: false, resource: 'child.child.resource1', responseType: '' }
+			// { args: [], batch: false, resource: 'child.child.resource1', responseType: 'default' }
 			expect(body[9]).toEqual({ a: 1 });
 
 			// { args: [], batch: false, resource: 'child.child.resource1', responseType: 'object' }
@@ -1034,7 +1063,7 @@ describe('/rpc', () => {
 				body: { a: 1 },
 				headers: {
 					'content-type': 'application/json',
-					'rpc-init-2': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1047,12 +1076,12 @@ describe('/rpc', () => {
 			expect(body[11].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-init-2': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceBoolean', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceBoolean', responseType: 'default' }
 			expect(body[12]).toBeFalsy();
 
 			// { args: [], batch: false, resource: 'resourceBoolean', responseType: 'object' }
@@ -1060,6 +1089,7 @@ describe('/rpc', () => {
 				body: false,
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1072,11 +1102,12 @@ describe('/rpc', () => {
 			expect(body[14].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceError', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceError', responseType: 'default' }
 			expect(body[15]).toBeNull();
 
 			// { args: [], batch: false, resource: 'resourceError', responseType: 'object' }
@@ -1088,12 +1119,13 @@ describe('/rpc', () => {
 							args: [],
 							batch: false,
 							resource: 'resourceError',
-							responseType: ''
+							responseType: 'default'
 						}
 					}
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: false,
@@ -1108,7 +1140,7 @@ describe('/rpc', () => {
 						args: [],
 						batch: false,
 						resource: 'resourceError',
-						responseType: ''
+						responseType: 'default'
 					}
 				}
 			});
@@ -1116,11 +1148,12 @@ describe('/rpc', () => {
 			expect(body[17].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceHttpError', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceHttpError', responseType: 'default' }
 			expect(body[18]).toBeNull();
 
 			// { args: [], batch: false, resource: 'resourceHttpError', responseType: 'object' }
@@ -1132,7 +1165,7 @@ describe('/rpc', () => {
 							args: [],
 							batch: false,
 							resource: 'resourceHttpError',
-							responseType: ''
+							responseType: 'default'
 						}
 					},
 					message: 'Not Found',
@@ -1142,13 +1175,14 @@ describe('/rpc', () => {
 				headers: {
 					'content-type': 'application/json',
 					'edge-resource-http-error': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: false,
 				status: 404
 			});
 
-			// { args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: 'default' }
 			expect(body[20]).toBeNull();
 
 			// { args: [], batch: false, resource: 'resourceHttpErrorResponse', responseType: 'object' }
@@ -1161,6 +1195,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: false,
@@ -1178,11 +1213,12 @@ describe('/rpc', () => {
 			expect(body[22].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceNull', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceNull', responseType: 'default' }
 			expect(body[23]).toBeNull();
 
 			// { args: [], batch: false, resource: 'resourceNull', responseType: 'object' }
@@ -1190,6 +1226,7 @@ describe('/rpc', () => {
 				body: null,
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1202,11 +1239,12 @@ describe('/rpc', () => {
 			expect(body[25].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceNumber', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceNumber', responseType: 'default' }
 			expect(body[26]).toEqual(1);
 
 			// { args: [], batch: false, resource: 'resourceNumber', responseType: 'object' }
@@ -1214,6 +1252,7 @@ describe('/rpc', () => {
 				body: 1,
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1226,11 +1265,12 @@ describe('/rpc', () => {
 			expect(body[28].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceResponse', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceResponse', responseType: 'default' }
 			expect(body[29]).toEqual({ a: 1 });
 
 			// { args: [], batch: false, resource: 'resourceResponse', responseType: 'object' }
@@ -1238,6 +1278,7 @@ describe('/rpc', () => {
 				body: { a: 1 },
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1250,11 +1291,12 @@ describe('/rpc', () => {
 			expect(body[31].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceString', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceString', responseType: 'default' }
 			expect(body[32]).toEqual('string');
 
 			// { args: [], batch: false, resource: 'resourceString', responseType: 'object' }
@@ -1262,6 +1304,7 @@ describe('/rpc', () => {
 				body: 'string',
 				headers: {
 					'content-type': 'text/plain;charset=UTF-8',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1274,11 +1317,12 @@ describe('/rpc', () => {
 			expect(body[34].headers).toEqual(
 				new Headers({
 					'content-type': 'text/plain;charset=UTF-8',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
 
-			// { args: [], batch: false, resource: 'resourceStream', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceStream', responseType: 'default' }
 			expect(body[35]).toEqual('stream');
 
 			// { args: [], batch: false, resource: 'resourceStream', responseType: 'object' }
@@ -1286,6 +1330,7 @@ describe('/rpc', () => {
 				body: 'stream',
 				headers: {
 					'content-type': 'application/octet-stream',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1295,7 +1340,7 @@ describe('/rpc', () => {
 			// { args: [], batch: false, resource: 'resourceStream', responseType: 'response' }
 			expect(await body[37].text()).toEqual('stream');
 
-			// { args: [], batch: false, resource: 'resourceZod', responseType: '' }
+			// { args: [], batch: false, resource: 'resourceZod', responseType: 'default' }
 			expect(body[38]).toBeNull();
 
 			// { args: [], batch: false, resource: 'resourceZod', responseType: 'object' }
@@ -1306,7 +1351,7 @@ describe('/rpc', () => {
 							args: [],
 							batch: false,
 							resource: 'resourceZod',
-							responseType: ''
+							responseType: 'default'
 						},
 						errors: [
 							{
@@ -1324,6 +1369,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: false,
@@ -1337,7 +1383,7 @@ describe('/rpc', () => {
 						args: [],
 						batch: false,
 						resource: 'resourceZod',
-						responseType: ''
+						responseType: 'default'
 					},
 					errors: [
 						{
@@ -1357,6 +1403,7 @@ describe('/rpc', () => {
 			expect(body[40].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
@@ -1365,7 +1412,8 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-response-batch': 'true'
+					'rpc-response-batch': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -1373,7 +1421,7 @@ describe('/rpc', () => {
 		it('should works with rpc.responseType = "object"', async () => {
 			const rpc: Rpc.Request = {
 				args: [
-					{ args: [], batch: false, resource: 'resource1', responseType: '' },
+					{ args: [], batch: false, resource: 'resource1', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'response' }
 				],
@@ -1386,7 +1434,7 @@ describe('/rpc', () => {
 			const res = await root.callMany(rpc, req);
 			const { body, headers, ok, status } = await rpcProxy.createResponse<any>(res);
 
-			// { args: [], batch: false, resource: 'resource1', responseType: '' }
+			// { args: [], batch: false, resource: 'resource1', responseType: 'default' }
 			expect(body[0]).toEqual({
 				cf: {},
 				data: { args: {} },
@@ -1406,6 +1454,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1424,6 +1473,7 @@ describe('/rpc', () => {
 			expect(body[2].headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
@@ -1440,7 +1490,7 @@ describe('/rpc', () => {
 		it('should works with rpc.responseType = "response"', async () => {
 			const rpc: Rpc.Request = {
 				args: [
-					{ args: [], batch: false, resource: 'resource1', responseType: '' },
+					{ args: [], batch: false, resource: 'resource1', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resource1', responseType: 'response' }
 				],
@@ -1462,7 +1512,7 @@ describe('/rpc', () => {
 				};
 			})();
 
-			// { args: [], batch: false, resource: 'resource1', responseType: '' }
+			// { args: [], batch: false, resource: 'resource1', responseType: 'default' }
 			expect(body[0]).toEqual({
 				cf: {},
 				data: { args: {} },
@@ -1482,6 +1532,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1499,6 +1550,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				},
 				ok: true,
@@ -1523,13 +1575,13 @@ describe('/rpc', () => {
 						batch: false,
 						args: ['a', [1, 2], { a: 1 }],
 						resource: 'resource1',
-						responseType: ''
+						responseType: 'default'
 					},
 					{ invalidKey: 'value' } as unknown as Rpc.Request
 				],
 				batch: true,
 				resource: 'batch',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			// @ts-expect-error
@@ -1581,7 +1633,9 @@ describe('/rpc', () => {
 				Response.json(
 					{ a: 1 },
 					{
-						headers: new Headers({ 'edge-header': 'true' }),
+						headers: new Headers({
+							'edge-header': 'true'
+						}),
 						status: 201
 					}
 				)
@@ -1602,7 +1656,9 @@ describe('/rpc', () => {
 				Response.json(
 					{ a: 1 },
 					{
-						headers: new Headers({ 'edge-header': 'true' }),
+						headers: new Headers({
+							'edge-header': 'true'
+						}),
 						status: 201
 					}
 				),
@@ -1627,11 +1683,7 @@ describe('/rpc', () => {
 			const res = root.createResponse('string');
 
 			expect(res).toBeInstanceOf(RpcResponse);
-			expect(res.headers).toEqual(
-				new Headers({
-					'content-type': 'text/plain;charset=UTF-8'
-				})
-			);
+			expect(res.headers).toEqual(new Headers({ 'content-type': 'text/plain;charset=UTF-8' }));
 			expect(res.status).toEqual(200);
 		});
 
@@ -1665,7 +1717,7 @@ describe('/rpc', () => {
 				args: [],
 				batch: false,
 				resource: 'resource1',
-				responseType: ''
+				responseType: 'default'
 			};
 			const res = await root.fetch(rpc, req);
 			const body = await rpcProxy.createResponse(res);
@@ -1678,7 +1730,9 @@ describe('/rpc', () => {
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
 				new Headers({
-					'content-type': 'application/json'
+					'content-type': 'application/json',
+					'rpc-init-1': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -1701,6 +1755,7 @@ describe('/rpc', () => {
 				},
 				headers: {
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				},
 				ok: true,
@@ -1710,6 +1765,7 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'object'
 				})
 			);
@@ -1734,7 +1790,8 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-response-type': 'response'
+					'rpc-response-type': 'response',
+					'rpc-init-1': 'true'
 				})
 			);
 		});
@@ -1742,13 +1799,13 @@ describe('/rpc', () => {
 		it('should works with batch request', async () => {
 			const rpc: Rpc.Request = {
 				args: [
-					{ args: [], batch: false, resource: 'resource2', responseType: '' },
+					{ args: [], batch: false, resource: 'resource2', responseType: 'default' },
 					{ args: [], batch: false, resource: 'resource2', responseType: 'object' },
 					{ args: [], batch: false, resource: 'resource2', responseType: 'response' }
 				],
 				batch: true,
 				resource: 'batch',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			const res = await root.fetch(rpc, req);
@@ -1760,7 +1817,8 @@ describe('/rpc', () => {
 				headers: {
 					'content-type': 'application/json',
 					'edge-resource-2': 'true',
-					'rpc-response-type': 'object'
+					'rpc-response-type': 'object',
+					'rpc-init-1': 'true'
 				},
 				ok: true,
 				status: 201
@@ -1770,6 +1828,7 @@ describe('/rpc', () => {
 				new Headers({
 					'content-type': 'application/json',
 					'edge-resource-2': 'true',
+					'rpc-init-1': 'true',
 					'rpc-response-type': 'response'
 				})
 			);
@@ -1779,7 +1838,8 @@ describe('/rpc', () => {
 			expect(res.headers).toEqual(
 				new Headers({
 					'content-type': 'application/json',
-					'rpc-response-batch': 'true'
+					'rpc-response-batch': 'true',
+					'rpc-response-type': 'default'
 				})
 			);
 		});
@@ -1804,11 +1864,6 @@ describe('/rpc', () => {
 				fn: root.child.resource1,
 				parents: [root, root.child]
 			});
-
-			// @ts-expect-error
-			expect(root.cache).toBe(cache);
-			// @ts-expect-error
-			expect(root.child.cache).toBe(cache);
 		});
 
 		it('should works with child child', () => {
@@ -1819,13 +1874,6 @@ describe('/rpc', () => {
 				fn: root.child.child.resource1,
 				parents: [root, root.child, root.child.child]
 			});
-
-			// @ts-expect-error
-			expect(root.cache).toBe(cache);
-			// @ts-expect-error
-			expect(root.child.cache).toBe(cache);
-			// @ts-expect-error
-			expect(root.child.child.cache).toBe(cache);
 		});
 
 		it('should works with non-existent resource', () => {
@@ -1885,10 +1933,10 @@ describe('/rpc', () => {
 				args: [{ a: 1 }],
 				batch: false,
 				resource: 'a',
-				responseType: ''
+				responseType: 'default'
 			};
 
-			vi.mocked(cache.wrap).mockResolvedValue(
+			vi.mocked(Rpc.cache!.wrap).mockResolvedValue(
 				Response.json(
 					{
 						a: 'cached'
@@ -1901,26 +1949,21 @@ describe('/rpc', () => {
 		});
 
 		it('should not handle if not cache', async () => {
-			// @ts-expect-error
-			root.cache = null;
+			Rpc.cache = null;
 
 			// @ts-expect-error
 			const res = await root.tryCached(rpc, fn);
 
 			expect(await res.json()).toEqual({ a: 'fresh' });
-			expect(res.headers).toEqual(
-				new Headers({
-					'content-type': 'application/json'
-				})
-			);
+			expect(res.headers).toEqual(new Headers({ 'content-type': 'application/json' }));
 		});
 
 		it('should returns cached', async () => {
 			// @ts-expect-error
 			const res = await root.tryCached(rpc, fn);
 
-			expect(cache.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
-			expect(cache.set).not.toHaveBeenCalled();
+			expect(Rpc.cache!.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
+			expect(Rpc.cache!.set).not.toHaveBeenCalled();
 
 			expect(await res.json()).toEqual({ a: 'cached' });
 			expect(res.headers).toEqual(
@@ -1932,32 +1975,28 @@ describe('/rpc', () => {
 		});
 
 		it('should returns fresh', async () => {
-			vi.mocked(cache.wrap).mockImplementation(cacheWrapMissImplementation);
+			vi.mocked(Rpc.cache!.wrap).mockImplementation(cacheWrapMissImplementation);
 
 			// @ts-expect-error
 			const res = await root.tryCached(rpc, fn);
 
-			expect(cache.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
-			expect(cache.set).toHaveBeenCalledWith(
+			expect(Rpc.cache!.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
+			expect(Rpc.cache!.set).toHaveBeenCalledWith(
 				'rpc_a_[{"a":1}]',
 				expect.any(Response),
 				{ tags: [], ttlSeconds: DEFAULT_CACHE_TTL_SECONDS },
 				true
 			);
 
-			const setCalls = vi.mocked(cache.set).mock.calls;
+			const setCalls = vi.mocked(Rpc.cache!.set).mock.calls;
 
 			expect(await setCalls[0][1].json()).toEqual({ a: 'fresh' });
 			expect(await res.json()).toEqual({ a: 'fresh' });
-			expect(res.headers).toEqual(
-				new Headers({
-					'content-type': 'application/json'
-				})
-			);
+			expect(res.headers).toEqual(new Headers({ 'content-type': 'application/json' }));
 		});
 
 		it('should returns fresh with cache options', async () => {
-			vi.mocked(cache.wrap).mockImplementation(cacheWrapMissImplementation);
+			vi.mocked(Rpc.cache!.wrap).mockImplementation(cacheWrapMissImplementation);
 
 			fn = vi.fn(async () => {
 				return new RpcResponse(
@@ -1974,22 +2013,18 @@ describe('/rpc', () => {
 			// @ts-expect-error
 			const res = await root.tryCached(rpc, fn);
 
-			expect(cache.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
-			expect(cache.set).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Response), { tags: ['a', 'b'], ttlSeconds: 100 }, true);
+			expect(Rpc.cache!.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
+			expect(Rpc.cache!.set).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Response), { tags: ['a', 'b'], ttlSeconds: 100 }, true);
 
-			const setCalls = vi.mocked(cache.set).mock.calls;
+			const setCalls = vi.mocked(Rpc.cache!.set).mock.calls;
 
 			expect(await setCalls[0][1].json()).toEqual({ a: 'fresh' });
 			expect(await res.json()).toEqual({ a: 'fresh' });
-			expect(res.headers).toEqual(
-				new Headers({
-					'content-type': 'application/json'
-				})
-			);
+			expect(res.headers).toEqual(new Headers({ 'content-type': 'application/json' }));
 		});
 
 		it('should returns fresh and not set cache if cache === false', async () => {
-			vi.mocked(cache.wrap).mockImplementation(cacheWrapMissImplementation);
+			vi.mocked(Rpc.cache!.wrap).mockImplementation(cacheWrapMissImplementation);
 
 			fn = vi.fn(async () => {
 				return new RpcResponse(
@@ -2003,15 +2038,11 @@ describe('/rpc', () => {
 			// @ts-expect-error
 			const res = await root.tryCached(rpc, fn);
 
-			expect(cache.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
-			expect(cache.set).not.toHaveBeenCalled();
+			expect(Rpc.cache!.wrap).toHaveBeenCalledWith('rpc_a_[{"a":1}]', expect.any(Function), { json: true });
+			expect(Rpc.cache!.set).not.toHaveBeenCalled();
 
 			expect(await res.json()).toEqual({ a: 'fresh' });
-			expect(res.headers).toEqual(
-				new Headers({
-					'content-type': 'application/json'
-				})
-			);
+			expect(res.headers).toEqual(new Headers({ 'content-type': 'application/json' }));
 		});
 	});
 

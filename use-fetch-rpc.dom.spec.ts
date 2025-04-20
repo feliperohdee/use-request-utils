@@ -842,7 +842,7 @@ describe('/use-rpc', () => {
 					args: ['test1', 'test2'],
 					batch: false,
 					resource: 'success',
-					responseType: ''
+					responseType: 'default'
 				},
 				new RpcProxyRequestOptions()
 			);
@@ -857,7 +857,7 @@ describe('/use-rpc', () => {
 						args: ['test1', 'test2'],
 						batch: false,
 						resource: 'error',
-						responseType: ''
+						responseType: 'default'
 					},
 					new RpcProxyRequestOptions()
 				);
@@ -870,7 +870,7 @@ describe('/use-rpc', () => {
 							args: ['test1', 'test2'],
 							batch: false,
 							resource: 'error',
-							responseType: ''
+							responseType: 'default'
 						}
 					},
 					message: 'Error',

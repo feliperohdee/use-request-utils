@@ -63,12 +63,6 @@ namespace Rpc {
 				ttlSeconds?: number;
 		  };
 
-	export type Options = {
-		cache?: CacheInterface | null;
-		defaultResponseHeaders?: Headers;
-		transformError?: (rpc: Request, err: Error) => HttpError;
-	};
-
 	export type Request = {
 		args: any[];
 		batch: boolean;
@@ -91,7 +85,7 @@ namespace Rpc {
 		ok: boolean;
 		status: number;
 	};
-	export type ResponseType = '' | 'object' | 'response';
+	export type ResponseType = 'default' | 'object' | 'response';
 
 	export type ResponseInit = {
 		cache?: CacheOptions;
@@ -102,31 +96,34 @@ namespace Rpc {
 
 const DEFAULT_CACHE_TTL_SECONDS = 86400; // 1 day
 const requestStorage = new AsyncLocalStorage<{ context: RpcContext }>();
+const defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
+	const httpError = HttpError.wrap(err);
+
+	httpError.setContext({ rpc });
+
+	return httpError;
+};
 
 class Rpc {
-	static defaultErrorTransformer = (rpc: Rpc.Request, err: Error) => {
-		const httpError = HttpError.wrap(err);
+	static cache: Rpc.CacheInterface | null;
+	static defaultErrorTransformer = defaultErrorTransformer;
+	static defaultResponseHeaders = new Headers();
+	static errorTransformer = defaultErrorTransformer;
 
-		httpError.setContext({ rpc });
-
-		return httpError;
-	};
-
-	static errorTransformer = Rpc.defaultErrorTransformer;
 	static restoreErrorTransformer() {
 		Rpc.errorTransformer = Rpc.defaultErrorTransformer;
 	}
 
-	static setErrorTransformer(transformError: (rpc: Rpc.Request, err: Error) => HttpError) {
-		Rpc.errorTransformer = transformError;
+	static setCache(cache: Rpc.CacheInterface) {
+		Rpc.cache = cache;
 	}
 
-	protected cache: Rpc.CacheInterface | null;
-	protected defaultResponseHeaders: Headers;
+	static setDefaultResponseHeaders(headers: Headers) {
+		Rpc.defaultResponseHeaders = headers;
+	}
 
-	constructor(options?: Rpc.Options) {
-		this.cache = options?.cache || null;
-		this.defaultResponseHeaders = options?.defaultResponseHeaders || new Headers();
+	static setErrorTransformer(transformError: (rpc: Rpc.Request, err: Error) => HttpError) {
+		Rpc.errorTransformer = transformError;
 	}
 
 	private async call(rpc: Rpc.Request, req: Request): Promise<Response> {
@@ -171,7 +168,7 @@ class Rpc {
 						return res;
 					})();
 
-					res.addDefaultHeaders(current.defaultResponseHeaders);
+					res.addDefaultHeaders(Rpc.defaultResponseHeaders);
 
 					for (let parent of parents) {
 						if (parent.$onAfterResponse) {
@@ -189,15 +186,13 @@ class Rpc {
 				const httpError = Rpc.errorTransformer(rpc, err as Error);
 
 				return this.createResponse(httpError.toJson(), {
-					headers: headers.merge(this.defaultResponseHeaders, httpError.headers),
+					headers: headers.merge(Rpc.defaultResponseHeaders, httpError.headers),
 					status: httpError.status
 				});
 			}
 		});
 
-		if (rpc.responseType) {
-			res.headers.set('rpc-response-type', rpc.responseType);
-		}
+		res.headers.set('rpc-response-type', rpc.responseType || 'default');
 
 		return res;
 	}
@@ -205,7 +200,7 @@ class Rpc {
 	private async callMany(rpc: Rpc.Request, req: Request): Promise<Response> {
 		if (!rpc.batch || !this.validRequest(rpc)) {
 			return this.createResponse(HttpError.json(400), {
-				headers: this.defaultResponseHeaders,
+				headers: Rpc.defaultResponseHeaders,
 				status: 400
 			});
 		}
@@ -264,11 +259,8 @@ class Rpc {
 
 		const result: Rpc.ResponseBatch[] = await Promise.all(
 			map(responses, async ({ res }, index) => {
-				const { responseType = '' } = requests[index].rpc;
-
-				if (responseType) {
-					res.headers.set('rpc-response-type', responseType);
-				}
+				const { responseType } = requests[index].rpc;
+				res.headers.set('rpc-response-type', responseType);
 
 				return {
 					body: await util.readStream(res.body),
@@ -282,12 +274,11 @@ class Rpc {
 		);
 
 		const res = Response.json(result, {
-			headers: { 'rpc-response-batch': 'true' }
+			headers: {
+				'rpc-response-batch': 'true',
+				'rpc-response-type': rpc.responseType
+			}
 		});
-
-		if (rpc.responseType !== '') {
-			res.headers.set('rpc-response-type', rpc.responseType);
-		}
 
 		return res;
 	}
@@ -349,11 +340,6 @@ class Rpc {
 
 			for (let i = 0; i < resourceParts.length - 1; i++) {
 				instance = get(instance, resourceParts[i]);
-
-				if (isNil(instance.cache) && this.cache) {
-					instance.cache = this.cache;
-				}
-
 				parents = [...parents, instance];
 			}
 
@@ -378,9 +364,9 @@ class Rpc {
 	protected async $onAfterResponse(res: RpcResponse, rpc: Rpc.Request, req: HttpRequest): Promise<void | RpcResponse> {}
 
 	private async tryCached(rpc: Rpc.Request, fn: () => Promise<RpcResponse>): Promise<Response> {
-		if (this.cache) {
+		if (Rpc.cache) {
 			const key = `rpc_${rpc.resource}_${JSON.stringify(rpc.args)}`;
-			const cached = await this.cache.wrap(
+			const cached = await Rpc.cache.wrap(
 				key,
 				async () => {
 					const res = await fn();

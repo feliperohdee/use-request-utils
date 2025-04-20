@@ -125,7 +125,7 @@ const create = <T, SetAbortable = false>(
 		batch: boolean;
 		options: RpcProxyRequestOptions;
 	},
-	responseType: Rpc.ResponseType = ''
+	responseType: Rpc.ResponseType = 'default'
 ): RpcProxy.Proxy<T, SetAbortable> => {
 	const context = parentContext ?? {
 		batch: false,
@@ -263,7 +263,7 @@ const createRequest = (
 
 const createResponse = async <T>(input: Response) => {
 	const responseBatch = input.headers.get('rpc-response-batch') === 'true';
-	const responseType = input.headers.get('rpc-response-type') || '';
+	const responseType = input.headers.get('rpc-response-type');
 
 	// handle batch responses
 	if (responseBatch) {
@@ -423,7 +423,7 @@ const payloadToRequest = (payload: RpcProxy.Payload): Rpc.Request => {
 					args: [],
 					batch: false,
 					resource: '',
-					responseType: ''
+					responseType: 'default'
 				};
 			}
 
@@ -434,7 +434,7 @@ const payloadToRequest = (payload: RpcProxy.Payload): Rpc.Request => {
 					args: [],
 					batch: false,
 					resource: '',
-					responseType: ''
+					responseType: 'default'
 				};
 			}
 
@@ -451,7 +451,7 @@ const payloadToRequest = (payload: RpcProxy.Payload): Rpc.Request => {
 const throwError = async (input: Response) => {
 	// object: returns error as error property
 	// response: returns error as body
-	if (!input.ok && !input.headers.get('rpc-response-type')) {
+	if (!input.ok && input.headers.get('rpc-response-type') !== 'object' && input.headers.get('rpc-response-type') !== 'response') {
 		const body = util.safeParse(await util.readStream(input.body));
 
 		if (isPlainObject(body)) {

@@ -65,7 +65,7 @@ const inspectResponse = async (res: any[]) => {
 	);
 };
 
-describe('/app/rpc-proxy', () => {
+describe('/rpc-proxy', () => {
 	beforeAll(() => {
 		HttpError.setIncludeStack(false);
 	});
@@ -96,7 +96,7 @@ describe('/app/rpc-proxy', () => {
 					args: [{ value: 123 }],
 					batch: false,
 					resource: 'a',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -117,7 +117,7 @@ describe('/app/rpc-proxy', () => {
 					args: [[123, 456]],
 					batch: false,
 					resource: 'd',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -215,7 +215,7 @@ describe('/app/rpc-proxy', () => {
 					args: [{ value: 123 }],
 					batch: false,
 					resource: 'a',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -245,13 +245,13 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
 						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'object' },
 						{ args: [{ value: 789 }], batch: false, resource: 'a', responseType: 'response' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -290,13 +290,13 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [[123, 456]], batch: false, resource: 'd', responseType: '' },
+						{ args: [[123, 456]], batch: false, resource: 'd', responseType: 'default' },
 						{ args: [[789, 101112]], batch: false, resource: 'd', responseType: 'object' },
 						{ args: [[131415, 161718]], batch: false, resource: 'd', responseType: 'response' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -343,7 +343,7 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
 						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'object' },
 						{ args: [{ value: 789 }], batch: false, resource: 'a', responseType: 'response' }
 					],
@@ -398,7 +398,7 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
 						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'object' },
 						{ args: [{ value: 789 }], batch: false, resource: 'a', responseType: 'response' }
 					],
@@ -503,13 +503,13 @@ describe('/app/rpc-proxy', () => {
 				}),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
-						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: '' },
-						{ args: [{ value: 789 }], batch: false, resource: 'a', responseType: '' }
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
+						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'default' },
+						{ args: [{ value: 789 }], batch: false, resource: 'a', responseType: 'default' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -583,12 +583,12 @@ describe('/app/rpc-proxy', () => {
 				}),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
-						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: '' }
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
+						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'default' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -609,12 +609,12 @@ describe('/app/rpc-proxy', () => {
 				}),
 				rpc: {
 					args: [
-						{ args: [{ value: 789 }], batch: false, resource: 'b', responseType: '' },
-						{ args: [{ value: 101112 }], batch: false, resource: 'b', responseType: '' }
+						{ args: [{ value: 789 }], batch: false, resource: 'b', responseType: 'default' },
+						{ args: [{ value: 101112 }], batch: false, resource: 'b', responseType: 'default' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -628,12 +628,12 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [{ value: 789 }], batch: false, resource: 'b', responseType: '' },
-						{ args: [{ value: 101112 }], batch: false, resource: 'b', responseType: '' }
+						{ args: [{ value: 789 }], batch: false, resource: 'b', responseType: 'default' },
+						{ args: [{ value: 101112 }], batch: false, resource: 'b', responseType: 'default' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -647,12 +647,12 @@ describe('/app/rpc-proxy', () => {
 				options: new RpcProxyRequestOptions(),
 				rpc: {
 					args: [
-						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: '' },
-						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: '' }
+						{ args: [{ value: 123 }], batch: false, resource: 'a', responseType: 'default' },
+						{ args: [{ value: 456 }], batch: false, resource: 'a', responseType: 'default' }
 					],
 					batch: true,
 					resource: 'batch',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -738,7 +738,7 @@ describe('/app/rpc-proxy', () => {
 				args: [{ value: 123 }],
 				batch: false,
 				resource: 'a',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			const req = rpcProxy.createRequest(rpc);
@@ -762,7 +762,7 @@ describe('/app/rpc-proxy', () => {
 				args: [{ value: 123 }],
 				batch: false,
 				resource: 'a',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			const controller = new AbortController();
@@ -801,7 +801,7 @@ describe('/app/rpc-proxy', () => {
 				args: [],
 				batch: true,
 				resource: 'a',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			try {
@@ -991,7 +991,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1045,7 +1045,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1104,7 +1104,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: false,
-						responseType: '',
+						responseType: 'default',
 						status: 404
 					},
 					{
@@ -1178,7 +1178,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1232,7 +1232,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1286,7 +1286,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1340,7 +1340,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1416,7 +1416,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1492,7 +1492,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1568,7 +1568,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1644,7 +1644,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1720,7 +1720,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1786,7 +1786,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1852,7 +1852,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1918,7 +1918,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -1984,7 +1984,7 @@ describe('/app/rpc-proxy', () => {
 						contentType: 'application/json',
 						headers: { 'content-type': 'application/json' },
 						ok: true,
-						responseType: '',
+						responseType: 'default',
 						status: 200
 					},
 					{
@@ -2068,7 +2068,7 @@ describe('/app/rpc-proxy', () => {
 					args: [{ value: 123 }],
 					batch: false,
 					resource: 'a',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -2092,7 +2092,7 @@ describe('/app/rpc-proxy', () => {
 					args: ['private'],
 					batch: false,
 					resource: '$e',
-					responseType: ''
+					responseType: 'default'
 				},
 				url: 'http://localhost/rpc'
 			});
@@ -2159,7 +2159,7 @@ describe('/app/rpc-proxy', () => {
 				args: [{ value: 123 }],
 				batch: false,
 				resource: 'resource.a.b',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			const req = rpcProxy.payloadToRequest(payload);
@@ -2168,7 +2168,7 @@ describe('/app/rpc-proxy', () => {
 				args: [{ value: 123 }],
 				batch: false,
 				resource: 'resource.a.b',
-				responseType: ''
+				responseType: 'default'
 			});
 		});
 
@@ -2179,7 +2179,7 @@ describe('/app/rpc-proxy', () => {
 						args: [{ value: 123 }],
 						batch: false,
 						resource: 'resource.a.b',
-						responseType: ''
+						responseType: 'default'
 					},
 					{
 						args: [{ value: 456 }],
@@ -2202,7 +2202,7 @@ describe('/app/rpc-proxy', () => {
 				],
 				batch: true,
 				resource: '',
-				responseType: ''
+				responseType: 'default'
 			};
 
 			const req = rpcProxy.payloadToRequest(payload);
@@ -2213,7 +2213,7 @@ describe('/app/rpc-proxy', () => {
 						args: [{ value: 123 }],
 						batch: false,
 						resource: 'resource.a.b',
-						responseType: ''
+						responseType: 'default'
 					},
 					{
 						args: [{ value: 456 }],
@@ -2231,12 +2231,12 @@ describe('/app/rpc-proxy', () => {
 						args: [],
 						batch: false,
 						resource: '',
-						responseType: ''
+						responseType: 'default'
 					}
 				],
 				batch: true,
 				resource: '',
-				responseType: ''
+				responseType: 'default'
 			});
 		});
 	});
@@ -2252,6 +2252,7 @@ describe('/app/rpc-proxy', () => {
 
 				throw new Error('Expected to throw');
 			} catch (err) {
+				console.log(err);
 				expect((err as HttpError).toJson()).toEqual({
 					context: {},
 					message: 'error',
