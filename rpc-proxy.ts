@@ -235,7 +235,7 @@ const createRequest = (
 	const body: BodyInit = JSON.stringify(rpc);
 	const form = new FormData();
 	const requestHeaders = new Headers(options?.headers);
-	const url = new URL(options?.pathname || '/rpc', options?.origin || 'http://localhost');
+	const url = new URL(options?.pathname || '/api/rpc', options?.origin || 'http://localhost');
 
 	form.append('rpc', body);
 	requestHeaders.delete('content-type');

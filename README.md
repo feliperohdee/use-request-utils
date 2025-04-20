@@ -2834,7 +2834,7 @@ describe('MyRpcService', () => {
         batch: false,
         responseType: 'default'
       },
-      url: 'http://localhost/rpc' // Default URL for testing
+      url: 'http://localhost/api/rpc' // Default URL for testing
     }));
   });
 

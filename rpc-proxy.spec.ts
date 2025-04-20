@@ -98,7 +98,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual({ a: 123 });
@@ -119,7 +119,7 @@ describe('/rpc-proxy', () => {
 					resource: 'd',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual([123, 456]);
@@ -140,7 +140,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'object'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual({
@@ -170,7 +170,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'response'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(await res.json()).toEqual({ a: 123 });
@@ -217,7 +217,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual({ a: 123 });
@@ -253,7 +253,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res[0]).toEqual({ a: 123 });
@@ -298,7 +298,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res[0]).toEqual([123, 456]);
@@ -351,7 +351,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'object'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res.body[0]).toEqual({ a: 123 });
@@ -406,7 +406,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'response'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(await res.json()).toEqual([
@@ -511,7 +511,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual([{ a: 123 }, { a: 456 }, { a: 789 }]);
@@ -590,7 +590,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(mock).toHaveBeenCalledWith({
@@ -616,7 +616,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(mock).toHaveBeenCalledWith({
@@ -635,7 +635,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(mock).toHaveBeenCalledWith({
@@ -654,7 +654,7 @@ describe('/rpc-proxy', () => {
 					resource: 'batch',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual([
@@ -747,7 +747,7 @@ describe('/rpc-proxy', () => {
 			expect(form.has('body')).toBeFalsy();
 			expect(form.get('rpc')).toEqual(JSON.stringify(rpc));
 			expect(req.cf).toEqual({});
-			expect(req.url).toEqual('http://localhost/rpc');
+			expect(req.url).toEqual('http://localhost/api/rpc');
 			expect(req.method).toEqual('POST');
 			expect(req.headers.get('content-type')).toContain('multipart/form-data');
 			expect(req.headers).toEqual(
@@ -2070,7 +2070,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual({ a: 123 });
@@ -2094,7 +2094,7 @@ describe('/rpc-proxy', () => {
 					resource: '$e',
 					responseType: 'default'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual('private');
@@ -2137,7 +2137,7 @@ describe('/rpc-proxy', () => {
 					resource: 'a',
 					responseType: 'object'
 				},
-				url: 'http://localhost/rpc'
+				url: 'http://localhost/api/rpc'
 			});
 
 			expect(res).toEqual({
@@ -2252,7 +2252,6 @@ describe('/rpc-proxy', () => {
 
 				throw new Error('Expected to throw');
 			} catch (err) {
-				console.log(err);
 				expect((err as HttpError).toJson()).toEqual({
 					context: {},
 					message: 'error',
