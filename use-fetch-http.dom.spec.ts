@@ -182,7 +182,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -193,7 +193,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -266,7 +266,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -277,7 +277,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1, a1: 1, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -320,7 +320,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(2);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -331,7 +331,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 2, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(2);
 			expect(result.current.loading).toBeFalsy();
@@ -380,7 +380,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(2);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -391,7 +391,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 2, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(2);
 			expect(result.current.loading).toBeFalsy();
@@ -434,7 +434,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -445,7 +445,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -488,7 +488,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(2);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -499,7 +499,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 2, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(2);
 			expect(result.current.loading).toBeFalsy();
@@ -548,7 +548,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(2);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -559,7 +559,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 2, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(2);
 			expect(result.current.loading).toBeFalsy();
@@ -588,7 +588,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(0);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeFalsy();
@@ -624,7 +624,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(0);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeFalsy();
@@ -647,7 +647,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -658,7 +658,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -679,7 +679,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 3 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(3);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(2);
 			expect(result.current.loading).toBeFalsy();
@@ -701,7 +701,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -712,7 +712,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -733,7 +733,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 3 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(3);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(3);
 			expect(result.current.loading).toBeFalsy();
@@ -755,7 +755,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -766,7 +766,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -781,7 +781,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1 });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -799,7 +799,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1, args: [] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
@@ -812,7 +812,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toBeNull();
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(0);
-			expect(result.current.lastCallDuration).toEqual(0);
+			expect(result.current.lastFetchDuration).toEqual(0);
 			expect(result.current.loaded).toBeFalsy();
 			expect(result.current.loadedTimes).toEqual(0);
 			expect(result.current.loading).toBeFalsy();
@@ -833,7 +833,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(1);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeTruthy();
@@ -844,7 +844,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toBeNull();
 			expect(result.current.error).toBeInstanceOf(HttpError);
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeFalsy();
 			expect(result.current.loadedTimes).toEqual(0);
 			expect(result.current.loading).toBeFalsy();
@@ -862,7 +862,7 @@ describe('/use-fetch-http', () => {
 		expect(result.current.error).toBeNull();
 		expect(result.current.fetchTimes).toEqual(0);
 		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastCallDuration).toEqual(0);
+		expect(result.current.lastFetchDuration).toEqual(0);
 		expect(result.current.loaded).toBeFalsy();
 		expect(result.current.loadedTimes).toEqual(0);
 		expect(result.current.loading).toBeFalsy();
@@ -875,7 +875,7 @@ describe('/use-fetch-http', () => {
 			expect(result.current.data).toEqual({ a: 1, args: ['test1', 'test2'] });
 			expect(result.current.error).toBeNull();
 			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastCallDuration).toBeGreaterThan(0);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current.loaded).toBeTruthy();
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();

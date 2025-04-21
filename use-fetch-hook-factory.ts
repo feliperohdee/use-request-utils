@@ -27,7 +27,7 @@ type UseFetchState<Mapped> = {
 	data: Mapped | null;
 	error: HttpError | null;
 	fetchTimes: number;
-	lastCallDuration: number;
+	lastFetchDuration: number;
 	loaded: boolean;
 	loadedTimes: number;
 	loading: boolean;
@@ -135,7 +135,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			data: null,
 			error: null,
 			fetchTimes: 0,
-			lastCallDuration: 0,
+			lastFetchDuration: 0,
 			loaded: false,
 			loadedTimes: 0,
 			loading: false,
@@ -174,7 +174,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 
 						setState(state => ({
 							...state,
-							lastCallDuration: duration,
+							lastFetchDuration: duration,
 							loading: false
 						}));
 						return null;
@@ -206,7 +206,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 							...state,
 							data,
 							error: null,
-							lastCallDuration: duration,
+							lastFetchDuration: duration,
 							loaded: true,
 							loadedTimes: state.loadedTimes + 1,
 							loading: false
@@ -221,7 +221,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 						setState(state => {
 							return {
 								...state,
-								lastCallDuration: duration,
+								lastFetchDuration: duration,
 								loading: false
 							};
 						});
@@ -231,7 +231,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 							return {
 								...state,
 								error: HttpError.wrap(err as Error),
-								lastCallDuration: duration,
+								lastFetchDuration: duration,
 								loading: false,
 								resetted: false
 							};
@@ -263,7 +263,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 				data: null,
 				error: null,
 				fetchTimes: 0,
-				lastCallDuration: 0,
+				lastFetchDuration: 0,
 				loaded: false,
 				loadedTimes: 0,
 				loading: false,
