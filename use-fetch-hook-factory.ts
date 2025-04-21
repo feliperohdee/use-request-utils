@@ -26,6 +26,8 @@ type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
 type UseFetchState<Mapped> = {
 	data: Mapped | null;
 	error: HttpError | null;
+	calledTimes: number;
+	lastCallDuration: number;
 	loaded: boolean;
 	loadedTimes: number;
 	loading: boolean;
@@ -117,6 +119,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
 		const mapperRef = useRef(options.mapper);
 		const shouldFetchRef = useRef<() => boolean>(() => false);
+		const startTimeRef = useRef<number>(0);
 
 		const deps = useDistinct(options.deps || [], {
 			debounce: Math.max(50, options.depsDebounce ?? 0),
@@ -131,6 +134,8 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 		const [state, setState] = useState<UseFetchState<Mapped>>({
 			data: null,
 			error: null,
+			calledTimes: 0,
+			lastCallDuration: 0,
 			loaded: false,
 			loadedTimes: 0,
 			loading: false,
@@ -149,9 +154,12 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					return null;
 				}
 
+				startTimeRef.current = Date.now();
+
 				setState(state => {
 					return {
 						...state,
+						calledTimes: state.calledTimes + 1,
 						loading: true,
 						resetted: false
 					};
@@ -162,6 +170,13 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					const promise = fnRef.current(client.current!, ...args);
 
 					if (!promise) {
+						const duration = Math.max(1, Date.now() - startTimeRef.current);
+
+						setState(state => ({
+							...state,
+							lastCallDuration: duration,
+							loading: false
+						}));
 						return null;
 					}
 
@@ -169,9 +184,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					const currentPromiseUniqueKey = getUniqueKey(currentPromise);
 					const promiseUniqueKey = getUniqueKey(promise);
 
-					// avoid aborting the same promise
 					if (!promiseUniqueKey || promiseUniqueKey !== currentPromiseUniqueKey) {
-						// abort previous promise
 						if (
 							!options.ignoreAbort &&
 							currentPromiseRef.current &&
@@ -185,6 +198,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					}
 
 					const data = map(await promise, mapper);
+					const duration = Math.max(1, Date.now() - startTimeRef.current);
 
 					currentPromiseRef.current = null;
 					setState(state => {
@@ -192,6 +206,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 							...state,
 							data,
 							error: null,
+							lastCallDuration: duration,
 							loaded: true,
 							loadedTimes: state.loadedTimes + 1,
 							loading: false
@@ -200,11 +215,13 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 
 					return data;
 				} catch (err) {
+					const duration = Math.max(1, Date.now() - startTimeRef.current);
+
 					if ((err instanceof DOMException && err.name === 'AbortError') || (err instanceof HttpError && err.status === 499)) {
 						setState(state => {
-							// abort exception must keep state as is, except loading
 							return {
 								...state,
+								lastCallDuration: duration,
 								loading: false
 							};
 						});
@@ -214,6 +231,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 							return {
 								...state,
 								error: HttpError.wrap(err as Error),
+								lastCallDuration: duration,
 								loading: false,
 								resetted: false
 							};
@@ -244,6 +262,8 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			setState({
 				data: null,
 				error: null,
+				calledTimes: 0,
+				lastCallDuration: 0,
 				loaded: false,
 				loadedTimes: 0,
 				loading: false,
@@ -352,12 +372,6 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 
 		// initial load
 		useEffect(() => {
-			// if cached/loaded data is available, skip initial fetch
-			if (state.loaded) {
-				initRef.current = true;
-				return;
-			}
-
 			if (initRef.current) {
 				return;
 			}
