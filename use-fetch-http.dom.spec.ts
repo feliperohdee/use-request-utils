@@ -66,10 +66,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.deps is not an array', async () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { deps: 'not-an-array' });
+				fetchHttp(() => null, { deps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -81,10 +81,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.depsDebounce is not a number', async () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { depsDebounce: 'not-a-number' });
+				fetchHttp(() => null, { depsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -96,10 +96,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.mapper is not a function', () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { mapper: 'not-a-function' });
+				fetchHttp(() => null, { mapper: 'not-a-function' });
 			});
 
 			throw new Error('Expected to throw');
@@ -111,10 +111,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerDeps is not an array', () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { triggerDeps: 'not-an-array' });
+				fetchHttp(() => null, { triggerDeps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -126,10 +126,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerDepsDebounce is not a number', () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { triggerDepsDebounce: 'not-a-number' });
+				fetchHttp(() => null, { triggerDepsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -141,10 +141,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerInterval is not a number', () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
 				// @ts-expect-error
-				http.fetch(() => null, { triggerInterval: 'not-a-number' });
+				fetchHttp(() => null, { triggerInterval: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -158,9 +158,9 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerInterval is less than 500', async () => {
 		try {
 			renderHook(() => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				http.fetch(fetcher, { triggerInterval: 499 });
+				fetchHttp(fetcher, { triggerInterval: 499 });
 			});
 
 			throw new Error('Expected to throw');
@@ -173,9 +173,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works', async () => {
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(fetcher);
+			return fetchHttp(fetcher);
 		});
 
 		expect(result.current.data).toBeNull();
@@ -209,9 +209,9 @@ describe('/use-fetch-http', () => {
 
 		const { result, rerender } = renderHook(
 			({ fn, deps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(fn, { deps });
+				return fetchHttp(fn, { deps });
 			},
 			{
 				initialProps: {
@@ -249,9 +249,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with options.mapper', async () => {
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(fetcher, {
+			return fetchHttp(fetcher, {
 				mapper: data => {
 					return data ? { ...data, a1: data.a } : null;
 				}
@@ -282,9 +282,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(
+				return fetchHttp(
 					(fetch: Fetch.Http, ...args: any[]) => {
 						mock();
 						return fetcher(fetch, ...args);
@@ -332,9 +332,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(
+				return fetchHttp(
 					(fetch: Fetch.Http, ...args: any[]) => {
 						mock();
 						return fetcher(fetch, ...args);
@@ -388,9 +388,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(
+				return fetchHttp(
 					(fetch: Fetch.Http, ...args: any[]) => {
 						mock();
 						return fetcher(fetch, ...args);
@@ -438,9 +438,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(
+				return fetchHttp(
 					(fetch: Fetch.Http, ...args: any[]) => {
 						mock();
 						return fetcher(fetch, ...args);
@@ -488,9 +488,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				const http = useFetchHttp();
+				const { fetchHttp } = useFetchHttp();
 
-				return http.fetch(
+				return fetchHttp(
 					(fetch: Fetch.Http, ...args: any[]) => {
 						mock();
 						return fetcher(fetch, ...args);
@@ -541,9 +541,9 @@ describe('/use-fetch-http', () => {
 	it('should works with options.shouldFetch = false', async () => {
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(
+			return fetchHttp(
 				(fetch: Fetch.Http, ...args: any[]) => {
 					mock();
 					return fetcher(fetch, ...args);
@@ -570,9 +570,9 @@ describe('/use-fetch-http', () => {
 		const mock = vi.fn();
 		const shouldFetch = vi.fn(() => false);
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(
+			return fetchHttp(
 				(fetch: Fetch.Http, ...args: any[]) => {
 					mock();
 					return fetcher(fetch, ...args);
@@ -603,9 +603,9 @@ describe('/use-fetch-http', () => {
 	it('should abort previous promises on subsequent calls with different promises', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(mock.fn);
+			return fetchHttp(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -651,9 +651,9 @@ describe('/use-fetch-http', () => {
 	it('should not abort previous promises on subsequent calls with same promises', async () => {
 		const mock = createAbortableMock('unique-key');
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(mock.fn);
+			return fetchHttp(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -699,9 +699,9 @@ describe('/use-fetch-http', () => {
 	it('should keep previous state on abort', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(mock.fn);
+			return fetchHttp(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -739,9 +739,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(fetcher);
+			return fetchHttp(fetcher);
 		});
 
 		await waitFor(() => {
@@ -769,9 +769,9 @@ describe('/use-fetch-http', () => {
 		vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Error'));
 
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(fetcher);
+			return fetchHttp(fetcher);
 		});
 
 		expect(result.current.data).toBeNull();
@@ -794,9 +794,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with useLazyFetchHttp with additional arguments', async () => {
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { lazyFetchHttp } = useFetchHttp();
 
-			return http.fetchLazy(fetcher);
+			return lazyFetchHttp(fetcher);
 		});
 
 		expect(result.current.data).toBeNull();
@@ -821,9 +821,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with setData', async () => {
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(fetcher);
+			return fetchHttp(fetcher);
 		});
 
 		await waitFor(() => {
@@ -852,9 +852,9 @@ describe('/use-fetch-http', () => {
 
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(
+			return fetchHttp(
 				(fetch: Fetch.Http, ...args: any[]) => {
 					mock();
 					return fetcher(fetch, ...args);
@@ -887,9 +887,9 @@ describe('/use-fetch-http', () => {
 
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const http = useFetchHttp();
+			const { fetchHttp } = useFetchHttp();
 
-			return http.fetch(
+			return fetchHttp(
 				(fetch: Fetch.Http, ...args: any[]) => {
 					mock();
 					return fetcher(fetch, ...args);

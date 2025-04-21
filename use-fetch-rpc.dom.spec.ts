@@ -70,10 +70,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.deps is not an array', async () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { deps: 'not-an-array' });
+				fetchRpc(() => null, { deps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -85,10 +85,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.depsDebounce is not a number', async () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { depsDebounce: 'not-a-number' });
+				fetchRpc(() => null, { depsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -100,10 +100,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.mapper is not a function', () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { mapper: 'not-a-function' });
+				fetchRpc(() => null, { mapper: 'not-a-function' });
 			});
 
 			throw new Error('Expected to throw');
@@ -115,10 +115,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.triggerDeps is not an array', () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { triggerDeps: 'not-an-array' });
+				fetchRpc(() => null, { triggerDeps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -130,10 +130,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.triggerDepsDebounce is not a number', () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { triggerDepsDebounce: 'not-a-number' });
+				fetchRpc(() => null, { triggerDepsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -145,10 +145,10 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.triggerInterval is not a number', () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
 				// @ts-expect-error
-				rpc.fetch(() => null, { triggerInterval: 'not-a-number' });
+				fetchRpc(() => null, { triggerInterval: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -162,9 +162,9 @@ describe('/use-fetch-rpc', () => {
 	it('should throw if options.triggerInterval is less than 500', async () => {
 		try {
 			renderHook(() => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				rpc.fetch(() => null, { triggerInterval: 499 });
+				fetchRpc(() => null, { triggerInterval: 499 });
 			});
 
 			throw new Error('Expected to throw');
@@ -177,9 +177,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch((rpc, ...args: any[]) => {
+			return fetchRpc((rpc, ...args: any[]) => {
 				return rpc.test(...args);
 			});
 		});
@@ -215,9 +215,9 @@ describe('/use-fetch-rpc', () => {
 
 		const { result, rerender } = renderHook(
 			({ fn, deps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(fn, { deps });
+				return fetchRpc(fn, { deps });
 			},
 			{
 				initialProps: {
@@ -255,9 +255,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works with options.mapper', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(
+			return fetchRpc(
 				(rpc, ...args: any[]) => {
 					return rpc.test(...args);
 				},
@@ -293,9 +293,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(
+				return fetchRpc(
 					(rpc, ...args: any[]) => {
 						mock();
 						return rpc.test(
@@ -348,9 +348,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(
+				return fetchRpc(
 					(rpc, ...args: any[]) => {
 						mock();
 						return rpc.test(
@@ -412,9 +412,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(
+				return fetchRpc(
 					(rpc, ...args: any[]) => {
 						mock();
 						return rpc.test(...args);
@@ -465,9 +465,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(
+				return fetchRpc(
 					(rpc, ...args: any[]) => {
 						mock();
 						return rpc.test(
@@ -520,9 +520,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				const rpc = useFetchRpc<TestRpc>();
+				const { fetchRpc } = useFetchRpc<TestRpc>();
 
-				return rpc.fetch(
+				return fetchRpc(
 					(rpc, ...args: any[]) => {
 						mock();
 						return rpc.test(
@@ -581,9 +581,9 @@ describe('/use-fetch-rpc', () => {
 	it('should works with options.shouldFetch = false', async () => {
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(
+			return fetchRpc(
 				(rpc, ...args: any[]) => {
 					mock();
 					return rpc.test(...args);
@@ -610,9 +610,9 @@ describe('/use-fetch-rpc', () => {
 		const mock = vi.fn();
 		const shouldFetch = vi.fn(() => false);
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(
+			return fetchRpc(
 				(rpc, ...args: any[]) => {
 					mock();
 					return rpc.test(...args);
@@ -645,9 +645,9 @@ describe('/use-fetch-rpc', () => {
 	it('should abort previous promises on subsequent calls with different promises', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(mock.fn);
+			return fetchRpc(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -693,9 +693,9 @@ describe('/use-fetch-rpc', () => {
 	it('should not abort previous promises on subsequent calls with same promises', async () => {
 		const mock = createAbortableMock('unique-key');
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(mock.fn);
+			return fetchRpc(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -741,9 +741,9 @@ describe('/use-fetch-rpc', () => {
 	it('should keep previous state on abort', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(mock.fn);
+			return fetchRpc(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -781,9 +781,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch((rpc, ...args: any[]) => {
+			return fetchRpc((rpc, ...args: any[]) => {
 				return rpc.test(...args);
 			});
 		});
@@ -811,9 +811,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works with error', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch((rpc, ...args: any[]) => {
+			return fetchRpc((rpc, ...args: any[]) => {
 				return rpc.testError(...args);
 			});
 		});
@@ -838,9 +838,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works with fetchLazy with additional arguments', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { lazyFetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetchLazy((rpc, arg1, arg2) => {
+			return lazyFetchRpc((rpc, arg1, arg2) => {
 				return rpc.test(arg1, arg2);
 			});
 		});
@@ -867,9 +867,9 @@ describe('/use-fetch-rpc', () => {
 
 	it('should works with setData', async () => {
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch((rpc, ...args: any[]) => {
+			return fetchRpc((rpc, ...args: any[]) => {
 				return rpc.test(...args);
 			});
 		});
@@ -900,9 +900,9 @@ describe('/use-fetch-rpc', () => {
 
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(
+			return fetchRpc(
 				(rpc, ...args: any[]) => {
 					mock();
 					return rpc.test(...args);
@@ -935,9 +935,9 @@ describe('/use-fetch-rpc', () => {
 
 		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			const rpc = useFetchRpc<TestRpc>();
+			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return rpc.fetch(
+			return fetchRpc(
 				(rpc, ...args: any[]) => {
 					mock();
 					return rpc.test(...args);

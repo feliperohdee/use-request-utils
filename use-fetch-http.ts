@@ -4,25 +4,24 @@ import fetch, { Fetch } from './fetch';
 
 type UseFetchHttpFn<T> = (fetch: Fetch.Http, ...args: any[]) => Promise<T> | null;
 
-const fetchHttp = fetch.http;
 const useFetchHttp = () => {
-	const fetch = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
+	const fetchHttp = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
 		const useFetchHook = fetchHookFactory(() => {
-			return fetchHttp;
+			return fetch.http;
 		});
 
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useFetchHook(fn, options);
 	};
 
-	const fetchLazy = <T, Mapped = T>(
+	const lazyFetchHttp = <T, Mapped = T>(
 		fn: UseFetchHttpFn<T>,
 		options?: {
 			ignoreAbort?: boolean;
 			mapper?: (data: T) => Mapped;
 		}
 	): UseFetchResponse<Mapped> => {
-		return fetch(fn, {
+		return fetchHttp(fn, {
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {
@@ -32,7 +31,7 @@ const useFetchHttp = () => {
 		});
 	};
 
-	return { fetch, fetchLazy };
+	return { fetchHttp, lazyFetchHttp };
 };
 
 export default useFetchHttp;

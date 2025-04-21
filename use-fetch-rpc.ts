@@ -6,7 +6,7 @@ import useRpc, { UseRpc } from './use-rpc';
 type UseFetchRpcFn<R extends Rpc, T> = (rpc: UseRpc<R>, ...args: any[]) => Promise<T> | null;
 
 const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathname?: string }) => {
-	const fetch = <T, Mapped = T>(fn: UseFetchRpcFn<R, T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
+	const fetchRpc = <T, Mapped = T>(fn: UseFetchRpcFn<R, T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		const rpc = useRpc<R>(requestOptions);
 		const useFetchHook = fetchHookFactory(() => {
@@ -17,14 +17,14 @@ const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathna
 		return useFetchHook(fn, options);
 	};
 
-	const fetchLazy = <T, Mapped = T>(
+	const lazyFetchRpc = <T, Mapped = T>(
 		fn: UseFetchRpcFn<R, T>,
 		options?: {
 			ignoreAbort?: boolean;
 			mapper?: (data: T) => Mapped;
 		}
 	): UseFetchResponse<Mapped> => {
-		return fetch(fn, {
+		return fetchRpc(fn, {
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {
@@ -34,7 +34,7 @@ const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathna
 		});
 	};
 
-	return { fetch, fetchLazy };
+	return { fetchRpc, lazyFetchRpc };
 };
 
 export default useFetchRpc;

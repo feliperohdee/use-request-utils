@@ -2864,21 +2864,21 @@ A factory hook for declaratively fetching data using the enhanced `fetch.http` u
 
 `useFetchHttp` returns an object containing methods for fetching data:
 
-- `fetch`: Initiates fetches automatically based on dependencies, intervals, etc.
-- `fetchLazy`: Prepares a fetch that must be triggered manually.
+- `fetchHttp`: Initiates fetches automatically based on dependencies, intervals, etc.
+- `lazyFetchHttp`: Prepares a fetch that must be triggered manually.
 
 ```typescript
 import useFetchHttp from 'use-request-utils/use-fetch-http';
 
 function MyComponent() {
 	// 1. Get the http fetcher instance
-	const http = useFetchHttp();
+	const { fetchHttp, lazyFetchHttp } = useFetchHttp();
 
-	// --- Automatic/Eager Fetching with http.fetch ---
-	const { data: user, loading: userLoading } = http.fetch(/* ... fn, options ... */);
+	// --- Automatic/Eager Fetching with fetchHttp ---
+	const { data: user, loading: userLoading } = fetchHttp(/* ... fn, options ... */);
 
-	// --- Manual/Lazy Fetching with http.fetchLazy ---
-	const { fetch: triggerSearch, data: searchResults, loading: searchLoading } = http.fetchLazy(/* ... fn, options ... */);
+	// --- Manual/Lazy Fetching with  throw if options.triggerInterval is not a num ---
+	const { fetch: triggerSearch, data: searchResults, loading: searchLoading } = lazyFetchHttp(/* ... fn, options ... */);
 
 	// Call triggerSearch() when needed
 }
@@ -2888,7 +2888,7 @@ function MyComponent() {
 
 The `useFetchHttp()` hook returns an object with the following methods:
 
-1.  **`fetch<T, Mapped = T>(fn, options?)`**
+1.  **`fetchHttp<T, Mapped = T>(fn, options?)`**
 
     - Initiates a data fetch automatically based on the provided `options`. Replaces the functionality of the old top-level `useFetchHttp` hook.
     - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: The asynchronous function to execute for fetching data. Receives the `fetch.http` instance and any arguments passed to the _manual_ `fetch()` call (returned in the response object). Return `null` to skip fetching conditionally.
@@ -2897,9 +2897,9 @@ The `useFetchHttp()` hook returns an object with the following methods:
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
       - `data`, `error`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
 
-2.  **`fetchLazy<T, Mapped = T>(fn, options?)`**
+2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
-    - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `http.fetch`.
+    - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchHttpfetch`.
     - **`options` (`{ ignoreAbort?: boolean; mapper?: (data: T) => Mapped }`, optional)**: Simplified options. Only `ignoreAbort` and `mapper` are directly configurable. Other options like `deps`, `triggerDeps`, `shouldFetch`, `triggerInterval` are internally set to disable automatic fetching.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
 
@@ -2917,9 +2917,9 @@ interface User {
   email: string;
 }
 
-// Example Component using http.fetch (Automatic/Eager)
+// Example Component using fetchHttp (Automatic/Eager)
 function UserProfile({ userId }) {
-  const http = useFetchHttp(); // Get the hook instance
+  const { fetchHttp } = useFetchHttp(); // Get the hook instance
 
   const fetchUser = useCallback((fetch: Fetch.Http, id: number) => {
     if (!id) return null;
@@ -2928,7 +2928,7 @@ function UserProfile({ userId }) {
   }, []);
 
   // Use http.fetch for automatic fetching based on deps
-  const { data: user, loading, error, loaded, reset, loadedTimes, fetch: manualFetch } = http.fetch(
+  const { data: user, loading, error, loaded, reset, loadedTimes, fetch: manualFetch } = fetchHttp(
     fetchUser,
     {
       deps: [userId],
@@ -2955,9 +2955,9 @@ function UserProfile({ userId }) {
   );
 }
 
-// Example Component using http.fetchLazy (Manual)
+// Example Component using lazyFetchHttp (Manual)
 function SearchUsers() {
-  const http = useFetchHttp(); // Get the hook instance
+  const { lazyFetchHttp } = useFetchHttp(); // Get the hook instance
   const [query, setQuery] = useState('');
 
   const searchUsersFn = useCallback((fetch: Fetch.Http, searchTerm: string) => {
@@ -2968,8 +2968,8 @@ function SearchUsers() {
     );
   }, []);
 
-  // Use http.fetchLazy for manual triggering
-  const { data: searchResult, loading, error, fetch: triggerSearch } = http.fetchLazy(
+  // Use lazyFetchHttp for manual triggering
+  const { data: searchResult, loading, error, fetch: triggerSearch } = lazyFetchHttp(
     searchUsersFn,
     {
       mapper: result => (result?.status === 200 ? result.body.results : [])
@@ -3007,17 +3007,17 @@ function SearchUsers() {
   );
 }
 
-// Example Component with Interval Polling using http.fetch
+// Example Component with Interval Polling using fetchHttp
 function LiveStatus() {
-    const http = useFetchHttp(); // Get the hook instance
+    const { fetchHttp } = useFetchHttp(); // Get the hook instance
 
     const fetchStatus = useCallback((fetch: Fetch.Http) => {
         console.log('Fetching live status...');
         return fetch.http.asResponse('https://api.example.com/live-status');
     }, []);
 
-    // Use http.fetch with triggerInterval option
-    const { data: response, loading, error, runningInterval, stopInterval, startInterval } = http.fetch(
+    // Use fetchHttp with triggerInterval option
+    const { data: response, loading, error, runningInterval, stopInterval, startInterval } = fetchHttp(
         fetchStatus,
         {
             triggerInterval: 5000 // Poll every 5 seconds
@@ -3055,8 +3055,8 @@ React hook for declaratively calling methods on an RPC service defined using the
 
 `useFetchRpc` returns an object containing methods for executing RPC calls:
 
-- `fetch`: Executes RPC calls automatically based on dependencies, intervals, etc.
-- `fetchLazy`: Prepares an RPC call that must be triggered manually.
+- `fetchRpc`: Executes RPC calls automatically based on dependencies, intervals, etc.
+- `lazyFetchRpc`: Prepares an RPC call that must be triggered manually.
 
 ```typescript
 import useFetchRpc from 'use-request-utils/use-fetch-rpc';
@@ -3064,13 +3064,13 @@ import type { MyRpcService } from './my-rpc-service'; // Import your Rpc service
 
 function MyRpcComponent() {
 	// 1. Get the rpc fetcher instance, specifying the Rpc service type
-	const rpcFetch = useFetchRpc<MyRpcService>();
+	const { fetchRpc, lazyFetchRpc } = useFetchRpc<MyRpcService>();
 
-	// --- Automatic/Eager Fetching with rpcFetch.fetch ---
-	const { data: userData, loading: userLoading } = rpcFetch.fetch(/* ... fn, options ... */);
+	// --- Automatic/Eager Fetching with fetchRpc ---
+	const { data: userData, loading: userLoading } = fetchRpc(/* ... fn, options ... */);
 
-	// --- Manual/Lazy Fetching with rpcFetch.fetchLazy ---
-	const { fetch: triggerAction, data: actionResult, loading: actionLoading } = rpcFetch.fetchLazy(/* ... fn, options ... */);
+	// --- Manual/Lazy Fetching with lazyFetchRpc ---
+	const { fetch: triggerAction, data: actionResult, loading: actionLoading } = lazyFetchRpc(/* ... fn, options ... */);
 
 	// Call triggerAction() when needed
 }
@@ -3082,15 +3082,15 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
 
 - **`requestOptions` (`{ headers?: Headers; pathname?: string }`, optional)**: Options passed to the underlying HTTP request for the RPC call (e.g., custom headers, endpoint path).
 
-1.  **`fetch<T, Mapped = T>(fn, options?)`**
+1.  **`fetchRpc<T, Mapped = T>(fn, options?)`**
 
     - Executes the RPC function `fn` automatically based on the provided `options`. Replaces the functionality of the old top-level `useFetchRpc` hook.
     - **`fn` (`(rpc: R, ...args: any[]) => Promise<T> | null`)**: The asynchronous function containing the RPC call(s). Receives a typed `rpcProxy` client instance (`R`) and any arguments passed to the _manual_ `fetch()` call (returned in the response object). Return `null` to skip fetching conditionally.
     - **`options` (`UseFetchOptions<T, Mapped>`, optional)**: Configuration options (same structure as `useFetchHttp`).
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods.
 
-2.  **`fetchLazy<T, Mapped = T>(fn, options?)`**. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the execution.
-    - **`fn` (`(rpc: R, ...args: any[]) => Promise<T> | null`)**: Same function definition as for `rpcFetch.fetch`.
+2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the execution.
+    - **`fn` (`(rpc: R, ...args: any[]) => Promise<T> | null`)**: Same function definition as for `fetchRpc`.
     - **`options` (`{ ignoreAbort?: boolean; mapper?: (data: T) => Mapped }`, optional)**: Simplified options for lazy fetching.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the RPC call(s).
 
@@ -3101,9 +3101,9 @@ import React, { useState, useCallback } from 'react';
 import useFetchRpc from 'use-request-utils/use-fetch-rpc';
 import type { RootRpc } from './my-rpc-service'; // Import the *type* of your Rpc class
 
-// --- Example Component using rpcFetch.fetch (Automatic/Eager) ---
+// --- Example Component using fetchRpc (Automatic/Eager) ---
 function UserDetails({ userId }) {
-  const rpcFetch = useFetchRpc<RootRpc>(); // Get the hook instance
+  const { fetchRpc } = useFetchRpc<RootRpc>(); // Get the hook instance
 
   const fetchUserData = useCallback((rpc: RootRpc, id: number) => {
     if (!id || id <= 0) return null;
@@ -3111,8 +3111,8 @@ function UserDetails({ userId }) {
     return rpc.users.getById(id); // Execute RPC call inside the function
   }, []);
 
-  // Use rpcFetch.fetch for automatic execution based on deps
-  const { data: user, loading, error, loadedTimes, reset, fetch: manualFetch } = rpcFetch.fetch(
+  // Use fetchRpc for automatic execution based on deps
+  const { data: user, loading, error, loadedTimes, reset, fetch: manualFetch } = fetchRpc(
     fetchUserData,
     {
       deps: [userId],
@@ -3137,9 +3137,9 @@ function UserDetails({ userId }) {
     );
 }
 
-// --- Example Component using rpcFetch.fetchLazy (Manual) ---
+// --- Example Component using lazyFetchRpc (Manual) ---
 function CreateUserForm() {
-  const rpcFetch = useFetchRpc<RootRpc>(); // Get the hook instance
+  const { lazyFetchRpc } = useFetchRpc<RootRpc>(); // Get the hook instance
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
 
@@ -3148,8 +3148,8 @@ function CreateUserForm() {
     return rpc.users.create(userData); // Execute RPC call inside the function
   }, []);
 
-  // Use rpcFetch.fetchLazy for manual triggering
-  const { data: createdUser, loading, error, fetch: submitCreateUser, reset } = rpcFetch.fetchLazy(
+  // Use lazyFetchRpc for manual triggering
+  const { data: createdUser, loading, error, fetch: submitCreateUser, reset } = lazyFetchRpc(
     createUserFn
   );
 
@@ -3172,9 +3172,9 @@ function CreateUserForm() {
   );
 }
 
-// --- Example Component using batching with rpcFetch.fetch ---
+// --- Example Component using batching with fetchRpc ---
 function DashboardData() {
-    const rpcFetch = useFetchRpc<RootRpc>(); // Get the hook instance
+    const { fetchRpc } = useFetchRpc<RootRpc>(); // Get the hook instance
 
     const fetchDashboardData = useCallback((rpc: RootRpc) => {
         console.log('RPC: Fetching dashboard batch');
@@ -3186,8 +3186,8 @@ function DashboardData() {
         ]);
     }, []);
 
-    // Use rpcFetch.fetch for automatic execution + interval
-    const { data, loading, error } = rpcFetch.fetch(fetchDashboardData, {
+    // Use fetchRpc for automatic execution + interval
+    const { data, loading, error } = fetchRpc(fetchDashboardData, {
         triggerInterval: 30000 // Refresh every 30s
     });
 
