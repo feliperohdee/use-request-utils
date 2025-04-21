@@ -26,7 +26,7 @@ type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
 type UseFetchState<Mapped> = {
 	data: Mapped | null;
 	error: HttpError | null;
-	calledTimes: number;
+	fetchTimes: number;
 	lastCallDuration: number;
 	loaded: boolean;
 	loadedTimes: number;
@@ -134,7 +134,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 		const [state, setState] = useState<UseFetchState<Mapped>>({
 			data: null,
 			error: null,
-			calledTimes: 0,
+			fetchTimes: 0,
 			lastCallDuration: 0,
 			loaded: false,
 			loadedTimes: 0,
@@ -159,7 +159,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 				setState(state => {
 					return {
 						...state,
-						calledTimes: state.calledTimes + 1,
+						fetchTimes: state.fetchTimes + 1,
 						loading: true,
 						resetted: false
 					};
@@ -262,7 +262,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			setState({
 				data: null,
 				error: null,
-				calledTimes: 0,
+				fetchTimes: 0,
 				lastCallDuration: 0,
 				loaded: false,
 				loadedTimes: 0,

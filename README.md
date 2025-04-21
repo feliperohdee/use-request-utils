@@ -2895,7 +2895,7 @@ The `useFetchHttp()` hook returns an object with the following methods:
     - **`options` (`UseFetchOptions<T, Mapped>`, optional)**: Configuration options (See details below in Examples/Previous description):
       - `deps`, `depsDebounce`, `ignoreAbort`, `mapper`, `shouldFetch`, `triggerDeps`, `triggerDepsDebounce`, `triggerInterval`.
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
-      - `calledTimes`, `data`, `error`, `lastCallDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
+      - `data`, `error`, `fetchTimes`, `lastCallDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
 
 2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
@@ -3087,7 +3087,7 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
     - **`options` (`UseFetchOptions<T, Mapped>`, optional)**: Configuration options (See details below in Examples/Previous description):
       - `deps`, `depsDebounce`, `ignoreAbort`, `mapper`, `shouldFetch`, `triggerDeps`, `triggerDepsDebounce`, `triggerInterval`.
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
-      - `calledTimes`, `data`, `error`, `lastCallDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
+      - `data`, `error`, `fetchTimes`, `lastCallDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
 
 2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**.
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
