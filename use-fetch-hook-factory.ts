@@ -170,13 +170,13 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					const promise = fnRef.current(client.current!, ...args);
 
 					if (!promise) {
-						const duration = Math.max(1, Date.now() - startTimeRef.current);
+						setState(state => {
+							return {
+								...state,
+								loading: false
+							};
+						});
 
-						setState(state => ({
-							...state,
-							lastFetchDuration: duration,
-							loading: false
-						}));
 						return null;
 					}
 
