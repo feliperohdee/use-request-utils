@@ -7,11 +7,12 @@ type UseFetchHttpFn<T> = (fetch: Fetch.Http, ...args: any[]) => Promise<T> | nul
 const fetchHttp = fetch.http;
 const useFetchHttp = () => {
 	const fetch = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
-		const createFetchHook = fetchHookFactory<Fetch.Http>(() => {
+		const useFetchHook = fetchHookFactory(() => {
 			return fetchHttp;
 		});
 
-		return createFetchHook(fn, options);
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useFetchHook(fn, options);
 	};
 
 	const fetchLazy = <T, Mapped = T>(

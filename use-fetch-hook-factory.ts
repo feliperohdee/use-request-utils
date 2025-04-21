@@ -100,7 +100,7 @@ const getUniqueKey = (promise: Promise<any> | null): string => {
 	return get(promise, 'unique-key', '');
 };
 
-const createFetchHook = <ClientType>(clientFactory: () => ClientType) => {
+const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 	const useFetchHook = <T, Mapped = T>(
 		fn: (client: ClientType, ...args: any[]) => Promise<T> | null,
 		options: UseFetchOptions<T, Mapped> = {}
@@ -398,4 +398,4 @@ const createFetchHook = <ClientType>(clientFactory: () => ClientType) => {
 };
 
 export type { UseFetchResponse, UseFetchOptions };
-export default createFetchHook;
+export default fetchHookFactory;

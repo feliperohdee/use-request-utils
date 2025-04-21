@@ -9,11 +9,12 @@ const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathna
 	const fetch = <T, Mapped = T>(fn: UseFetchRpcFn<R, T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		const rpc = useRpc<R>(requestOptions);
-		const createFetchHook = fetchHookFactory(() => {
+		const useFetchHook = fetchHookFactory(() => {
 			return rpc;
 		});
 
-		return createFetchHook(fn, options);
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useFetchHook(fn, options);
 	};
 
 	const fetchLazy = <T, Mapped = T>(
