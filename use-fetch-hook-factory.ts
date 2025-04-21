@@ -159,7 +159,7 @@ const createFetchHook = <ClientType>(clientFactory: () => ClientType) => {
 
 				try {
 					const mapper = mapperRef.current;
-					const promise = fnRef.current(client.current as ClientType, ...args);
+					const promise = fnRef.current(client.current!, ...args);
 
 					if (!promise) {
 						return null;
@@ -287,13 +287,11 @@ const createFetchHook = <ClientType>(clientFactory: () => ClientType) => {
 						};
 					});
 
-					stopInterval();
-					intervalRef.current = setInterval(() => {
-						fetch();
-					}, interval);
+					clearInterval(intervalRef.current!);
+					intervalRef.current = setInterval(fetch, interval);
 				}
 			},
-			[fetch, options.triggerInterval, stopInterval]
+			[fetch, options.triggerInterval]
 		);
 
 		// update should fetch ref

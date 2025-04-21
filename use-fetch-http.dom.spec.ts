@@ -1,13 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, Mock, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import HttpError from 'use-http-error';
 
 import { Fetch } from './fetch';
-import { useFetchHttp, useLazyFetchHttp } from './use-fetch-http';
+import useFetchHttp from './use-fetch-http';
 
 const createAbortableMock = (uniqueKey: string = '') => {
 	const abort = vi.fn();
-	const fn = vi.fn((ctx: any, ...args: any[]) => {
+	const fn = vi.fn((fetch: Fetch.Http, ...args: any[]) => {
 		const [a = 1] = args || [];
 
 		const abortController = new AbortController();
@@ -36,22 +36,40 @@ const createAbortableMock = (uniqueKey: string = '') => {
 	return { abort, fn };
 };
 
-describe('/use-fetch-http', () => {
-	let mock: Mock<(...args: any[]) => Promise<{ a: number; args: any[] }>>;
+const fetcher = (fetch: Fetch.Http, ...args: any[]) => {
+	return fetch<{ a: number; args: any[] }>(
+		new Request('http://localhost', {
+			body: JSON.stringify({ args }),
+			method: 'POST'
+		})
+	);
+};
 
+describe('/use-fetch-http', () => {
 	beforeEach(() => {
 		let i = 0;
 
-		mock = vi.fn(async (fetch: Fetch.Http, ...args: any[]) => {
-			return { a: ++i, args };
+		vi.spyOn(global, 'fetch').mockImplementation(async input => {
+			if (input instanceof Request) {
+				const json = await input.json();
+
+				return Response.json({
+					a: ++i,
+					args: json.args
+				});
+			}
+
+			return Response.json(null);
 		});
 	});
 
 	it('should throw if options.deps is not an array', async () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { deps: 'not-an-array' });
+				http.fetch(() => null, { deps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -63,8 +81,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.depsDebounce is not a number', async () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { depsDebounce: 'not-a-number' });
+				http.fetch(() => null, { depsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -76,8 +96,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.mapper is not a function', () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { mapper: 'not-a-function' });
+				http.fetch(() => null, { mapper: 'not-a-function' });
 			});
 
 			throw new Error('Expected to throw');
@@ -89,8 +111,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerDeps is not an array', () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { triggerDeps: 'not-an-array' });
+				http.fetch(() => null, { triggerDeps: 'not-an-array' });
 			});
 
 			throw new Error('Expected to throw');
@@ -102,8 +126,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerDepsDebounce is not a number', () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { triggerDepsDebounce: 'not-a-number' });
+				http.fetch(() => null, { triggerDepsDebounce: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -115,8 +141,10 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerInterval is not a number', () => {
 		try {
 			renderHook(() => {
+				const http = useFetchHttp();
+
 				// @ts-expect-error
-				useFetchHttp(mock, { triggerInterval: 'not-a-number' });
+				http.fetch(() => null, { triggerInterval: 'not-a-number' });
 			});
 
 			throw new Error('Expected to throw');
@@ -130,7 +158,9 @@ describe('/use-fetch-http', () => {
 	it('should throw if options.triggerInterval is less than 500', async () => {
 		try {
 			renderHook(() => {
-				useFetchHttp(mock, { triggerInterval: 499 });
+				const http = useFetchHttp();
+
+				http.fetch(fetcher, { triggerInterval: 499 });
 			});
 
 			throw new Error('Expected to throw');
@@ -143,10 +173,10 @@ describe('/use-fetch-http', () => {
 
 	it('should works', async () => {
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock);
-		});
+			const http = useFetchHttp();
 
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
+			return http.fetch(fetcher);
+		});
 
 		expect(result.current.data).toBeNull();
 		expect(result.current.error).toBeNull();
@@ -179,7 +209,9 @@ describe('/use-fetch-http', () => {
 
 		const { result, rerender } = renderHook(
 			({ fn, deps }) => {
-				return useFetchHttp(fn, { deps });
+				const http = useFetchHttp();
+
+				return http.fetch(fn, { deps });
 			},
 			{
 				initialProps: {
@@ -217,14 +249,14 @@ describe('/use-fetch-http', () => {
 
 	it('should works with options.mapper', async () => {
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock, {
+			const http = useFetchHttp();
+
+			return http.fetch(fetcher, {
 				mapper: data => {
 					return data ? { ...data, a1: data.a } : null;
 				}
 			});
 		});
-
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
 
 		expect(result.current.data).toBeNull();
 		expect(result.current.error).toBeNull();
@@ -247,11 +279,18 @@ describe('/use-fetch-http', () => {
 	it('should works with options.deps using default debounce', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				return useFetchHttp(mock, {
-					deps
-				});
+				const http = useFetchHttp();
+
+				return http.fetch(
+					(fetch: Fetch.Http, ...args: any[]) => {
+						mock();
+						return fetcher(fetch, ...args);
+					},
+					{ deps }
+				);
 			},
 			{
 				initialProps: { deps: [0] }
@@ -259,10 +298,8 @@ describe('/use-fetch-http', () => {
 		);
 
 		expect(mock).toHaveBeenCalledOnce();
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
-
 		rerender({ deps: [1] });
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
@@ -292,12 +329,18 @@ describe('/use-fetch-http', () => {
 	it('should works with options.deps using custom debounce', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				return useFetchHttp(mock, {
-					deps,
-					depsDebounce: 100
-				});
+				const http = useFetchHttp();
+
+				return http.fetch(
+					(fetch: Fetch.Http, ...args: any[]) => {
+						mock();
+						return fetcher(fetch, ...args);
+					},
+					{ deps, depsDebounce: 100 }
+				);
 			},
 			{
 				initialProps: { deps: [0] }
@@ -305,16 +348,14 @@ describe('/use-fetch-http', () => {
 		);
 
 		expect(mock).toHaveBeenCalledOnce();
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
-
 		rerender({ deps: [1] });
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
 			vi.advanceTimersByTime(50);
 		});
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
@@ -344,12 +385,18 @@ describe('/use-fetch-http', () => {
 	it('should works with options.deps and empty options.triggerDeps', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
-				return useFetchHttp(mock, {
-					deps,
-					triggerDeps: []
-				});
+				const http = useFetchHttp();
+
+				return http.fetch(
+					(fetch: Fetch.Http, ...args: any[]) => {
+						mock();
+						return fetcher(fetch, ...args);
+					},
+					{ deps, triggerDeps: [] }
+				);
 			},
 			{
 				initialProps: { deps: [0] }
@@ -357,16 +404,14 @@ describe('/use-fetch-http', () => {
 		);
 
 		expect(mock).toHaveBeenCalledOnce();
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
-
 		rerender({ deps: [1] });
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
 			vi.advanceTimersByTime(50);
 		});
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 		vi.useRealTimers();
 
 		expect(result.current.data).toBeNull();
@@ -390,11 +435,18 @@ describe('/use-fetch-http', () => {
 	it('should works with options.triggerDeps using default debounce', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				return useFetchHttp(mock, {
-					triggerDeps
-				});
+				const http = useFetchHttp();
+
+				return http.fetch(
+					(fetch: Fetch.Http, ...args: any[]) => {
+						mock();
+						return fetcher(fetch, ...args);
+					},
+					{ triggerDeps }
+				);
 			},
 			{
 				initialProps: { triggerDeps: [0] }
@@ -402,10 +454,8 @@ describe('/use-fetch-http', () => {
 		);
 
 		expect(mock).toHaveBeenCalledOnce();
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
-
 		rerender({ triggerDeps: [1] });
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
@@ -435,12 +485,18 @@ describe('/use-fetch-http', () => {
 	it('should works with options.triggerDeps using custom debounce', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result, rerender } = renderHook(
 			({ triggerDeps }) => {
-				return useFetchHttp(mock, {
-					triggerDeps,
-					triggerDepsDebounce: 100
-				});
+				const http = useFetchHttp();
+
+				return http.fetch(
+					(fetch: Fetch.Http, ...args: any[]) => {
+						mock();
+						return fetcher(fetch, ...args);
+					},
+					{ triggerDeps, triggerDepsDebounce: 100 }
+				);
 			},
 			{
 				initialProps: { triggerDeps: [0] }
@@ -448,16 +504,14 @@ describe('/use-fetch-http', () => {
 		);
 
 		expect(mock).toHaveBeenCalledOnce();
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
-
 		rerender({ triggerDeps: [1] });
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
 			vi.advanceTimersByTime(50);
 		});
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		// wait debounce
 		act(() => {
@@ -485,10 +539,19 @@ describe('/use-fetch-http', () => {
 	});
 
 	it('should works with options.shouldFetch = false', async () => {
+		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock, {
-				shouldFetch: false
-			});
+			const http = useFetchHttp();
+
+			return http.fetch(
+				(fetch: Fetch.Http, ...args: any[]) => {
+					mock();
+					return fetcher(fetch, ...args);
+				},
+				{
+					shouldFetch: false
+				}
+			);
 		});
 
 		expect(mock).not.toHaveBeenCalled();
@@ -504,11 +567,18 @@ describe('/use-fetch-http', () => {
 	});
 
 	it('should works with options.shouldFetch = () => false', async () => {
+		const mock = vi.fn();
 		const shouldFetch = vi.fn(() => false);
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock, {
-				shouldFetch
-			});
+			const http = useFetchHttp();
+
+			return http.fetch(
+				(fetch: Fetch.Http, ...args: any[]) => {
+					mock();
+					return fetcher(fetch, ...args);
+				},
+				{ shouldFetch }
+			);
 		});
 
 		expect(mock).not.toHaveBeenCalled();
@@ -533,7 +603,9 @@ describe('/use-fetch-http', () => {
 	it('should abort previous promises on subsequent calls with different promises', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock.fn, {});
+			const http = useFetchHttp();
+
+			return http.fetch(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -579,7 +651,9 @@ describe('/use-fetch-http', () => {
 	it('should not abort previous promises on subsequent calls with same promises', async () => {
 		const mock = createAbortableMock('unique-key');
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock.fn, {});
+			const http = useFetchHttp();
+
+			return http.fetch(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -625,7 +699,9 @@ describe('/use-fetch-http', () => {
 	it('should keep previous state on abort', async () => {
 		const mock = createAbortableMock();
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock.fn, {});
+			const http = useFetchHttp();
+
+			return http.fetch(mock.fn);
 		});
 
 		expect(mock.fn).toHaveBeenCalledOnce();
@@ -663,7 +739,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock);
+			const http = useFetchHttp();
+
+			return http.fetch(fetcher);
 		});
 
 		await waitFor(() => {
@@ -688,15 +766,13 @@ describe('/use-fetch-http', () => {
 	});
 
 	it('should works with error', async () => {
-		mock.mockImplementationOnce(async () => {
-			throw new Error('Error');
-		});
+		vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Error'));
 
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock);
-		});
+			const http = useFetchHttp();
 
-		expect(mock).toHaveBeenCalledWith(expect.any(Function));
+			return http.fetch(fetcher);
+		});
 
 		expect(result.current.data).toBeNull();
 		expect(result.current.error).toBeNull();
@@ -718,9 +794,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with useLazyFetchHttp with additional arguments', async () => {
 		const { result } = renderHook(() => {
-			return useLazyFetchHttp((context, arg1, arg2) => {
-				return mock(context, arg1, arg2);
-			});
+			const http = useFetchHttp();
+
+			return http.fetchLazy(fetcher);
 		});
 
 		expect(result.current.data).toBeNull();
@@ -734,8 +810,6 @@ describe('/use-fetch-http', () => {
 
 		await result.current.fetch('test1', 'test2');
 
-		expect(mock).toHaveBeenCalledWith(expect.any(Function), 'test1', 'test2');
-
 		await waitFor(() => {
 			expect(result.current.data).toEqual({ a: 1, args: ['test1', 'test2'] });
 			expect(result.current.error).toBeNull();
@@ -747,7 +821,9 @@ describe('/use-fetch-http', () => {
 
 	it('should works with setData', async () => {
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock);
+			const http = useFetchHttp();
+
+			return http.fetch(fetcher);
 		});
 
 		await waitFor(() => {
@@ -774,13 +850,20 @@ describe('/use-fetch-http', () => {
 	it('should fetch data at specified interval', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock, {
-				triggerInterval: 600
-			});
+			const http = useFetchHttp();
+
+			return http.fetch(
+				(fetch: Fetch.Http, ...args: any[]) => {
+					mock();
+					return fetcher(fetch, ...args);
+				},
+				{ triggerInterval: 600 }
+			);
 		});
 
-		expect(mock).toHaveBeenCalledTimes(1);
+		expect(mock).toHaveBeenCalledOnce();
 
 		act(() => {
 			vi.advanceTimersByTime(600);
@@ -802,8 +885,17 @@ describe('/use-fetch-http', () => {
 	it('should fetch data with startInterval and stopInterval', async () => {
 		vi.useFakeTimers();
 
+		const mock = vi.fn();
 		const { result } = renderHook(() => {
-			return useFetchHttp(mock);
+			const http = useFetchHttp();
+
+			return http.fetch(
+				(fetch: Fetch.Http, ...args: any[]) => {
+					mock();
+					return fetcher(fetch, ...args);
+				},
+				{ triggerInterval: 600 }
+			);
 		});
 
 		result.current.startInterval(600);
