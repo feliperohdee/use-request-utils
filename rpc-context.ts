@@ -1,6 +1,6 @@
 import type { CfProperties } from '@cloudflare/workers-types';
-import headers from 'use-request-utils/headers';
 
+import headers from './headers';
 import MapStore from './map-store';
 
 namespace RpcContext {

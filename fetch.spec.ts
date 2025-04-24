@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it, expect, vi } from 'vitest';
-import ephemeralCache from 'use-request-utils/ephemeral-cache';
 import HttpError from 'use-http-error';
 
+import ephemeralCache from './ephemeral-cache';
 import fetch, { HttpOptions } from './fetch';
 import Request from './request';
 import util from './util';

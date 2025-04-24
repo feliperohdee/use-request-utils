@@ -11,11 +11,11 @@ import map from 'lodash/map';
 import size from 'lodash/size';
 import trim from 'lodash/trim';
 
-import headers from 'use-request-utils/headers';
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
 import type { CfProperties } from '@cloudflare/workers-types';
 
+import headers from './headers';
 import Request from './request';
 import RpcResponse from './rpc-response';
 import type Rpc from './rpc';
@@ -458,7 +458,7 @@ const throwError = async (input: Response) => {
 			throw HttpError.fromJson(body as HttpError.Json);
 		}
 
-		throw new HttpError(input.status, isString(body) ? body : '');
+		throw new HttpError(input.status, isString(body) ? body : input.statusText);
 	}
 
 	return null;

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, beforeEach, describe, it, expect, vi, Mock } from 'vitest';
-import headers from 'use-request-utils/headers';
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
 
+import headers from './headers';
 import Rpc from './rpc';
 import RpcResponse from './rpc-response';
 import rpcProxy, { RpcProxy, RpcProxyRequestOptions } from './rpc-proxy';

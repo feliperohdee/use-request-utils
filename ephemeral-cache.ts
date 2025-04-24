@@ -1,10 +1,10 @@
-import headers from 'use-request-utils/headers';
 import includes from 'lodash/includes';
 import now from 'lodash/now';
 import startsWith from 'lodash/startsWith';
 import trim from 'lodash/trim';
 
 import { BROWSER } from './constants';
+import headers from './headers';
 import util from './util';
 
 namespace EphemeralCache {

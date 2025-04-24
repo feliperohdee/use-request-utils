@@ -1,9 +1,9 @@
-import ephemeralCache from 'use-request-utils/ephemeral-cache';
 import HttpError from 'use-http-error';
 import isNumber from 'lodash/isNumber';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
 
+import ephemeralCache from './ephemeral-cache';
 import Request from './request';
 import util from './util';
 

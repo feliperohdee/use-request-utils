@@ -17,10 +17,10 @@ import toPath from 'lodash/toPath';
 import uniqBy from 'lodash/uniqBy';
 
 import { AsyncLocalStorage } from 'node:async_hooks';
-import headers from 'use-request-utils/headers';
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
 
+import headers from './headers';
 import Request from './request';
 import RpcContext from './rpc-context';
 import RpcResponse from './rpc-response';
