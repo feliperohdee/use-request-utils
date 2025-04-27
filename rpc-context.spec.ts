@@ -9,7 +9,8 @@ describe('/rpc-context', () => {
 		request = new RpcContext({
 			body: null,
 			cf: {},
-			headers: new Headers()
+			headers: new Headers(),
+			url: new URL('https://localhost')
 		});
 	});
 
@@ -28,7 +29,8 @@ describe('/rpc-context', () => {
 			request = new RpcContext({
 				body: new ReadableStream(),
 				cf: {},
-				headers: new Headers()
+				headers: new Headers(),
+				url: new URL('https://localhost')
 			});
 
 			expect(request.body).toBeInstanceOf(ReadableStream);
@@ -66,7 +68,8 @@ describe('/rpc-context', () => {
 			expect(request.toJson()).toEqual({
 				cf: {},
 				data: { a: 1 },
-				headers: {}
+				headers: {},
+				url: 'https://localhost/'
 			});
 		});
 	});

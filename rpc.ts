@@ -130,7 +130,8 @@ class Rpc {
 		const context = new RpcContext({
 			body: req.body,
 			cf: req.cf || {},
-			headers: req.headers
+			headers: req.headers,
+			url: new URL(req.url)
 		});
 
 		const res = await requestStorage.run({ context }, async () => {
@@ -290,7 +291,8 @@ class Rpc {
 			return new RpcContext({
 				body: null,
 				cf: {},
-				headers: new Headers()
+				headers: new Headers(),
+				url: new URL('https://localhost')
 			});
 		}
 

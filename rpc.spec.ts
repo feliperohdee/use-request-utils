@@ -409,7 +409,8 @@ describe('/rpc', () => {
 			expect(body).toEqual({
 				cf: {},
 				data: { args: { string: 'a', array: [1, 2], object: { a: 1 } } },
-				headers: { 'content-type': 'application/json' }
+				headers: { 'content-type': 'application/json' },
+				url: 'http://localhost/'
 			});
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
@@ -963,7 +964,8 @@ describe('/rpc', () => {
 				data: { args: {} },
 				headers: {
 					'content-type': 'application/json'
-				}
+				},
+				url: 'http://localhost/'
 			});
 
 			// { args: [], batch: false, resource: 'resource1', responseType: 'object' }
@@ -973,7 +975,8 @@ describe('/rpc', () => {
 					data: { args: {} },
 					headers: {
 						'content-type': 'application/json'
-					}
+					},
+					url: 'http://localhost/'
 				},
 				headers: {
 					'content-type': 'application/json',
@@ -990,7 +993,8 @@ describe('/rpc', () => {
 				data: { args: {} },
 				headers: {
 					'content-type': 'application/json'
-				}
+				},
+				url: 'http://localhost/'
 			});
 			expect(body[2].status).toEqual(200);
 			expect(body[2].headers).toEqual(
@@ -1440,7 +1444,8 @@ describe('/rpc', () => {
 				data: { args: {} },
 				headers: {
 					'content-type': 'application/json'
-				}
+				},
+				url: 'http://localhost/'
 			});
 
 			// { args: [], batch: false, resource: 'resource1', responseType: 'object' }
@@ -1450,7 +1455,8 @@ describe('/rpc', () => {
 					data: { args: {} },
 					headers: {
 						'content-type': 'application/json'
-					}
+					},
+					url: 'http://localhost/'
 				},
 				headers: {
 					'content-type': 'application/json',
@@ -1467,7 +1473,8 @@ describe('/rpc', () => {
 				data: { args: {} },
 				headers: {
 					'content-type': 'application/json'
-				}
+				},
+				url: 'http://localhost/'
 			});
 			expect(body[2].status).toEqual(200);
 			expect(body[2].headers).toEqual(
@@ -1518,7 +1525,8 @@ describe('/rpc', () => {
 				data: { args: {} },
 				headers: {
 					'content-type': 'application/json'
-				}
+				},
+				url: 'http://localhost/'
 			});
 
 			// { args: [], batch: false, resource: 'resource1', responseType: 'object' }
@@ -1528,7 +1536,8 @@ describe('/rpc', () => {
 					data: { args: {} },
 					headers: {
 						'content-type': 'application/json'
-					}
+					},
+					url: 'http://localhost/'
 				},
 				headers: {
 					'content-type': 'application/json',
@@ -1546,7 +1555,8 @@ describe('/rpc', () => {
 					data: { args: {} },
 					headers: {
 						'content-type': 'application/json'
-					}
+					},
+					url: 'http://localhost/'
 				},
 				headers: {
 					'content-type': 'application/json',
@@ -1594,7 +1604,8 @@ describe('/rpc', () => {
 					data: {
 						args: { string: 'a', array: [1, 2], object: { a: 1 } }
 					},
-					headers: { 'content-type': 'application/json' }
+					headers: { 'content-type': 'application/json' },
+					url: 'http://localhost/'
 				}
 			]);
 		});
@@ -1725,7 +1736,8 @@ describe('/rpc', () => {
 			expect(body).toEqual({
 				cf: {},
 				data: { args: {} },
-				headers: { 'content-type': 'application/json' }
+				headers: { 'content-type': 'application/json' },
+				url: 'http://localhost/'
 			});
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(
@@ -1751,7 +1763,8 @@ describe('/rpc', () => {
 				body: {
 					cf: {},
 					data: { args: {} },
-					headers: { 'content-type': 'application/json' }
+					headers: { 'content-type': 'application/json' },
+					url: 'http://localhost/'
 				},
 				headers: {
 					'content-type': 'application/json',
@@ -1784,7 +1797,8 @@ describe('/rpc', () => {
 			expect(await body.json()).toEqual({
 				cf: {},
 				data: { args: {} },
-				headers: { 'content-type': 'application/json' }
+				headers: { 'content-type': 'application/json' },
+				url: 'http://localhost/'
 			});
 			expect(res.status).toEqual(200);
 			expect(res.headers).toEqual(

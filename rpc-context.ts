@@ -8,6 +8,7 @@ namespace RpcContext {
 		body: ReadableStream | null;
 		cf: CfProperties;
 		headers: Headers;
+		url: URL;
 	};
 }
 
@@ -19,6 +20,7 @@ class RpcContext extends MapStore {
 		headers: Headers;
 		status: number;
 	};
+	public url: URL;
 
 	constructor(options: RpcContext.Options) {
 		super({}, 'public');
@@ -30,6 +32,7 @@ class RpcContext extends MapStore {
 			headers: new Headers(),
 			status: 0
 		};
+		this.url = options.url;
 	}
 
 	setDefaultResponseHeaders(headers: Headers) {
@@ -44,7 +47,8 @@ class RpcContext extends MapStore {
 		return {
 			cf: this.cf,
 			data: super.toJson(),
-			headers: headers.toJson(this.headers)
+			headers: headers.toJson(this.headers),
+			url: this.url.toString()
 		};
 	}
 }
