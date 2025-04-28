@@ -1,3 +1,4 @@
+import isObject from 'lodash/isObject';
 import isString from 'lodash/isString';
 import JSON from 'use-json';
 
@@ -47,18 +48,14 @@ const byteStringToBytes = (byteStr: string): Uint8Array => {
 	return bytes;
 };
 
-const decodePayload = <T = any>(raw: string): T | undefined => {
-	try {
-		const bytes = Array.from(atob(raw), char => {
-			return char.charCodeAt(0);
-		});
+const decodePayload = <T = any>(raw: string): T => {
+	const bytes = Array.from(atob(raw), char => {
+		return char.charCodeAt(0);
+	});
 
-		const decodedString = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
+	const decodedString = new TextDecoder('utf-8').decode(new Uint8Array(bytes));
 
-		return JSON.parse(decodedString);
-	} catch {
-		return;
-	}
+	return JSON.parse(decodedString);
 };
 
 const deriveKey = async (secret: string | JsonWebKey | CryptoKey, enc: string): Promise<CryptoKey> => {
@@ -97,11 +94,11 @@ const importJwk = async (key: JsonWebKey, alg: SubtleCryptoImportKeyAlgorithm, k
 };
 
 const importKey = async (key: string | JsonWebKey, alg: SubtleCryptoImportKeyAlgorithm, keyUsages: KeyUsages[]): Promise<CryptoKey> => {
-	if (typeof key === 'object') {
+	if (isObject(key)) {
 		return importJwk(key, alg, keyUsages);
 	}
 
-	if (typeof key !== 'string') {
+	if (!isString(key)) {
 		throw new Error('Unsupported key type!');
 	}
 

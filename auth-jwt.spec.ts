@@ -381,7 +381,7 @@ describe('/authJwt', () => {
 			const { headers, payload } = await auth.destroy();
 
 			expect(headers.entries.length).toEqual(0);
-			expect(payload).toBeNull();
+			expect(payload).toEqual({});
 		});
 
 		it('should works with cookie', async () => {
@@ -393,7 +393,7 @@ describe('/authJwt', () => {
 			const { headers, payload } = await auth.destroy();
 
 			expect(headers.get('set-cookie')).toEqual('token=; Max-Age=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
-			expect(payload).toBeNull();
+			expect(payload).toEqual({});
 		});
 	});
 

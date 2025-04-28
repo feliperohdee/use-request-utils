@@ -57,8 +57,8 @@ namespace Jwt {
 	} & Options;
 
 	export type Data<P = any, H = any> = {
-		header?: Header<H>;
-		payload?: Payload<P>;
+		header: Header<H>;
+		payload: Payload<P>;
 	};
 }
 

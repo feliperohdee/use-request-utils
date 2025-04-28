@@ -24,7 +24,7 @@ namespace AuthJwt {
 
 	export type Response<T> = {
 		headers: Headers;
-		payload: Jwt.Payload<T> | null;
+		payload: Jwt.Payload<T>;
 	};
 }
 
@@ -78,7 +78,7 @@ class AuthJwt {
 				decrypt: !isUndefined(this.options.encrypt)
 			});
 
-			if (payload && revalidate) {
+			if (revalidate) {
 				if (payload.exp && payload.exp > 0 && payload.iat && payload?.iat > 0) {
 					const currentTtl = payload.exp - payload.iat;
 
@@ -90,7 +90,10 @@ class AuthJwt {
 				return this.sign(payload);
 			}
 
-			return { headers: new Headers(), payload: payload || null };
+			return {
+				headers: new Headers(),
+				payload
+			};
 		} catch (err) {
 			let errorType = (err as Error).message;
 
@@ -120,7 +123,7 @@ class AuthJwt {
 		}
 	}
 
-	async destroy(): Promise<AuthJwt.Response<null>> {
+	async destroy(): Promise<AuthJwt.Response<object>> {
 		let headers = new Headers();
 
 		if (this.options.cookie) {
@@ -135,7 +138,7 @@ class AuthJwt {
 			}
 		}
 
-		return { headers, payload: null };
+		return { headers, payload: {} };
 	}
 
 	async sign<P = any>(payload: Jwt.Payload<P>, revalidateExpires?: Date): Promise<AuthJwt.Response<P> & { token: string }> {
