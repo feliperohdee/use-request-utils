@@ -7,8 +7,8 @@ import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDistinct } from 'use-good-hooks';
 import HttpError from 'use-http-error';
+import useDistinct from 'use-good-hooks/use-distinct';
 
 type ShouldFetch =
 	| boolean
