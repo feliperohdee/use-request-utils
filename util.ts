@@ -1,5 +1,6 @@
 import isDate from 'lodash/isDate';
 import isPlainObject from 'lodash/isPlainObject';
+import JSON from 'use-json';
 import map from 'lodash/map';
 import trim from 'lodash/trim';
 
@@ -95,11 +96,11 @@ const readStreamToArrayBuffer = async (stream: ReadableStream): Promise<ArrayBuf
 	return result.buffer;
 };
 
-const safeParse = (input: string) => {
+const safeParse = <T = any>(input: string): T => {
 	try {
 		return JSON.parse(input);
 	} catch {
-		return input;
+		return input as T;
 	}
 };
 

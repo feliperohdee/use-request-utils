@@ -57,7 +57,7 @@ describe('/use-fetch-rpc', () => {
 		vi.spyOn(global, 'fetch').mockImplementation(async input => {
 			if (input instanceof Request) {
 				const form = await input.formData();
-				const rpcRequest = util.safeParse(form.get('rpc') as string);
+				const rpcRequest = util.safeParse<Rpc.Request>(form.get('rpc') as string);
 				const rpc = new TestRpc();
 
 				return rpc.fetch(rpcRequest, input);

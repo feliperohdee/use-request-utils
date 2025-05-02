@@ -5,6 +5,7 @@ import HttpError from 'use-http-error';
 import Request from './request';
 import Rpc from './rpc';
 import useRpc from './use-rpc';
+import util from './util';
 
 class TestRpc extends Rpc {
 	async error() {
@@ -22,7 +23,7 @@ describe('/use-rpc', () => {
 			if (req instanceof Request) {
 				const form = await req.formData();
 				const rpc = new TestRpc();
-				const rpcRequest = JSON.parse(form.get('rpc') as string) as Rpc.Request;
+				const rpcRequest = util.safeParse<Rpc.Request>(form.get('rpc') as string);
 
 				return rpc.fetch(rpcRequest, req);
 			}

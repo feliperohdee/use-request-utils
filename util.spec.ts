@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import JSON from 'use-json';
 
 import util from './util';
 
@@ -66,8 +67,13 @@ describe('/util', () => {
 
 	describe('safeParse', () => {
 		it('should parse JSON', () => {
-			const obj = { foo: 'bar' };
+			const obj = {
+				foo: 'bar',
+				map: new Map([['foo', 'bar']]),
+				set: new Set([1, 2, 3])
+			};
 			const str = JSON.stringify(obj);
+
 			expect(util.safeParse(str)).toEqual(obj);
 		});
 

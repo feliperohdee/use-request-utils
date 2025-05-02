@@ -48,7 +48,7 @@ const http: Fetch.Http = (<T>(info: RequestInfo, options?: Fetch.HttpOptions) =>
 		const json = res.headers.get('content-type')?.includes('application/json');
 		const body = await util.readStream(res.body);
 
-		return (json ? util.safeParse(body) : body) as T;
+		return json ? util.safeParse<T>(body) : body;
 	})();
 
 	return Object.assign(promise, { abort: abortableResponse.abort });
@@ -62,7 +62,7 @@ http.asObject = <T>(info: RequestInfo, options?: Fetch.HttpOptions) => {
 		const body = await util.readStream(res.body);
 
 		return {
-			body: (json ? util.safeParse(body) : body) as T,
+			body: (json ? util.safeParse<T>(body) : body) as T,
 			headers: res.headers,
 			status: res.status
 		};

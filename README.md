@@ -2457,7 +2457,7 @@ async function handleRpcRequest(req: Request /* or standard Request */) {
 		}
 
 		// Safely parse the RPC payload string
-		const rpc: Rpc.Request = util.safeParse(formRpc);
+		const rpc = util.safeParse<Rpc.Request>(formRpc);
 
 		// Validate the parsed payload structure
 		if (!_.isPlainObject(rpc) || typeof rpc.resource !== 'string' || !Array.isArray(rpc.args)) {

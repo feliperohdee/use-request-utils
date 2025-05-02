@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import JSON from 'use-json';
 
 import ephemeralCache from './ephemeral-cache';
 import headers from './headers';

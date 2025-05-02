@@ -735,7 +735,13 @@ describe('/rpc-proxy', () => {
 	describe('createRequest', () => {
 		it('should create request', async () => {
 			const rpc: Rpc.Request = {
-				args: [{ value: 123 }],
+				args: [
+					{
+						map: new Map([['foo', 'bar']]),
+						set: new Set([1, 2, 3]),
+						value: 123
+					}
+				],
 				batch: false,
 				resource: 'a',
 				responseType: 'default'
@@ -759,7 +765,13 @@ describe('/rpc-proxy', () => {
 
 		it('should create request with options', async () => {
 			const rpc: Rpc.Request = {
-				args: [{ value: 123 }],
+				args: [
+					{
+						map: new Map([['foo', 'bar']]),
+						set: new Set([1, 2, 3]),
+						value: 123
+					}
+				],
 				batch: false,
 				resource: 'a',
 				responseType: 'default'
@@ -823,12 +835,20 @@ describe('/rpc-proxy', () => {
 		let res: RpcResponse;
 
 		beforeEach(() => {
-			res = new RpcResponse({ a: 1 });
+			res = new RpcResponse({
+				a: 1,
+				map: new Map([['foo', 'bar']]),
+				set: new Set([1, 2, 3])
+			});
 		});
 
 		describe('single', () => {
 			it('should works', async () => {
-				expect(await rpcProxy.createResponse(res)).toEqual({ a: 1 });
+				expect(await rpcProxy.createResponse(res)).toEqual({
+					a: 1,
+					map: new Map([['foo', 'bar']]),
+					set: new Set([1, 2, 3])
+				});
 			});
 
 			it('should works with boolean', async () => {
