@@ -6,7 +6,7 @@ import MapStore from './map-store';
 namespace RpcContext {
 	export type Options = {
 		body: ReadableStream | null;
-		cf: CfProperties;
+		cf: CfProperties | undefined;
 		headers: Headers;
 		url: URL;
 	};
@@ -26,7 +26,7 @@ class RpcContext extends MapStore {
 		super({}, 'public');
 
 		this.body = options.body || null;
-		this.cf = options.cf;
+		this.cf = options.cf || {};
 		this.headers = options.headers;
 		this.defaultResponseMeta = {
 			headers: new Headers(),

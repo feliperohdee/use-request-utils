@@ -129,7 +129,7 @@ class Rpc {
 	private async call(rpc: Rpc.Request, req: Request): Promise<Response> {
 		const context = new RpcContext({
 			body: req.body,
-			cf: req.cf || {},
+			cf: req.cf,
 			headers: req.headers,
 			url: new URL(req.url)
 		});

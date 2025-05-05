@@ -80,7 +80,7 @@ describe('/rpc-proxy', () => {
 
 		beforeEach(() => {
 			mock = vi.fn();
-			rpc = rpcProxy.createTestCaller(new RpcSpec(), { mock });
+			rpc = rpcProxy.createTestCaller(new RpcSpec(), { cf: {}, mock });
 		});
 
 		it('should call the handler with single request', async () => {
@@ -2074,7 +2074,7 @@ describe('/rpc-proxy', () => {
 		});
 
 		it('should works', async () => {
-			rpc = rpcProxy.createTestCaller(new RpcSpec(), { mock });
+			rpc = rpcProxy.createTestCaller(new RpcSpec(), { cf: {}, mock });
 
 			const res = await rpc.a({ value: 123 });
 
@@ -2097,7 +2097,7 @@ describe('/rpc-proxy', () => {
 		});
 
 		it('should works with private method', async () => {
-			rpc = rpcProxy.createTestCaller(new RpcSpec(), { mock });
+			rpc = rpcProxy.createTestCaller(new RpcSpec(), { cf: {}, mock });
 
 			// @ts-expect-error
 			const res = await rpc.$e('private');

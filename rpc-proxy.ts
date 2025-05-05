@@ -93,7 +93,7 @@ namespace RpcProxy {
 			cf?: CfProperties;
 			headers?: Headers;
 			mock?: (args: {
-				cf: CfProperties;
+				cf: CfProperties | undefined;
 				headers: Record<string, string>;
 				options: RpcProxyRequestOptions;
 				rpc: Rpc.Request;
@@ -389,7 +389,7 @@ const createTestCaller = <T extends Rpc>(instance: T, testOptions?: RpcProxy.Tes
 
 		if (testOptions?.mock) {
 			testOptions.mock({
-				cf: req.cf || {},
+				cf: req.cf,
 				headers: headers.toJson(req.headers),
 				options,
 				rpc,
