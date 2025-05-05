@@ -13,11 +13,11 @@ import trim from 'lodash/trim';
 
 import HttpError from 'use-http-error';
 import JSON from 'use-json';
-import type { CfProperties } from '@cloudflare/workers-types';
 
 import headers from './headers';
 import Request from './request';
 import RpcResponse from './rpc-response';
+import type { CfProperties } from './cloudflare-types';
 import type Rpc from './rpc';
 import util from './util';
 

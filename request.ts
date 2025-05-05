@@ -1,4 +1,4 @@
-import type { CfProperties } from '@cloudflare/workers-types';
+import type { CfProperties } from './cloudflare-types';
 
 class CustomRequest extends Request {
 	public cf: CfProperties | undefined;

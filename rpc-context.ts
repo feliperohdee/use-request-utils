@@ -1,7 +1,6 @@
-import type { CfProperties } from '@cloudflare/workers-types';
-
 import headers from './headers';
 import MapStore from './map-store';
+import type { CfProperties } from './cloudflare-types';
 
 namespace RpcContext {
 	export type Options = {

@@ -1,7 +1,6 @@
 {
 	"author": "Felipe Rohde <feliperohdee@gmail.com>",
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20250417.0",
 		"@testing-library/dom": "^10.4.0",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.3.0",
@@ -41,7 +40,7 @@
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
-	"version": "1.0.45",
+	"version": "1.0.46",
 	"dependencies": {
 		"lodash": "^4.17.21",
 		"use-good-hooks": "^1.0.13",
