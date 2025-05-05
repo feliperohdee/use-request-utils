@@ -7,7 +7,7 @@ import Rpc from './rpc';
 import useFetchRpc from './use-fetch-rpc';
 import util from './util';
 
-const createAbortableMock = (uniqueKey: string = '') => {
+const createAbortableMock = (uniqueKey: string = '', timeoutMs: number = 0) => {
 	const abort = vi.fn();
 	const fn = vi.fn((ctx: any, ...args: any[]) => {
 		const [a = 1] = args || [];
@@ -16,7 +16,7 @@ const createAbortableMock = (uniqueKey: string = '') => {
 		const promise = new Promise<{ a: number }>((resolve, reject) => {
 			const timeout = setTimeout(() => {
 				resolve({ a });
-			});
+			}, timeoutMs);
 
 			abortController.signal.addEventListener('abort', () => {
 				clearTimeout(timeout);
@@ -827,6 +827,18 @@ describe('/use-fetch-rpc', () => {
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
 		});
+	});
+
+	it('should abort on unmount', async () => {
+		const mock = createAbortableMock('', 1000);
+		const { unmount } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(mock.fn);
+		});
+
+		unmount();
+		expect(mock.abort).toHaveBeenCalledOnce();
 	});
 
 	it('should works with reset', async () => {

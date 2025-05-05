@@ -5,11 +5,11 @@ import fetch, { Fetch } from './fetch';
 type UseFetchHttpFn<T> = (fetch: Fetch.Http, ...args: any[]) => Promise<T> | null;
 
 const useFetchHttp = () => {
-	const fetchHttp = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
-		const useFetchHook = fetchHookFactory(() => {
-			return fetch.http;
-		});
+	const useFetchHook = fetchHookFactory(() => {
+		return fetch.http;
+	});
 
+	const fetchHttp = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useFetchHook(fn, options);
 	};

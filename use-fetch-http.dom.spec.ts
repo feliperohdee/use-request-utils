@@ -5,7 +5,7 @@ import HttpError from 'use-http-error';
 import { Fetch } from './fetch';
 import useFetchHttp from './use-fetch-http';
 
-const createAbortableMock = (uniqueKey: string = '') => {
+const createAbortableMock = (uniqueKey: string = '', timeoutMs: number = 0) => {
 	const abort = vi.fn();
 	const fn = vi.fn((fetch: Fetch.Http, ...args: any[]) => {
 		const [a = 1] = args || [];
@@ -14,7 +14,7 @@ const createAbortableMock = (uniqueKey: string = '') => {
 		const promise = new Promise<{ a: number }>((resolve, reject) => {
 			const timeout = setTimeout(() => {
 				resolve({ a });
-			});
+			}, timeoutMs);
 
 			abortController.signal.addEventListener('abort', () => {
 				clearTimeout(timeout);
@@ -786,6 +786,18 @@ describe('/use-fetch-http', () => {
 			expect(result.current.loadedTimes).toEqual(1);
 			expect(result.current.loading).toBeFalsy();
 		});
+	});
+
+	it('should abort on unmount', async () => {
+		const mock = createAbortableMock('', 1000);
+		const { unmount } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(mock.fn);
+		});
+
+		unmount();
+		expect(mock.abort).toHaveBeenCalledOnce();
 	});
 
 	it('should works with reset', async () => {
