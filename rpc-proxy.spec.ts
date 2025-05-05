@@ -752,7 +752,7 @@ describe('/rpc-proxy', () => {
 
 			expect(form.has('body')).toBeFalsy();
 			expect(form.get('rpc')).toEqual(JSON.stringify(rpc));
-			expect(req.cf).toEqual({});
+			expect(req.cf).toBeUndefined();
 			expect(req.url).toEqual('http://localhost/api/rpc');
 			expect(req.method).toEqual('POST');
 			expect(req.headers.get('content-type')).toContain('multipart/form-data');

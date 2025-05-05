@@ -1,7 +1,7 @@
 import type { CfProperties } from '@cloudflare/workers-types';
 
 class CustomRequest extends Request {
-	public cf: CfProperties;
+	public cf?: CfProperties;
 
 	constructor(
 		input: RequestInfo | URL,
@@ -13,8 +13,6 @@ class CustomRequest extends Request {
 
 		if (init?.cf) {
 			this.cf = init.cf;
-		} else {
-			this.cf = {};
 		}
 	}
 }

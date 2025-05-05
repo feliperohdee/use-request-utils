@@ -6,7 +6,7 @@ describe('./request', () => {
 	it('should create request', () => {
 		const req = new Request('http://localhost/api/rpc');
 
-		expect(req.cf).toEqual({});
+		expect(req.cf).toBeUndefined();
 	});
 
 	it('should create request with cf', () => {

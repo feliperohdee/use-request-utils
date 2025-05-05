@@ -224,7 +224,7 @@ const createRequest = (
 	rpc: Rpc.Request,
 	options?: Partial<{
 		body: Blob | null;
-		cf: CfProperties;
+		cf?: CfProperties;
 		ephemeralCacheTtlSeconds: number;
 		headers: Headers;
 		origin: string;
@@ -254,7 +254,7 @@ const createRequest = (
 
 	return new Request(url, {
 		body: form,
-		cf: options?.cf || {},
+		cf: options?.cf,
 		headers: requestHeaders,
 		method: 'POST',
 		signal: options?.signal || null
