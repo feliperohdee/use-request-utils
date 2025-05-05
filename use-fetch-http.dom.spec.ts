@@ -788,18 +788,6 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
-	it('should abort on unmount', async () => {
-		const mock = createAbortableMock('', 1000);
-		const { unmount } = renderHook(() => {
-			const { fetchHttp } = useFetchHttp();
-
-			return fetchHttp(mock.fn);
-		});
-
-		unmount();
-		expect(mock.abort).toHaveBeenCalledOnce();
-	});
-
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
 			const { fetchHttp } = useFetchHttp();

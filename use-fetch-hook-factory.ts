@@ -397,17 +397,6 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			return stopInterval;
 		}, [options.triggerInterval, startInterval, stopInterval]);
 
-		// abort on unmount
-		useEffect(() => {
-			if (!initRef.current) {
-				return;
-			}
-
-			return () => {
-				abort();
-			};
-		}, [abort]);
-
 		return {
 			...state,
 			abort,

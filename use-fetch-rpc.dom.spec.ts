@@ -829,18 +829,6 @@ describe('/use-fetch-rpc', () => {
 		});
 	});
 
-	it('should abort on unmount', async () => {
-		const mock = createAbortableMock('', 1000);
-		const { unmount } = renderHook(() => {
-			const { fetchRpc } = useFetchRpc<TestRpc>();
-
-			return fetchRpc(mock.fn);
-		});
-
-		unmount();
-		expect(mock.abort).toHaveBeenCalledOnce();
-	});
-
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
 			const { fetchRpc } = useFetchRpc<TestRpc>();
