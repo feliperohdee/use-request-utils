@@ -399,6 +399,10 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 
 		// abort on unmount
 		useEffect(() => {
+			if (!initRef.current) {
+				return;
+			}
+
 			return () => {
 				abort();
 			};
