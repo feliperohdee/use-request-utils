@@ -224,7 +224,7 @@ const createRequest = (
 	rpc: Rpc.Request,
 	options?: Partial<{
 		body: Blob | null;
-		cf?: CfProperties;
+		cf: CfProperties;
 		ephemeralCacheTtlSeconds: number;
 		headers: Headers;
 		origin: string;
