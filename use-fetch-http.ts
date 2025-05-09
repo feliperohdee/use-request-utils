@@ -17,11 +17,13 @@ const useFetchHttp = () => {
 	const lazyFetchHttp = <T, Mapped = T>(
 		fn: UseFetchHttpFn<T>,
 		options?: {
+			deps?: any[];
 			ignoreAbort?: boolean;
 			mapper?: (data: T) => Mapped;
 		}
 	): UseFetchResponse<Mapped> => {
 		return fetchHttp(fn, {
+			deps: options?.deps,
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {

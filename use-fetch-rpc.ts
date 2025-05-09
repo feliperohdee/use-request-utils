@@ -19,11 +19,13 @@ const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathna
 	const lazyFetchRpc = <T, Mapped = T>(
 		fn: UseFetchRpcFn<R, T>,
 		options?: {
+			deps?: any[];
 			ignoreAbort?: boolean;
 			mapper?: (data: T) => Mapped;
 		}
 	): UseFetchResponse<Mapped> => {
 		return fetchRpc(fn, {
+			deps: options?.deps,
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {
