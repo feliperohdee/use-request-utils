@@ -295,6 +295,45 @@ describe('/use-fetch-rpc', () => {
 		});
 	});
 
+	it('should works with async options.mapper', async () => {
+		const { result } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(
+				(rpc, ...args: any[]) => {
+					return rpc.test(...args);
+				},
+				{
+					mapper: async data => {
+						await util.wait(100);
+						return data ? { ...data, a1: data.a } : null;
+					}
+				}
+			);
+		});
+
+		expect(result.current.data).toBeNull();
+		expect(result.current.error).toBeNull();
+		expect(result.current.fetchTimes).toEqual(1);
+		expect(result.current.fetch).toBeTypeOf('function');
+		expect(result.current.lastFetchDuration).toEqual(0);
+		expect(result.current.loaded).toBeFalsy();
+		expect(result.current.loadedTimes).toEqual(0);
+		expect(result.current.loading).toBeTruthy();
+		expect(result.current.reset).toBeTypeOf('function');
+		expect(result.current.runningInterval).toEqual(0);
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, a1: 1, args: [] });
+			expect(result.current.error).toBeNull();
+			expect(result.current.fetchTimes).toEqual(1);
+			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current.loaded).toBeTruthy();
+			expect(result.current.loadedTimes).toEqual(1);
+			expect(result.current.loading).toBeFalsy();
+		});
+	});
+
 	it('should works with options.deps using default debounce', async () => {
 		vi.useFakeTimers();
 

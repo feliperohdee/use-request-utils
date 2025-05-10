@@ -94,7 +94,7 @@ const validateOptions = <T, Mapped>(options: UseFetchOptions<T, Mapped>): void =
 	}
 };
 
-const map = <T, Mapped>(data: T, mapper?: (data: T) => Mapped): Mapped => {
+const map = async <T, Mapped>(data: T, mapper?: (data: T) => Mapped): Promise<Mapped> => {
 	return isFunction(mapper) ? mapper(data) : (data as unknown as Mapped);
 };
 
@@ -197,7 +197,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 						currentPromiseRef.current = promise;
 					}
 
-					const data = map(await promise, mapper);
+					const data = await map(await promise, mapper);
 					const duration = Math.max(1, Date.now() - startTimeRef.current);
 
 					currentPromiseRef.current = null;
@@ -344,7 +344,15 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			fnRef.current = fn;
 		}, [fn, deps.distinct]);
 
-		// update deps/triggerDeps
+		// update mapper if deps changed
+		useEffect(() => {
+			if (!deps.distinct || !options.mapper) {
+				return;
+			}
+
+			mapperRef.current = options.mapper;
+		}, [options.mapper, deps.distinct]);
+
 		const declaredDeps = !isUndefined(options.deps);
 		const declaredTriggerDeps = !isUndefined(options.triggerDeps);
 
