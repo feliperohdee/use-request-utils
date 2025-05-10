@@ -39,7 +39,7 @@ type UseFetchOptions<T, Mapped> = {
 	deps?: any[];
 	depsDebounce?: number;
 	ignoreAbort?: boolean;
-	mapper?: (data: T) => Mapped | null;
+	mapper?: (data: T) => Mapped | Promise<Mapped> | null;
 	shouldFetch?: ShouldFetch;
 	triggerDeps?: any[];
 	triggerDepsDebounce?: number;
@@ -94,7 +94,7 @@ const validateOptions = <T, Mapped>(options: UseFetchOptions<T, Mapped>): void =
 	}
 };
 
-const map = async <T, Mapped>(data: T, mapper?: (data: T) => Mapped): Promise<Mapped> => {
+const map = async <T, Mapped>(data: T, mapper?: (data: T) => Mapped | Promise<Mapped>): Promise<Mapped> => {
 	return isFunction(mapper) ? mapper(data) : (data as unknown as Mapped);
 };
 

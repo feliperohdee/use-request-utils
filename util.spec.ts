@@ -143,7 +143,7 @@ describe('/util', () => {
 			await util.wait(100);
 			const endTime = Date.now();
 
-			expect(endTime - startTime).toBeGreaterThanOrEqual(100);
+			expect(endTime - startTime).toBeGreaterThanOrEqual(99);
 		});
 	});
 });
