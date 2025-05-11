@@ -193,12 +193,29 @@ describe('/use-fetch-rpc', () => {
 	});
 
 	it('should works ensuring fetch function updates dynamically across hooks', async () => {
+		const mockDeps = vi.fn();
 		const { result, rerender } = renderHook(
 			({ deps }) => {
 				const { fetchRpc } = useFetchRpc<TestRpc>();
-				const hook = fetchRpc(async () => {
-					return deps;
-				});
+				const hook = fetchRpc(
+					async () => {
+						mockDeps('fetch', deps);
+						return deps;
+					},
+					{
+						effect: () => {
+							mockDeps('effect', deps);
+						},
+						mapper: ({ data }) => {
+							mockDeps('mapper', deps);
+							return data;
+						},
+						shouldFetch: () => {
+							mockDeps('shouldFetch', deps);
+							return true;
+						}
+					}
+				);
 
 				const stableFetch1 = useMemo(() => {
 					return hook.fetch;
@@ -223,12 +240,21 @@ describe('/use-fetch-rpc', () => {
 
 		await waitFor(() => {
 			expect(result.current.data).toEqual([1, 2]);
+			expect(mockDeps).toHaveBeenCalledWith('fetch', [1, 2]);
+			expect(mockDeps).toHaveBeenCalledWith('effect', [1, 2]);
+			expect(mockDeps).toHaveBeenCalledWith('mapper', [1, 2]);
+			expect(mockDeps).toHaveBeenCalledWith('shouldFetch', [1, 2]);
 		});
 
+		mockDeps.mockClear();
 		rerender({ deps: [3, 4] });
 
 		await waitFor(() => {
 			expect(result.current.data).toEqual([3, 4]);
+			expect(mockDeps).toHaveBeenCalledWith('fetch', [3, 4]);
+			expect(mockDeps).toHaveBeenCalledWith('effect', [3, 4]);
+			expect(mockDeps).toHaveBeenCalledWith('mapper', [3, 4]);
+			expect(mockDeps).toHaveBeenCalledWith('shouldFetch', [3, 4]);
 		});
 	});
 

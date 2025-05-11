@@ -91,7 +91,7 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 	}
 };
 
-const effect = async <Client, MappedData>(client: Client, data: MappedData, effect?: Effect<Client, MappedData>): Promise<void> => {
+const effect = async <Client, MappedData>(client: Client, data: MappedData, effect?: Effect<Client, MappedData> | null): Promise<void> => {
 	if (isFunction(effect)) {
 		await effect({ client, data });
 	}
@@ -100,7 +100,7 @@ const effect = async <Client, MappedData>(client: Client, data: MappedData, effe
 const map = async <Client, Data, MappedData>(
 	client: Client,
 	data: Data,
-	mapper?: Mapper<Client, Data, MappedData>
+	mapper?: Mapper<Client, Data, MappedData> | null
 ): Promise<MappedData> => {
 	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData);
 };
@@ -125,9 +125,12 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		}
 
 		const currentPromiseRef = useRef<Promise<Data> | null>(null);
+		const effectRef = useRef<Effect<Client, MappedData> | null>(options.effect ?? null);
 		const fetchFnRef = useRef<FetchFn>(fetchFn);
 		const initRef = useRef(false);
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
+		const mapperRef = useRef<Mapper<Client, Data, MappedData> | null>(options.mapper ?? null);
+		const shouldFetchRef = useRef<ShouldFetch>(options.shouldFetch ?? true);
 		const startTimeRef = useRef<number>(0);
 
 		const triggerDeps = useDistinct(options.triggerDeps ?? STABLE_ARRAY, {
@@ -154,10 +157,10 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 
 		const fetchRef = useRef(async (...args: any[]): Promise<MappedData | null> => {
 			const shouldFetch = () => {
-				if (isBoolean(options.shouldFetch)) {
-					return options.shouldFetch;
-				} else if (isFunction(options.shouldFetch)) {
-					return options.shouldFetch({
+				if (isBoolean(shouldFetchRef.current)) {
+					return shouldFetchRef.current;
+				} else if (isFunction(shouldFetchRef.current)) {
+					return shouldFetchRef.current({
 						initial: !initRef.current,
 						loaded: state.loaded,
 						loadedTimes: state.loadedTimes,
@@ -214,10 +217,10 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					currentPromiseRef.current = promise;
 				}
 
-				const data = await map(client.current, await promise, options.mapper);
+				const data = await map(client.current, await promise, mapperRef.current);
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 
-				await effect(client.current, data, options.effect);
+				await effect(client.current, data, effectRef.current);
 
 				currentPromiseRef.current = null;
 				setState(state => {
@@ -332,6 +335,27 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		);
 
 		const declaredTriggerDeps = !isUndefined(options.triggerDeps);
+
+		// update effect ref
+		useEffect(() => {
+			if (!isUndefined(options.effect)) {
+				effectRef.current = options.effect;
+			}
+		}, [options.effect]);
+
+		// update mapper ref
+		useEffect(() => {
+			if (!isUndefined(options.mapper)) {
+				mapperRef.current = options.mapper;
+			}
+		}, [options.mapper]);
+
+		// update shouldFetch ref
+		useEffect(() => {
+			if (!isUndefined(options.shouldFetch)) {
+				shouldFetchRef.current = options.shouldFetch;
+			}
+		}, [options.shouldFetch]);
 
 		// update fetch fn ref
 		useEffect(() => {
