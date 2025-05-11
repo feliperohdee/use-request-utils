@@ -524,8 +524,7 @@ describe('/use-fetch-rpc', () => {
 			initial: true,
 			loaded: false,
 			loadedTimes: 0,
-			loading: false,
-			worker: false
+			loading: false
 		});
 
 		expect(result.current.data).toBeNull();

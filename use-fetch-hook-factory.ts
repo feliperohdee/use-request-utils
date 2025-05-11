@@ -11,16 +11,14 @@ import HttpError from 'use-http-error';
 import useDistinct from 'use-good-hooks/use-distinct';
 
 type Effect<Client, MappedData> = ({ client, data }: { client: Client; data: MappedData }) => void | Promise<void>;
-type FetchParameters<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
+type FetchArgs<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
 type Mapper<Client, Data, MappedData> = ({ client, data }: { client: Client; data: Data }) => MappedData | Promise<MappedData>;
 
-type ShouldFetch =
-	| boolean
-	| ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean; worker: boolean }) => boolean);
+type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
 
 type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
 	abort: () => void;
-	fetch: (...args: FetchParameters<FetchFn>) => Promise<MappedData | null>;
+	fetch: (...args: FetchArgs<FetchFn>) => Promise<MappedData | null>;
 	reset: () => void;
 	setData: (update: MappedData | ((data: MappedData) => MappedData)) => void;
 	stopInterval: () => void;
@@ -157,8 +155,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 						initial: !initRef.current,
 						loaded: state.loaded,
 						loadedTimes: state.loadedTimes,
-						loading: state.loading,
-						worker: false
+						loading: state.loading
 					});
 				}
 

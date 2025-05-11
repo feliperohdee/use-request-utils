@@ -485,8 +485,7 @@ describe('/use-fetch-http', () => {
 			initial: true,
 			loaded: false,
 			loadedTimes: 0,
-			loading: false,
-			worker: false
+			loading: false
 		});
 
 		expect(result.current.data).toBeNull();
