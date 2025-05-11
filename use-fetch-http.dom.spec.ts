@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useCallback, useEffect, useMemo } from 'react';
 import HttpError from 'use-http-error';
 
 import { Fetch } from './fetch';
