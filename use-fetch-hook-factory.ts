@@ -6,25 +6,29 @@ import isNumber from 'lodash/isNumber';
 import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HttpError from 'use-http-error';
 import useDistinct from 'use-good-hooks/use-distinct';
+
+type Effect<Client, MappedData> = ({ client, data }: { client: Client; data: MappedData }) => void | Promise<void>;
+type FetchParameters<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
+type Mapper<Client, Data, MappedData> = ({ client, data }: { client: Client; data: Data }) => MappedData | Promise<MappedData>;
 
 type ShouldFetch =
 	| boolean
 	| ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean; worker: boolean }) => boolean);
 
-type UseFetchResponse<Mapped> = UseFetchState<Mapped> & {
+type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
 	abort: () => void;
-	fetch: (...args: any[]) => Promise<Mapped | null>;
+	fetch: (...args: FetchParameters<FetchFn>) => Promise<MappedData | null>;
 	reset: () => void;
-	setData: (update: Mapped | ((data: Mapped) => Mapped)) => void;
+	setData: (update: MappedData | ((data: MappedData) => MappedData)) => void;
 	stopInterval: () => void;
 	startInterval: (interval?: number) => void;
 };
 
-type UseFetchState<Mapped> = {
-	data: Mapped | null;
+type UseFetchState<MappedData> = {
+	data: MappedData | null;
 	error: HttpError | null;
 	fetchTimes: number;
 	lastFetchDuration: number;
@@ -35,32 +39,21 @@ type UseFetchState<Mapped> = {
 	runningInterval: number;
 };
 
-type UseFetchOptions<T, Mapped> = {
-	deps?: any[];
-	depsDebounce?: number;
+type UseFetchOptions<Client, Data, MappedData> = {
+	effect?: Effect<Client, MappedData>;
 	ignoreAbort?: boolean;
-	mapper?: (data: T) => Mapped | Promise<Mapped> | null;
+	mapper?: Mapper<Client, Data, MappedData>;
 	shouldFetch?: ShouldFetch;
 	triggerDeps?: any[];
 	triggerDepsDebounce?: number;
 	triggerInterval?: number;
 };
 
-const validateOptions = <T, Mapped>(options: UseFetchOptions<T, Mapped>): void => {
+const STABLE_ARRAY: any[] = [];
+
+const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Client, Data, MappedData>): void => {
 	if (!isObject(options)) {
 		throw new Error('Options must be a valid object');
-	}
-
-	if ('deps' in options && !isUndefined(options.deps)) {
-		if (!isArray(options.deps)) {
-			throw new Error('The "deps" property must be an array');
-		}
-	}
-
-	if ('depsDebounce' in options && !isUndefined(options.depsDebounce)) {
-		if (!isNumber(options.depsDebounce)) {
-			throw new Error('The "depsDebounce" property must be a number');
-		}
 	}
 
 	if ('mapper' in options && !isUndefined(options.mapper)) {
@@ -94,44 +87,51 @@ const validateOptions = <T, Mapped>(options: UseFetchOptions<T, Mapped>): void =
 	}
 };
 
-const map = async <T, Mapped>(data: T, mapper?: (data: T) => Mapped | Promise<Mapped>): Promise<Mapped> => {
-	return isFunction(mapper) ? mapper(data) : (data as unknown as Mapped);
+const effect = async <Client, MappedData>(client: Client, data: MappedData, effect?: Effect<Client, MappedData>): Promise<void> => {
+	if (isFunction(effect)) {
+		await effect({ client, data });
+	}
+};
+
+const map = async <Client, Data, MappedData>(
+	client: Client,
+	data: Data,
+	mapper?: Mapper<Client, Data, MappedData>
+): Promise<MappedData> => {
+	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData);
 };
 
 const getUniqueKey = (promise: Promise<any> | null): string => {
 	return get(promise, 'unique-key', '');
 };
 
-const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
-	const useFetchHook = <T, Mapped = T>(
-		fn: (client: ClientType, ...args: any[]) => Promise<T> | null,
-		options: UseFetchOptions<T, Mapped> = {}
-	): UseFetchResponse<Mapped> => {
+const fetchHookFactory = <Client>(clientFactory: () => Client) => {
+	const useFetchHook = <
+		Data,
+		MappedData = Data,
+		FetchFn extends (client: Client, ...args: any[]) => Promise<Data> | null = (client: Client, ...args: any[]) => Promise<Data> | null
+	>(
+		fetchFn: FetchFn,
+		options: UseFetchOptions<Client, Data, MappedData> = {}
+	): UseFetchResponse<MappedData, FetchFn> => {
 		try {
-			validateOptions<T, Mapped>(options);
+			validateOptions<Client, Data, MappedData>(options);
 		} catch (err) {
 			throw new Error('failed to start due to invalid options: ' + (err as Error).message);
 		}
 
-		const currentPromiseRef = useRef<Promise<T> | null>(null);
-		const fnRef = useRef(fn);
+		const currentPromiseRef = useRef<Promise<Data> | null>(null);
+		const fetchFnRef = useRef<FetchFn>(fetchFn);
 		const initRef = useRef(false);
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
-		const mapperRef = useRef(options.mapper);
-		const shouldFetchRef = useRef<() => boolean>(() => false);
 		const startTimeRef = useRef<number>(0);
 
-		const deps = useDistinct(options.deps || [], {
-			debounce: Math.max(50, options.depsDebounce ?? 0),
-			deep: true
-		});
-
-		const triggerDeps = useDistinct(options.triggerDeps || [], {
+		const triggerDeps = useDistinct(options.triggerDeps ?? STABLE_ARRAY, {
 			debounce: Math.max(50, options.triggerDepsDebounce ?? 0),
 			deep: true
 		});
 
-		const [state, setState] = useState<UseFetchState<Mapped>>({
+		const [state, setState] = useState<UseFetchState<MappedData>>({
 			data: null,
 			error: null,
 			fetchTimes: 0,
@@ -143,106 +143,120 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			runningInterval: 0
 		});
 
-		const client = useRef<ClientType | null>(null);
+		const client = useRef<Client>(null!);
 		if (client.current === null) {
 			client.current = clientFactory();
 		}
 
-		const fetch = useCallback(
-			async (...args: any[]): Promise<Mapped | null> => {
-				if (!shouldFetchRef.current()) {
-					return null;
+		const fetchRef = useRef(async (...args: any[]): Promise<MappedData | null> => {
+			const shouldFetch = () => {
+				if (isBoolean(options.shouldFetch)) {
+					return options.shouldFetch;
+				} else if (isFunction(options.shouldFetch)) {
+					return options.shouldFetch({
+						initial: !initRef.current,
+						loaded: state.loaded,
+						loadedTimes: state.loadedTimes,
+						loading: state.loading,
+						worker: false
+					});
 				}
 
-				startTimeRef.current = Date.now();
+				return true;
+			};
 
-				setState(state => {
-					return {
-						...state,
-						fetchTimes: state.fetchTimes + 1,
-						loading: true,
-						resetted: false
-					};
-				});
+			if (!shouldFetch()) {
+				return null;
+			}
 
-				try {
-					const mapper = mapperRef.current;
-					const promise = fnRef.current(client.current!, ...args);
+			startTimeRef.current = Date.now();
 
-					if (!promise) {
-						setState(state => {
-							return {
-								...state,
-								loading: false
-							};
-						});
+			setState(state => {
+				return {
+					...state,
+					fetchTimes: state.fetchTimes + 1,
+					loading: true,
+					resetted: false
+				};
+			});
 
-						return null;
-					}
+			try {
+				const promise = fetchFnRef.current(client.current, ...args);
 
-					const currentPromise = currentPromiseRef.current || null;
-					const currentPromiseUniqueKey = getUniqueKey(currentPromise);
-					const promiseUniqueKey = getUniqueKey(promise);
-
-					if (!promiseUniqueKey || promiseUniqueKey !== currentPromiseUniqueKey) {
-						if (
-							!options.ignoreAbort &&
-							currentPromiseRef.current &&
-							'abort' in currentPromiseRef.current &&
-							isFunction(currentPromiseRef.current.abort)
-						) {
-							currentPromiseRef.current.abort();
-						}
-
-						currentPromiseRef.current = promise;
-					}
-
-					const data = await map(await promise, mapper);
-					const duration = Math.max(1, Date.now() - startTimeRef.current);
-
-					currentPromiseRef.current = null;
+				if (!promise) {
 					setState(state => {
 						return {
 							...state,
-							data,
-							error: null,
-							lastFetchDuration: duration,
-							loaded: true,
-							loadedTimes: state.loadedTimes + 1,
 							loading: false
 						};
 					});
 
-					return data;
-				} catch (err) {
-					const duration = Math.max(1, Date.now() - startTimeRef.current);
-
-					if ((err instanceof DOMException && err.name === 'AbortError') || (err instanceof HttpError && err.status === 499)) {
-						setState(state => {
-							return {
-								...state,
-								lastFetchDuration: duration,
-								loading: false
-							};
-						});
-					} else {
-						currentPromiseRef.current = null;
-						setState(state => {
-							return {
-								...state,
-								error: HttpError.wrap(err as Error),
-								lastFetchDuration: duration,
-								loading: false,
-								resetted: false
-							};
-						});
-					}
-
 					return null;
 				}
-			},
-			[options.ignoreAbort]
-		);
+
+				const currentPromise = currentPromiseRef.current || null;
+				const currentPromiseUniqueKey = getUniqueKey(currentPromise);
+				const promiseUniqueKey = getUniqueKey(promise);
+
+				if (!promiseUniqueKey || promiseUniqueKey !== currentPromiseUniqueKey) {
+					if (
+						!options.ignoreAbort &&
+						currentPromiseRef.current &&
+						'abort' in currentPromiseRef.current &&
+						isFunction(currentPromiseRef.current.abort)
+					) {
+						currentPromiseRef.current.abort();
+					}
+
+					currentPromiseRef.current = promise;
+				}
+
+				const data = await map(client.current, await promise, options.mapper);
+				const duration = Math.max(1, Date.now() - startTimeRef.current);
+
+				await effect(client.current, data, options.effect);
+
+				currentPromiseRef.current = null;
+				setState(state => {
+					return {
+						...state,
+						data,
+						error: null,
+						lastFetchDuration: duration,
+						loaded: true,
+						loadedTimes: state.loadedTimes + 1,
+						loading: false
+					};
+				});
+
+				return data;
+			} catch (err) {
+				const duration = Math.max(1, Date.now() - startTimeRef.current);
+
+				if ((err instanceof DOMException && err.name === 'AbortError') || (err instanceof HttpError && err.status === 499)) {
+					setState(state => {
+						return {
+							...state,
+							lastFetchDuration: duration,
+							loading: false
+						};
+					});
+				} else {
+					currentPromiseRef.current = null;
+					setState(state => {
+						return {
+							...state,
+							error: HttpError.wrap(err as Error),
+							lastFetchDuration: duration,
+							loading: false,
+							resetted: false
+						};
+					});
+				}
+
+				return null;
+			}
+		});
 
 		const abort = useCallback(() => {
 			const currentPromise = currentPromiseRef.current || null;
@@ -272,7 +286,7 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			});
 		}, [abort]);
 
-		const setData = useCallback((update: Mapped | ((data: Mapped) => Mapped)) => {
+		const setData = useCallback((update: MappedData | ((data: MappedData) => MappedData)) => {
 			setState(state => {
 				return {
 					...state,
@@ -308,54 +322,20 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					});
 
 					clearInterval(intervalRef.current!);
-					intervalRef.current = setInterval(fetch, interval);
+					intervalRef.current = setInterval(fetchRef.current, interval);
 				}
 			},
-			[fetch, options.triggerInterval]
+			[options.triggerInterval]
 		);
 
-		// update should fetch ref
-		useEffect(() => {
-			const shouldFetch = options.shouldFetch;
-
-			shouldFetchRef.current = () => {
-				if (isBoolean(shouldFetch)) {
-					return shouldFetch;
-				} else if (isFunction(shouldFetch)) {
-					return shouldFetch({
-						initial: !initRef.current,
-						loaded: state.loaded,
-						loadedTimes: state.loadedTimes,
-						loading: state.loading,
-						worker: false
-					});
-				}
-
-				return true;
-			};
-		}, [deps.value, options.shouldFetch, state.loaded, state.loadedTimes, state.loading, triggerDeps.value]);
-
-		// update fn if deps changed
-		useEffect(() => {
-			if (!deps.distinct) {
-				return;
-			}
-
-			fnRef.current = fn;
-		}, [fn, deps.distinct]);
-
-		// update mapper if deps changed
-		useEffect(() => {
-			if (!deps.distinct || !options.mapper) {
-				return;
-			}
-
-			mapperRef.current = options.mapper;
-		}, [options.mapper, deps.distinct]);
-
-		const declaredDeps = !isUndefined(options.deps);
 		const declaredTriggerDeps = !isUndefined(options.triggerDeps);
 
+		// update fetch fn ref
+		useEffect(() => {
+			fetchFnRef.current = fetchFn;
+		}, [fetchFn]);
+
+		// trigger based on triggerDeps
 		useEffect(() => {
 			// just trigger fetch after initial fetch
 			if (!initRef.current) {
@@ -368,15 +348,9 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 					return;
 				}
 
-				fetch();
-			} else if (declaredDeps) {
-				if (!deps.distinct) {
-					return;
-				}
-
-				fetch();
+				fetchRef.current();
 			}
-		}, [deps, fetch, declaredDeps, declaredTriggerDeps, triggerDeps]);
+		}, [declaredTriggerDeps, triggerDeps]);
 
 		// initial load
 		useEffect(() => {
@@ -388,9 +362,9 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 				return;
 			}
 
-			fetch();
+			fetchRef.current();
 			initRef.current = true;
-		}, [fetch, state]);
+		}, [state.loading, state.resetted]);
 
 		// interval fetch
 		useEffect(() => {
@@ -405,10 +379,15 @@ const fetchHookFactory = <ClientType>(clientFactory: () => ClientType) => {
 			return stopInterval;
 		}, [options.triggerInterval, startInterval, stopInterval]);
 
+		// create a stable fetch function to avoid re-creating the fetch function on every render
+		const stableFetch = useMemo(() => {
+			return fetchRef.current;
+		}, []);
+
 		return {
 			...state,
 			abort,
-			fetch,
+			fetch: stableFetch,
 			reset,
 			setData,
 			stopInterval,

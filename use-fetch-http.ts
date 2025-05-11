@@ -2,28 +2,27 @@ import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch
 
 import fetch, { Fetch } from './fetch';
 
-type UseFetchHttpFn<T> = (fetch: Fetch.Http, ...args: any[]) => Promise<T> | null;
+type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (fetch: Fetch.Http, ...args: FetchFnArgs) => Promise<Data> | null;
 
 const useFetchHttp = () => {
 	const useFetchHook = fetchHookFactory(() => {
 		return fetch.http;
 	});
 
-	const fetchHttp = <T, Mapped = T>(fn: UseFetchHttpFn<T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
+	const fetchHttp = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+		fn: UseFetchHttpFn<Data, FetchFnArgs>,
+		options: UseFetchOptions<Fetch.Http, Data, MappedData> = {}
+	): UseFetchResponse<MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useFetchHook(fn, options);
 	};
 
-	const lazyFetchHttp = <T, Mapped = T>(
-		fn: UseFetchHttpFn<T>,
-		options?: {
-			deps?: any[];
-			ignoreAbort?: boolean;
-			mapper?: (data: T) => Mapped;
-		}
-	): UseFetchResponse<Mapped> => {
+	const lazyFetchHttp = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+		fn: UseFetchHttpFn<Data, FetchFnArgs>,
+		options?: Pick<UseFetchOptions<Fetch.Http, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper'>
+	): UseFetchResponse<MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
 		return fetchHttp(fn, {
-			deps: options?.deps,
+			effect: options?.effect,
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {

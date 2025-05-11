@@ -2893,14 +2893,23 @@ The `useFetchHttp()` hook returns an object with the following methods:
     - Initiates a data fetch automatically based on the provided `options`. Replaces the functionality of the old top-level `useFetchHttp` hook.
     - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: The asynchronous function to execute for fetching data. Receives the `fetch.http` instance and any arguments passed to the _manual_ `fetch()` call (returned in the response object). Return `null` to skip fetching conditionally.
     - **`options` (`UseFetchOptions<T, Mapped>`, optional)**: Configuration options (See details below in Examples/Previous description):
-      - `deps`, `depsDebounce`, `ignoreAbort`, `mapper`, `shouldFetch`, `triggerDeps`, `triggerDepsDebounce`, `triggerInterval`.
+      - `effect`: Function to execute when the data is fetched. Receives the `fetch.http` instance and the fetched data.
+      - `ignoreAbort`: Whether to ignore the abort signal.
+      - `mapper`: Function to map the fetched data. Receives the `fetch.http` instance and the fetched data.
+      - `shouldFetch`: Function to determine if the data should be fetched. Receives the `fetch.http` instance and the fetched data.
+      - `triggerDeps`: Array of dependencies to trigger the fetch.
+      - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
+      - `triggerInterval`: Number of milliseconds to trigger the fetch.
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
       - `data`, `error`, `fetchTimes`, `lastFetchDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
 
 2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
     - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchHttpfetch`.
-    - **`options` (`{ ignoreAbort?: boolean; mapper?: (data: T) => Mapped }`, optional)**: Simplified options. Only `ignoreAbort` and `mapper` are directly configurable. Other options like `deps`, `triggerDeps`, `shouldFetch`, `triggerInterval` are internally set to disable automatic fetching.
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
+      - `effect`: Function to execute when the data is fetched. Receives the `fetch.http` instance and the fetched data.
+      - `ignoreAbort`: Whether to ignore the abort signal.
+      - `mapper`: Function to map the fetched data. Receives the `fetch.http` instance and the fetched data.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
 
 #### Usage Examples
@@ -2925,13 +2934,13 @@ function UserProfile({ userId }) {
     return fetch.http<User>(`https://api.example.com/users/${id}`);
   }, []);
 
-  // Use http.fetch for automatic fetching based on deps
+  // Use http.fetch for automatic fetching based on triggerDeps
   const { data: user, loading, error, loaded, reset, loadedTimes, fetch: manualFetch } = fetchHttp(
     fetchUser,
     {
-      deps: [userId],
-      depsDebounce: 200,
-      shouldFetch: !!userId && userId > 0,
+	  shouldFetch: !!userId && userId > 0,
+      triggerDeps: [userId],
+      triggerDepsDebounce: 200
     }
   );
 
@@ -2970,7 +2979,7 @@ function SearchUsers() {
   const { data: searchResult, loading, error, fetch: triggerSearch } = lazyFetchHttp(
     searchUsersFn,
     {
-      mapper: result => (result?.status === 200 ? result.body.results : [])
+      mapper: ({ data }) => (data?.status === 200 ? data.body.results : [])
     }
   );
 
@@ -3083,16 +3092,25 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
 1.  **`fetchRpc<T, Mapped = T>(fn, options?)`**
 
     - Initiates a data fetch automatically based on the provided `options`. Replaces the functionality of the old top-level `useFetchRpc` hook.
-    - **`fn` (`(rpc: RpcInstance, ...args: any[]) => Promise<T> | null`)**: The asynchronous function to execute for fetching data. Receives the `rpcProxy` instance and any arguments passed to the _manual_ `fetch()` call (returned in the response object). Return `null` to skip fetching conditionally.
+    - **`fn` (`(rpc: RpcInstance, ...args: any[]) => Promise<T> | null`)**: The asynchronous function to execute for fetching data. Receives the `rpcProxy` instance and any arguments passed to the _manual_ `fetch()` call (returned in the response object).
     - **`options` (`UseFetchOptions<T, Mapped>`, optional)**: Configuration options (See details below in Examples/Previous description):
-      - `deps`, `depsDebounce`, `ignoreAbort`, `mapper`, `shouldFetch`, `triggerDeps`, `triggerDepsDebounce`, `triggerInterval`.
+      - `effect`: Function to execute when the data is fetched. Receives the `rpcProxy` instance and the fetched data.
+      - `ignoreAbort`: Whether to ignore the abort signal.
+      - `mapper`: Function to map the fetched data. Receives the `rpcProxy` instance and the fetched data.
+      - `shouldFetch`: Function to determine if the data should be fetched. Receives the `rpcProxy` instance and the fetched data.
+      - `triggerDeps`: Array of dependencies to trigger the fetch.
+      - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
+      - `triggerInterval`: Number of milliseconds to trigger the fetch.
     - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
       - `data`, `error`, `fetchTimes`, `lastFetchDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
 
 2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**.
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
     - **`fn` (`(rpc: RpcInstance, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchRpc`.
-    - **`options` (`{ ignoreAbort?: boolean; mapper?: (data: T) => Mapped }`, optional)**: Simplified options. Only `ignoreAbort` and `mapper` are directly configurable. Other options like `deps`, `triggerDeps`, `shouldFetch`, `triggerInterval` are internally set to disable automatic fetching.
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
+      - `effect`: Function to execute when the data is fetched. Receives the `rpcProxy` instance and the fetched data.
+      - `ignoreAbort`: Whether to ignore the abort signal.
+      - `mapper`: Function to map the fetched data. Receives the `rpcProxy` instance and the fetched data.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
 
 #### Usage Examples
@@ -3112,11 +3130,11 @@ function UserDetails({ userId }) {
     return rpc.users.getById(id); // Execute RPC call inside the function
   }, []);
 
-  // Use fetchRpc for automatic execution based on deps
+  // Use fetchRpc for automatic execution based on triggerDeps
   const { data: user, loading, error, loadedTimes, reset, fetch: manualFetch } = fetchRpc(
     fetchUserData,
     {
-      deps: [userId],
+      triggerDeps: [userId],
     },
     {
       headers: new Headers({ 'X-App-Version': '1.2.0' }),

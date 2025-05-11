@@ -3,29 +3,31 @@ import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch
 import type Rpc from './rpc';
 import useRpc, { UseRpc } from './use-rpc';
 
-type UseFetchRpcFn<R extends Rpc, T> = (rpc: UseRpc<R>, ...args: any[]) => Promise<T> | null;
+type UseFetchRpcFn<Client extends Rpc, Data, FetchFnArgs extends any[] = any[]> = (
+	rpc: UseRpc<Client>,
+	...args: FetchFnArgs
+) => Promise<Data> | null;
 
-const useFetchRpc = <R extends Rpc>(requestOptions?: { headers?: Headers; pathname?: string }) => {
-	const rpc = useRpc<R>(requestOptions);
-	const fetchRpc = <T, Mapped = T>(fn: UseFetchRpcFn<R, T>, options: UseFetchOptions<T, Mapped> = {}): UseFetchResponse<Mapped> => {
+const useFetchRpc = <Client extends Rpc>(requestOptions?: { headers?: Headers; pathname?: string }) => {
+	const rpc = useRpc<Client>(requestOptions);
+	const fetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+		fetchFn: UseFetchRpcFn<Client, Data, FetchFnArgs>,
+		options: UseFetchOptions<UseRpc<Client>, Data, MappedData> = {}
+	): UseFetchResponse<MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
 		const useFetchHook = fetchHookFactory(() => {
 			return rpc;
 		});
 
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useFetchHook(fn, options);
+		return useFetchHook(fetchFn, options);
 	};
 
-	const lazyFetchRpc = <T, Mapped = T>(
-		fn: UseFetchRpcFn<R, T>,
-		options?: {
-			deps?: any[];
-			ignoreAbort?: boolean;
-			mapper?: (data: T) => Mapped;
-		}
-	): UseFetchResponse<Mapped> => {
+	const lazyFetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+		fn: UseFetchRpcFn<Client, Data, FetchFnArgs>,
+		options?: Pick<UseFetchOptions<UseRpc<Client>, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper'>
+	): UseFetchResponse<MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
 		return fetchRpc(fn, {
-			deps: options?.deps,
+			effect: options?.effect,
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {
