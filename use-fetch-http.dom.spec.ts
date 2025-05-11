@@ -65,6 +65,21 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
+	it('should throw if options.effect is not a function', () => {
+		try {
+			renderHook(() => {
+				const { fetchHttp } = useFetchHttp();
+
+				// @ts-expect-error
+				fetchHttp(() => null, { effect: 'not-a-function' });
+			});
+
+			throw new Error('Expected to throw');
+		} catch (err) {
+			expect((err as Error).message).toEqual('failed to start due to invalid options: The "effect" property must be a function');
+		}
+	});
+
 	it('should throw if options.mapper is not a function', () => {
 		try {
 			renderHook(() => {

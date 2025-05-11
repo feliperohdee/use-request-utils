@@ -54,6 +54,12 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 		throw new Error('Options must be a valid object');
 	}
 
+	if ('effect' in options && !isUndefined(options.effect)) {
+		if (!isFunction(options.effect)) {
+			throw new Error('The "effect" property must be a function');
+		}
+	}
+
 	if ('mapper' in options && !isUndefined(options.mapper)) {
 		if (!isFunction(options.mapper)) {
 			throw new Error('The "mapper" property must be a function');
