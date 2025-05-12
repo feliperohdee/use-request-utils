@@ -267,16 +267,38 @@ describe('/use-fetch-http', () => {
 		await waitFor(() => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
-				data: { a: 1, args: [] }
+				data: { a: 1, args: [] },
+				error: null
+			});
+		});
+	});
+
+	it('should works with options.effect when error', async () => {
+		vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Error'));
+		const effect = vi.fn();
+
+		renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher, { effect });
+		});
+
+		expect(effect).not.toHaveBeenCalledOnce();
+
+		await waitFor(() => {
+			expect(effect).toHaveBeenCalledWith({
+				client: expect.anything(),
+				data: null,
+				error: expect.any(HttpError)
 			});
 		});
 	});
 
 	it('should works with async options.effect', async () => {
 		const mock = vi.fn();
-		const effect = vi.fn(async ({ client, data }) => {
+		const effect = vi.fn(async ({ client, data, error }) => {
 			await util.wait(100);
-			mock({ client, data });
+			mock({ client, data, error });
 		});
 
 		renderHook(() => {
@@ -290,7 +312,8 @@ describe('/use-fetch-http', () => {
 		await waitFor(() => {
 			expect(mock).toHaveBeenCalledWith({
 				client: expect.anything(),
-				data: { a: 1, args: [] }
+				data: { a: 1, args: [] },
+				error: null
 			});
 		});
 	});

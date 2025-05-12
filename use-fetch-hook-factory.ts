@@ -10,10 +10,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HttpError from 'use-http-error';
 import useDistinct from 'use-good-hooks/use-distinct';
 
-type Effect<Client, MappedData> = ({ client, data }: { client: Client; data: MappedData }) => void | Promise<void>;
+type Effect<Client, MappedData> = ({
+	client,
+	data,
+	error
+}: {
+	client: Client;
+	data: MappedData | null;
+	error: HttpError | null;
+}) => void | Promise<void>;
+
 type FetchArgs<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
 type Mapper<Client, Data, MappedData> = ({ client, data }: { client: Client; data: Data }) => MappedData | Promise<MappedData>;
-
 type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
 
 type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
@@ -91,17 +99,31 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 	}
 };
 
-const effect = async <Client, MappedData>(client: Client, data: MappedData, effect?: Effect<Client, MappedData> | null): Promise<void> => {
+const effect = async <Client, MappedData>({
+	client,
+	data,
+	error,
+	effect
+}: {
+	client: Client;
+	data: MappedData | null;
+	error: HttpError | null;
+	effect?: Effect<Client, MappedData> | null;
+}): Promise<void> => {
 	if (isFunction(effect)) {
-		await effect({ client, data });
+		await effect({ client, data, error });
 	}
 };
 
-const map = async <Client, Data, MappedData>(
-	client: Client,
-	data: Data,
-	mapper?: Mapper<Client, Data, MappedData> | null
-): Promise<MappedData> => {
+const map = async <Client, Data, MappedData>({
+	client,
+	data,
+	mapper
+}: {
+	client: Client;
+	data: Data;
+	mapper?: Mapper<Client, Data, MappedData> | null;
+}): Promise<MappedData> => {
 	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData);
 };
 
@@ -217,10 +239,19 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					currentPromiseRef.current = promise;
 				}
 
-				const data = await map(client.current, await promise, mapperRef.current);
+				const data = await map({
+					client: client.current,
+					data: await promise,
+					mapper: mapperRef.current
+				});
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 
-				await effect(client.current, data, effectRef.current);
+				await effect({
+					client: client.current,
+					data,
+					error: null,
+					effect: effectRef.current
+				});
 
 				currentPromiseRef.current = null;
 				setState(state => {
@@ -238,6 +269,14 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				return data;
 			} catch (err) {
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
+				const httpError = HttpError.wrap(err as Error);
+
+				await effect({
+					client: client.current,
+					data: null,
+					error: httpError,
+					effect: effectRef.current
+				});
 
 				if ((err instanceof DOMException && err.name === 'AbortError') || (err instanceof HttpError && err.status === 499)) {
 					setState(state => {
@@ -252,7 +291,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					setState(state => {
 						return {
 							...state,
-							error: HttpError.wrap(err as Error),
+							error: httpError,
 							lastFetchDuration: duration,
 							loading: false,
 							resetted: false

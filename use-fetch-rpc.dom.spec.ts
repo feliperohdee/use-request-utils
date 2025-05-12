@@ -277,16 +277,42 @@ describe('/use-fetch-rpc', () => {
 		await waitFor(() => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
-				data: { a: 1, args: [] }
+				data: { a: 1, args: [] },
+				error: null
+			});
+		});
+	});
+
+	it('should works with options.effect when error', async () => {
+		const effect = vi.fn();
+
+		renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(
+				(rpc, ...args: any[]) => {
+					return rpc.testError(...args);
+				},
+				{ effect }
+			);
+		});
+
+		expect(effect).not.toHaveBeenCalledOnce();
+
+		await waitFor(() => {
+			expect(effect).toHaveBeenCalledWith({
+				client: expect.anything(),
+				data: null,
+				error: expect.any(HttpError)
 			});
 		});
 	});
 
 	it('should works with async options.effect', async () => {
 		const mock = vi.fn();
-		const effect = vi.fn(async ({ client, data }) => {
+		const effect = vi.fn(async ({ client, data, error }) => {
 			await util.wait(100);
-			mock({ client, data });
+			mock({ client, data, error });
 		});
 
 		renderHook(() => {
@@ -305,7 +331,8 @@ describe('/use-fetch-rpc', () => {
 		await waitFor(() => {
 			expect(mock).toHaveBeenCalledWith({
 				client: expect.anything(),
-				data: { a: 1, args: [] }
+				data: { a: 1, args: [] },
+				error: null
 			});
 		});
 	});
