@@ -271,13 +271,6 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 				const httpError = HttpError.wrap(err as Error);
 
-				await effect({
-					client: client.current,
-					data: null,
-					error: httpError,
-					effect: effectRef.current
-				});
-
 				if ((err instanceof DOMException && err.name === 'AbortError') || (err instanceof HttpError && err.status === 499)) {
 					setState(state => {
 						return {
@@ -288,6 +281,14 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					});
 				} else {
 					currentPromiseRef.current = null;
+
+					await effect({
+						client: client.current,
+						data: null,
+						error: httpError,
+						effect: effectRef.current
+					});
+
 					setState(state => {
 						return {
 							...state,
