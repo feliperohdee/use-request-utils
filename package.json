@@ -1,5 +1,13 @@
 {
+	"name": "use-request-utils",
 	"author": "Felipe Rohde <feliperohdee@gmail.com>",
+	"dependencies": {
+		"lodash": "^4.17.21",
+		"use-good-hooks": "^1.0.23",
+		"use-http-error": "^1.0.6",
+		"use-infer": "^1.0.7",
+		"use-json": "^1.0.1"
+	},
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.0",
 		"@testing-library/jest-dom": "^6.6.3",
@@ -20,14 +28,13 @@
 		"vitest": "^3.0.2",
 		"zod": "^3.24.3"
 	},
-	"files": [
-		"dist"
-	],
 	"exports": {
 		"./*": "./dist/*.js"
 	},
+	"files": [
+		"dist"
+	],
 	"license": "MIT",
-	"name": "use-request-utils",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/feliperohdee/use-request-utils"
@@ -40,12 +47,5 @@
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
-	"version": "1.0.66",
-	"dependencies": {
-		"lodash": "^4.17.21",
-		"use-good-hooks": "^1.0.23",
-		"use-http-error": "^1.0.6",
-		"use-infer": "^1.0.7",
-		"use-json": "^1.0.1"
-	}
+	"version": "1.0.68"
 }

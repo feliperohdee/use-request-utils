@@ -6,7 +6,6 @@ import JSON from 'use-json';
 import Request from './request';
 import Rpc from './rpc';
 import useRpc from './use-rpc';
-import util from './util';
 
 class TestRpc extends Rpc {
 	async error() {

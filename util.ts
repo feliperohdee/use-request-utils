@@ -1,6 +1,5 @@
 import isDate from 'lodash/isDate';
 import isPlainObject from 'lodash/isPlainObject';
-import JSON from 'use-json';
 import map from 'lodash/map';
 import trim from 'lodash/trim';
 
