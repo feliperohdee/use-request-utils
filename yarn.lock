@@ -1996,10 +1996,10 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-good-hooks@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.13.tgz#e87864953f202f3661ffc3ef85c7f892ef50429c"
-  integrity sha512-LwPYRXd7hnmpm7LO1ejjbCGbUZvNo6xDnT/uSJhoI+/ZvOH1myTTJx7eyfGVmTUVPiHTTMXhj1oThNiXDtIKyA==
+use-good-hooks@^1.0.22:
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.22.tgz#0bfe74b08fa78c17cccf13d5966e46ff4a601e18"
+  integrity sha512-dQ9jj5jsmU32FWXREqF0rQKv8RVoF+UFqOVgb13cIv3ipvF8VAJRX/5PY98GFMHZEQ3oZuWD4YL/MxJoo7c5iw==
   dependencies:
     use-json "^1.0.0"
     use-qs "^1.0.4"
