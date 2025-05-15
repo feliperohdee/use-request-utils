@@ -65,23 +65,6 @@ describe('/util', () => {
 		});
 	});
 
-	describe('safeParse', () => {
-		it('should parse JSON', () => {
-			const obj = {
-				foo: 'bar',
-				map: new Map([['foo', 'bar']]),
-				set: new Set([1, 2, 3])
-			};
-			const str = JSON.stringify(obj);
-
-			expect(util.safeParse(str)).toEqual(obj);
-		});
-
-		it('should return string for invalid JSON', () => {
-			expect(util.safeParse('{')).toEqual('{');
-		});
-	});
-
 	describe('stringHash', () => {
 		it('should return a hash for a string', () => {
 			expect(util.stringHash('Hello, world!')).toEqual('mmtl9ghu2aee');

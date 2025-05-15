@@ -96,14 +96,6 @@ const readStreamToArrayBuffer = async (stream: ReadableStream): Promise<ArrayBuf
 	return result.buffer;
 };
 
-const safeParse = <T = any>(input: string): T => {
-	try {
-		return JSON.parse(input);
-	} catch {
-		return input as T;
-	}
-};
-
 const stringHash = (str: string) => {
 	let h1 = 0xdeadbeef;
 	let h2 = 0x41c6ce57;
@@ -153,7 +145,6 @@ export default {
 	pathJoin,
 	readStream,
 	readStreamToArrayBuffer,
-	safeParse,
 	stringHash,
 	stringToStream,
 	stringToStreamWithDelay,

@@ -52,7 +52,7 @@ const inspectResponse = async (res: any[]) => {
 				const body = await util.readStream(res.body);
 
 				return {
-					body: json ? util.safeParse(body) : body,
+					body: json ? JSON.safeParse(body) : body,
 					headers: headers.toJson(res.headers),
 					ok: res.ok,
 					status: res.status,

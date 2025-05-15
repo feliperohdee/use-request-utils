@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, Mock, vi } from 'vitest';
 import HttpError from 'use-http-error';
+import JSON from 'use-json';
 import z, { ZodError } from 'zod';
 
 import Request from './request';
@@ -1512,7 +1513,7 @@ describe('/rpc', () => {
 				const { body, headers, ok, status } = await rpcProxy.createResponse<any>(res);
 
 				return {
-					body: util.safeParse(await util.readStream(body)),
+					body: JSON.safeParse(await util.readStream(body)),
 					headers,
 					ok,
 					status

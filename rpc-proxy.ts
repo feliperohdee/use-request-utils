@@ -281,7 +281,7 @@ const createResponse = async <T>(input: Response) => {
 			let body = res.body;
 
 			if (json) {
-				body = util.safeParse(body);
+				body = JSON.safeParse(body);
 			}
 
 			if (res.responseType === 'object') {
@@ -313,7 +313,7 @@ const createResponse = async <T>(input: Response) => {
 							let json = res.headers.get('content-type')?.includes('application/json');
 
 							if (json) {
-								body = util.safeParse(body);
+								body = JSON.safeParse(body);
 							}
 
 							const obj: Rpc.ResponseObject<T> = {
@@ -357,7 +357,7 @@ const createResponse = async <T>(input: Response) => {
 	let json = input.headers.get('content-type')?.includes('application/json');
 
 	if (json) {
-		body = util.safeParse(body);
+		body = JSON.safeParse(body);
 	}
 
 	if (responseType === 'object') {
@@ -452,7 +452,7 @@ const throwError = async (input: Response) => {
 	// object: returns error as error property
 	// response: returns error as body
 	if (!input.ok && input.headers.get('rpc-response-type') !== 'object' && input.headers.get('rpc-response-type') !== 'response') {
-		const body = util.safeParse(await util.readStream(input.body));
+		const body = JSON.safeParse(await util.readStream(input.body));
 
 		if (isPlainObject(body)) {
 			throw HttpError.fromJson(body as HttpError.Json);

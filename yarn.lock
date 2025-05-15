@@ -1996,12 +1996,12 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-good-hooks@^1.0.22:
-  version "1.0.22"
-  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.22.tgz#0bfe74b08fa78c17cccf13d5966e46ff4a601e18"
-  integrity sha512-dQ9jj5jsmU32FWXREqF0rQKv8RVoF+UFqOVgb13cIv3ipvF8VAJRX/5PY98GFMHZEQ3oZuWD4YL/MxJoo7c5iw==
+use-good-hooks@^1.0.23:
+  version "1.0.23"
+  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.23.tgz#68cf5f1c432b929fc033b5e4d4138f1676afeb4b"
+  integrity sha512-bwAHnWFrUGQEJYwPFeAtyaLc1bOcLU7mNIQOtEuQv6R4QCkeQe62QFOZz6mgBoQ5cZa0p4hISKOwjEQGwAoPvg==
   dependencies:
-    use-json "^1.0.0"
+    use-json "^1.0.1"
     use-qs "^1.0.4"
 
 use-http-error@^1.0.6:
@@ -2016,10 +2016,10 @@ use-infer@^1.0.7:
   dependencies:
     lodash "^4.17.21"
 
-use-json@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/use-json/-/use-json-1.0.0.tgz#bc52d060aa442b1ad5d292e777e2a784b7a5dc45"
-  integrity sha512-GwKwdqtW6+QxChpdit+GjJ02JHWfR536FRQ6TzXlO5Ku+VYUOHcXL2WhQuoOcW/82vRUoGae+3drjFOpHXVZow==
+use-json@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/use-json/-/use-json-1.0.1.tgz#c0e6bc5a18976467f96061ab5209c5af08c4111e"
+  integrity sha512-wEhCjimTeHeaoMEjU4cmjB44R/fRCajazRKnk19Lw1tiN7TMpdplYvT2orIvVOoYL3gKUQxAHG9eYKzY0R5PxA==
 
 use-qs@^1.0.4:
   version "1.0.4"

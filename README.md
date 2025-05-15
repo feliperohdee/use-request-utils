@@ -1957,36 +1957,6 @@ console.log(buffer.byteLength); // Output: 4
 console.log(new Uint8Array(buffer)); // Output: Uint8Array(4) [ 1, 2, 3, 4 ]
 ```
 
-#### `safeParse`
-
-Attempts to parse a string as JSON. If parsing fails, it returns the original string.
-
-**Parameters:**
-
-- `input` (`string`): The string to parse.
-
-**Returns:**
-
-- (`any | string`): The parsed JavaScript object/value if successful, or the original input string if parsing fails.
-
-**Usage Example:**
-
-```typescript
-import util from 'use-request-utils/util';
-
-const jsonString = '{"name": "Alice", "age": 30}';
-const parsedJson = util.safeParse(jsonString);
-console.log(parsedJson); // Output: { name: 'Alice', age: 30 }
-
-const plainString = 'This is not JSON';
-const parsedString = util.safeParse(plainString);
-console.log(parsedString); // Output: This is not JSON
-
-const invalidJson = '{"name": "Bob",}'; // Invalid JSON (trailing comma)
-const parsedInvalid = util.safeParse(invalidJson);
-console.log(parsedInvalid); // Output: {"name": "Bob",}
-```
-
 #### `stringHash`
 
 Generates a non-cryptographic hash code (string) for a given input string. Useful for creating relatively unique keys from string inputs (e.g., for caching). Uses a simple algorithm based on `Math.imul`.

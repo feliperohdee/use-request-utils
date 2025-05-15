@@ -1,6 +1,7 @@
-import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import HttpError from 'use-http-error';
+import JSON from 'use-json';
 
 import Request from './request';
 import Rpc from './rpc';
@@ -23,7 +24,7 @@ describe('/use-rpc', () => {
 			if (req instanceof Request) {
 				const form = await req.formData();
 				const rpc = new TestRpc();
-				const rpcRequest = util.safeParse<Rpc.Request>(form.get('rpc') as string);
+				const rpcRequest = JSON.parse<Rpc.Request>(form.get('rpc') as string);
 
 				return rpc.fetch(rpcRequest, req);
 			}
