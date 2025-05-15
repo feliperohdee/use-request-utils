@@ -2405,7 +2405,6 @@ This demonstrates how a server (e.g., Cloudflare Worker, Node.js server) might p
 import _ from 'lodash'; // Assuming lodash for isPlainObject
 import Rpc from 'use-request-utils/rpc';
 import Request from 'use-request-utils/request'; // Your custom Request class if needed
-import util from 'use-request-utils/util';
 import HttpError from 'use-http-error';
 
 // Assume 'this.rpc' is an instantiated Rpc service (e.g., new RootRpc())
@@ -2427,7 +2426,7 @@ async function handleRpcRequest(req: Request /* or standard Request */) {
 		}
 
 		// Safely parse the RPC payload string
-		const rpc = util.safeParse<Rpc.Request>(formRpc);
+		const rpc = Rpc.parseString(formRpc);
 
 		// Validate the parsed payload structure
 		if (!_.isPlainObject(rpc) || typeof rpc.resource !== 'string' || !Array.isArray(rpc.args)) {

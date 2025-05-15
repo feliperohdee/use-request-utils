@@ -109,6 +109,9 @@ class Rpc {
 	static defaultErrorTransformer = defaultErrorTransformer;
 	static defaultResponseHeaders = new Headers();
 	static errorTransformer = defaultErrorTransformer;
+	static parseString(str: string): Rpc.Request {
+		return JSON.parse(str);
+	}
 
 	static restoreErrorTransformer() {
 		Rpc.errorTransformer = Rpc.defaultErrorTransformer;

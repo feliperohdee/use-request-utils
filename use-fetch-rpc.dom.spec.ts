@@ -2,7 +2,6 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCallback, useEffect, useMemo } from 'react';
 import HttpError from 'use-http-error';
-import JSON from 'use-json';
 
 import Request from './request';
 import Rpc from './rpc';
@@ -59,8 +58,8 @@ describe('/use-fetch-rpc', () => {
 		vi.spyOn(global, 'fetch').mockImplementation(async input => {
 			if (input instanceof Request) {
 				const form = await input.formData();
-				const rpcRequest = JSON.parse<Rpc.Request>(form.get('rpc') as string);
 				const rpc = new TestRpc();
+				const rpcRequest = Rpc.parseString(form.get('rpc') as string);
 
 				return rpc.fetch(rpcRequest, input);
 			}
