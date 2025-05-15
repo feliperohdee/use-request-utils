@@ -2009,12 +2009,11 @@ use-http-error@^1.0.6:
   resolved "https://registry.yarnpkg.com/use-http-error/-/use-http-error-1.0.6.tgz#5877e038ab0ae1fec417769b77b2e41031189406"
   integrity sha512-uZf/uFhn1lLlZAyj3HZwjGCENZFPZYGJgkU0ABg7t/+vR8UEKcUDLy7Ws7erw3OT/iIZ26HVL7gszurJq0w3KA==
 
-use-infer@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/use-infer/-/use-infer-1.0.5.tgz#236d4636adefff6e309c1fe6750ae1fd8104b36f"
-  integrity sha512-VXHOOXAZMpVxlrv5AAxuL1jLnR9HTJ1Z7AeXgs+XQ4n6WqiXbO75/jpCss+dMqJeOmmBv+3hs3ALXT4fneSKaA==
+use-infer@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/use-infer/-/use-infer-1.0.7.tgz#85b773930fbf5d88f8c6c51617484b5e53a44a4d"
+  integrity sha512-zTs+tTHyJgPp+NvKlhlUvsLzynY6AeAC+juxb7Vdn28uV5/LMLEsnL/oXVZYobzjt4u1EnDe5V0kkS5cPX4vAQ==
   dependencies:
-    "@types/lodash" "^4.17.14"
     lodash "^4.17.21"
 
 use-json@^1.0.0:
