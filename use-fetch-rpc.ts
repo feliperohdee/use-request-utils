@@ -6,20 +6,19 @@ import useRpc, { UseRpc } from './use-rpc';
 type UseFetchRpcFn<Client extends Rpc, Data, FetchFnArgs extends any[] = any[]> = (
 	rpc: UseRpc<Client>,
 	...args: FetchFnArgs
-) => Promise<Data> | null;
+) => Promise<Data> | null | undefined;
 
 const useFetchRpc = <Client extends Rpc>(requestOptions?: { headers?: Headers; pathname?: string }) => {
 	const rpc = useRpc<Client>(requestOptions);
+	const fetchHook = fetchHookFactory(() => {
+		return rpc;
+	});
+
 	const fetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
 		fetchFn: UseFetchRpcFn<Client, Data, FetchFnArgs>,
 		options: UseFetchOptions<UseRpc<Client>, Data, MappedData> = {}
 	): UseFetchResponse<MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
-		const useFetchHook = fetchHookFactory(() => {
-			return rpc;
-		});
-
-		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useFetchHook(fetchFn, options);
+		return fetchHook(fetchFn, options);
 	};
 
 	const lazyFetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(

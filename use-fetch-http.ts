@@ -2,10 +2,13 @@ import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch
 
 import fetch, { Fetch } from './fetch';
 
-type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (fetch: Fetch.Http, ...args: FetchFnArgs) => Promise<Data> | null;
+type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (
+	fetch: Fetch.Http,
+	...args: FetchFnArgs
+) => Promise<Data> | null | undefined;
 
 const useFetchHttp = () => {
-	const useFetchHook = fetchHookFactory(() => {
+	const fetchHook = fetchHookFactory(() => {
 		return fetch.http;
 	});
 
@@ -13,8 +16,7 @@ const useFetchHttp = () => {
 		fn: UseFetchHttpFn<Data, FetchFnArgs>,
 		options: UseFetchOptions<Fetch.Http, Data, MappedData> = {}
 	): UseFetchResponse<MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
-		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useFetchHook(fn, options);
+		return fetchHook(fn, options);
 	};
 
 	const lazyFetchHttp = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
