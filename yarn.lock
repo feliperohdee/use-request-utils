@@ -2042,10 +2042,10 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-good-hooks@^1.0.24:
-  version "1.0.24"
-  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.24.tgz#c08a04ad4e7dd056d144677f405c5bd16f7d10a1"
-  integrity sha512-0UpSf8hz6jOq4vXbG2j0DiLpdaXTlmLin7fz8ZKCuQLkvNJhT+MnWsVPGIxWOOxfei3JwLrlJMX1Xpihn1fv4g==
+use-good-hooks@^1.0.29:
+  version "1.0.29"
+  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.29.tgz#45a1f2a1c5bbbd48ce5c66ba29134bc7db1c2b0f"
+  integrity sha512-xzs0jo75w07Ju35kzN5+SoUqx4QmVDE6qF3FUgcII8zdcf+PwVLDX4PljRX8CPwDnTBTtmaBIMWzhMmnOZ+8Aw==
   dependencies:
     use-json "^1.0.1"
     use-qs "^1.0.4"
