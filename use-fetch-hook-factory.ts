@@ -21,9 +21,15 @@ type Effect<Client, MappedData> = ({
 }) => void | Promise<void>;
 
 type FetchArgs<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
-type Mapper<Client, Data, MappedData> = ({ client, data }: { client: Client; data: Data }) => MappedData | Promise<MappedData>;
-type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
+type Mapper<Client, Data, MappedData> = ({
+	client,
+	data
+}: {
+	client: Client;
+	data: Data;
+}) => MappedData | null | Promise<MappedData | null>;
 
+type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
 type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
 	abort: () => void;
 	fetch: (...args: FetchArgs<FetchFn>) => Promise<MappedData | null>;
@@ -123,8 +129,8 @@ const map = async <Client, Data, MappedData>({
 	client: Client;
 	data: Data;
 	mapper?: Mapper<Client, Data, MappedData> | null;
-}): Promise<MappedData> => {
-	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData);
+}): Promise<MappedData | null> => {
+	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData | null);
 };
 
 const getUniqueKey = (promise: Promise<any> | null): string => {
