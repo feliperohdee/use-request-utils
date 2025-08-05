@@ -894,6 +894,26 @@ describe('/use-fetch-rpc', () => {
 		});
 	});
 
+	it('should works with setData with null', async () => {
+		const { result } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc((rpc, ...args: any[]) => {
+				return rpc.test(...args);
+			});
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		result.current.setData(null);
+
+		await waitFor(() => {
+			expect(result.current.data).toBeNull();
+		});
+	});
+
 	it('should fetch data at specified interval', async () => {
 		vi.useFakeTimers();
 

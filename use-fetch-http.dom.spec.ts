@@ -847,6 +847,24 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
+	it('should works with setData with null', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher);
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		result.current.setData(null);
+
+		await waitFor(() => {
+			expect(result.current.data).toBeNull();
+		});
+	});
+
 	it('should fetch data at specified interval', async () => {
 		vi.useFakeTimers();
 

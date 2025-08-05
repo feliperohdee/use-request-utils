@@ -42,7 +42,7 @@ type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = Use
 	abort: () => void;
 	fetch: (...args: FetchArgs<FetchFn>) => Promise<MappedData | null>;
 	reset: () => void;
-	setData: (update: MappedData | ((data: MappedData) => MappedData)) => void;
+	setData: (update: MappedData | null | ((data: MappedData) => MappedData | null)) => void;
 	stopInterval: () => void;
 	startInterval: (interval?: number) => void;
 };
@@ -368,7 +368,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			});
 		}, [abort]);
 
-		const setData = useCallback((update: MappedData | ((data: MappedData) => MappedData)) => {
+		const setData = useCallback((update: MappedData | null | ((data: MappedData) => MappedData | null)) => {
 			setState(state => {
 				return {
 					...state,
