@@ -5,7 +5,7 @@ import fetch, { Fetch } from './fetch';
 type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (
 	fetch: Fetch.Http,
 	...args: FetchFnArgs
-) => Promise<Data> | null | undefined;
+) => Data | Promise<Data> | null | undefined;
 
 const useFetchHttp = () => {
 	const fetchHook = fetchHookFactory(() => {

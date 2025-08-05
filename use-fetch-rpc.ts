@@ -6,7 +6,7 @@ import useRpc, { UseRpc } from './use-rpc';
 type UseFetchRpcFn<Client extends Rpc, Data, FetchFnArgs extends any[] = any[]> = (
 	rpc: UseRpc<Client>,
 	...args: FetchFnArgs
-) => Promise<Data> | null | undefined;
+) => Data | Promise<Data> | null | undefined;
 
 const useFetchRpc = <Client extends Rpc>(requestOptions?: { headers?: Headers; pathname?: string }) => {
 	const rpc = useRpc<Client>(requestOptions);

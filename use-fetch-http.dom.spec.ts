@@ -193,7 +193,7 @@ describe('/use-fetch-http', () => {
 			({ deps }) => {
 				const { fetchHttp } = useFetchHttp();
 				const hook = fetchHttp(
-					async () => {
+					() => {
 						mockDeps('fetch', deps);
 						return deps;
 					},
@@ -268,7 +268,8 @@ describe('/use-fetch-http', () => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: { a: 1, args: [] },
-				error: null
+				error: null,
+				prevData: null
 			});
 		});
 	});
@@ -289,16 +290,17 @@ describe('/use-fetch-http', () => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: null,
-				error: expect.any(HttpError)
+				error: expect.any(HttpError),
+				prevData: null
 			});
 		});
 	});
 
 	it('should works with async options.effect', async () => {
 		const mock = vi.fn();
-		const effect = vi.fn(async ({ client, data, error }) => {
+		const effect = vi.fn(async ({ client, data, error, prevData }) => {
 			await util.wait(100);
-			mock({ client, data, error });
+			mock({ client, data, error, prevData });
 		});
 
 		renderHook(() => {
@@ -310,10 +312,11 @@ describe('/use-fetch-http', () => {
 		expect(effect).not.toHaveBeenCalledOnce();
 
 		await waitFor(() => {
-			expect(mock).toHaveBeenCalledWith({
+			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: { a: 1, args: [] },
-				error: null
+				error: null,
+				prevData: null
 			});
 		});
 	});

@@ -198,7 +198,7 @@ describe('/use-fetch-rpc', () => {
 			({ deps }) => {
 				const { fetchRpc } = useFetchRpc<TestRpc>();
 				const hook = fetchRpc(
-					async () => {
+					() => {
 						mockDeps('fetch', deps);
 						return deps;
 					},
@@ -278,7 +278,8 @@ describe('/use-fetch-rpc', () => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: { a: 1, args: [] },
-				error: null
+				error: null,
+				prevData: null
 			});
 		});
 	});
@@ -303,16 +304,17 @@ describe('/use-fetch-rpc', () => {
 			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: null,
-				error: expect.any(HttpError)
+				error: expect.any(HttpError),
+				prevData: null
 			});
 		});
 	});
 
 	it('should works with async options.effect', async () => {
 		const mock = vi.fn();
-		const effect = vi.fn(async ({ client, data, error }) => {
+		const effect = vi.fn(async ({ client, data, error, prevData }) => {
 			await util.wait(100);
-			mock({ client, data, error });
+			mock({ client, data, error, prevData });
 		});
 
 		renderHook(() => {
@@ -329,10 +331,11 @@ describe('/use-fetch-rpc', () => {
 		expect(effect).not.toHaveBeenCalledOnce();
 
 		await waitFor(() => {
-			expect(mock).toHaveBeenCalledWith({
+			expect(effect).toHaveBeenCalledWith({
 				client: expect.anything(),
 				data: { a: 1, args: [] },
-				error: null
+				error: null,
+				prevData: null
 			});
 		});
 	});

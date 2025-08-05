@@ -47,5 +47,5 @@
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
-	"version": "1.0.74"
+	"version": "1.0.75"
 }

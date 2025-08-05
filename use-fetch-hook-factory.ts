@@ -10,23 +10,31 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HttpError from 'use-http-error';
 import useDistinct from 'use-good-hooks/use-distinct';
 
+const isPromise = <T>(value: any): value is Promise<T> => {
+	return value && typeof value.then === 'function';
+};
+
 type Effect<Client, MappedData> = ({
 	client,
 	data,
-	error
+	error,
+	prevData
 }: {
 	client: Client;
 	data: MappedData | null;
 	error: HttpError | null;
+	prevData: MappedData | null;
 }) => void | Promise<void>;
 
 type FetchArgs<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
 type Mapper<Client, Data, MappedData> = ({
 	client,
-	data
+	data,
+	prevData
 }: {
 	client: Client;
 	data: Data;
+	prevData: Data | null;
 }) => MappedData | null | Promise<MappedData | null>;
 
 type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
@@ -108,29 +116,33 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 const effect = async <Client, MappedData>({
 	client,
 	data,
+	effect,
 	error,
-	effect
+	prevData
 }: {
 	client: Client;
 	data: MappedData | null;
-	error: HttpError | null;
 	effect?: Effect<Client, MappedData> | null;
+	error: HttpError | null;
+	prevData: MappedData | null;
 }): Promise<void> => {
 	if (isFunction(effect)) {
-		await effect({ client, data, error });
+		await effect({ client, data, error, prevData });
 	}
 };
 
 const map = async <Client, Data, MappedData>({
 	client,
 	data,
-	mapper
+	mapper,
+	prevData
 }: {
 	client: Client;
 	data: Data;
 	mapper?: Mapper<Client, Data, MappedData> | null;
+	prevData: Data | null;
 }): Promise<MappedData | null> => {
-	return isFunction(mapper) ? mapper({ client, data }) : (data as unknown as MappedData | null);
+	return isFunction(mapper) ? mapper({ client, data, prevData }) : (data as unknown as MappedData | null);
 };
 
 const getUniqueKey = (promise: Promise<any> | null): string => {
@@ -141,10 +153,10 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 	const useFetchHook = <
 		Data,
 		MappedData = Data,
-		FetchFn extends (client: Client, ...args: any[]) => Promise<Data> | null | undefined = (
+		FetchFn extends (client: Client, ...args: any[]) => Data | Promise<Data> | null | undefined = (
 			client: Client,
 			...args: any[]
-		) => Promise<Data> | null | undefined
+		) => Data | Promise<Data> | null | undefined
 	>(
 		fetchFn: FetchFn,
 		options: UseFetchOptions<Client, Data, MappedData> = {}
@@ -161,6 +173,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const initRef = useRef(false);
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
 		const mapperRef = useRef<Mapper<Client, Data, MappedData> | null>(options.mapper ?? null);
+		const prevDataRef = useRef<Data | null>(null);
 		const shouldFetchRef = useRef<ShouldFetch>(options.shouldFetch ?? true);
 		const startTimeRef = useRef<number>(0);
 
@@ -218,7 +231,15 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			});
 
 			try {
-				const promise = fetchFnRef.current(client.current, ...args);
+				const promise = (() => {
+					const r = fetchFnRef.current(client.current, ...args);
+
+					if (isPromise(r)) {
+						return r;
+					}
+
+					return Promise.resolve(r as Data);
+				})();
 
 				if (!promise) {
 					setState(state => {
@@ -248,25 +269,30 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					currentPromiseRef.current = promise;
 				}
 
-				const data = await map({
+				const data = await promise;
+				const mappedData = await map({
 					client: client.current,
-					data: await promise,
-					mapper: mapperRef.current
+					data,
+					mapper: mapperRef.current,
+					prevData: prevDataRef.current
 				});
+				prevDataRef.current = data;
+
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 
 				await effect({
 					client: client.current,
-					data,
+					data: mappedData,
+					effect: effectRef.current,
 					error: null,
-					effect: effectRef.current
+					prevData: state.data
 				});
 
 				currentPromiseRef.current = null;
 				setState(state => {
 					return {
 						...state,
-						data,
+						data: mappedData,
 						error: null,
 						lastFetchDuration: duration,
 						loaded: true,
@@ -275,7 +301,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					};
 				});
 
-				return data;
+				return mappedData;
 			} catch (err) {
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 				const httpError = HttpError.wrap(err as Error);
@@ -294,8 +320,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					await effect({
 						client: client.current,
 						data: null,
+						effect: effectRef.current,
 						error: httpError,
-						effect: effectRef.current
+						prevData: state.data
 					});
 
 					setState(state => {
