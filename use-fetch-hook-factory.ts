@@ -174,6 +174,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
 		const mapperRef = useRef<Mapper<Client, Data, MappedData> | null>(options.mapper ?? null);
 		const prevDataRef = useRef<Data | null>(null);
+		const prevMappedDataRef = useRef<MappedData | null>(null);
 		const shouldFetchRef = useRef<ShouldFetch>(options.shouldFetch ?? true);
 		const startTimeRef = useRef<number>(0);
 
@@ -276,7 +277,6 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					mapper: mapperRef.current,
 					prevData: prevDataRef.current
 				});
-				prevDataRef.current = data;
 
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 
@@ -285,7 +285,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					data: mappedData,
 					effect: effectRef.current,
 					error: null,
-					prevData: state.data
+					prevData: prevMappedDataRef.current
 				});
 
 				currentPromiseRef.current = null;
@@ -300,6 +300,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 						loading: false
 					};
 				});
+
+				prevDataRef.current = data;
+				prevMappedDataRef.current = mappedData;
 
 				return mappedData;
 			} catch (err) {
@@ -322,7 +325,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 						data: null,
 						effect: effectRef.current,
 						error: httpError,
-						prevData: state.data
+						prevData: prevMappedDataRef.current
 					});
 
 					setState(state => {
