@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isBoolean from 'lodash/isBoolean';
 import isFunction from 'lodash/isFunction';
+import isNil from 'lodash/isNil';
 import isNumber from 'lodash/isNumber';
 import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
@@ -14,7 +15,7 @@ const isPromise = <T>(value: any): value is Promise<T> => {
 	return value && typeof value.then === 'function';
 };
 
-type Effect<Client, MappedData> = ({
+type EffectFn<Client, MappedData> = ({
 	client,
 	data,
 	error,
@@ -27,7 +28,7 @@ type Effect<Client, MappedData> = ({
 }) => void | Promise<void>;
 
 type FetchArgs<FetchFn> = FetchFn extends (client: any, ...args: infer FetchFnArgs) => any ? FetchFnArgs : never;
-type Mapper<Client, Data, MappedData> = ({
+type MapperFn<Client, Data, MappedData> = ({
 	client,
 	data,
 	prevData
@@ -60,9 +61,9 @@ type UseFetchState<MappedData> = {
 };
 
 type UseFetchOptions<Client, Data, MappedData> = {
-	effect?: Effect<Client, MappedData>;
+	effect?: EffectFn<Client, MappedData>;
 	ignoreAbort?: boolean;
-	mapper?: Mapper<Client, Data, MappedData>;
+	mapper?: MapperFn<Client, Data, MappedData>;
 	shouldFetch?: ShouldFetch;
 	triggerDeps?: any[];
 	triggerDepsDebounce?: number;
@@ -122,7 +123,7 @@ const effect = async <Client, MappedData>({
 }: {
 	client: Client;
 	data: MappedData | null;
-	effect?: Effect<Client, MappedData> | null;
+	effect?: EffectFn<Client, MappedData> | null;
 	error: HttpError | null;
 	prevData: MappedData | null;
 }): Promise<void> => {
@@ -139,7 +140,7 @@ const map = async <Client, Data, MappedData>({
 }: {
 	client: Client;
 	data: Data;
-	mapper?: Mapper<Client, Data, MappedData> | null;
+	mapper?: MapperFn<Client, Data, MappedData> | null;
 	prevData: Data | null;
 }): Promise<MappedData | null> => {
 	return isFunction(mapper) ? mapper({ client, data, prevData }) : (data as unknown as MappedData | null);
@@ -168,11 +169,11 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		}
 
 		const currentPromiseRef = useRef<Promise<Data> | null>(null);
-		const effectRef = useRef<Effect<Client, MappedData> | null>(options.effect ?? null);
+		const effectRef = useRef<EffectFn<Client, MappedData> | null>(options.effect ?? null);
 		const fetchFnRef = useRef<FetchFn>(fetchFn);
 		const initRef = useRef(false);
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
-		const mapperRef = useRef<Mapper<Client, Data, MappedData> | null>(options.mapper ?? null);
+		const mapperRef = useRef<MapperFn<Client, Data, MappedData> | null>(options.mapper ?? null);
 		const prevDataRef = useRef<Data | null>(null);
 		const prevMappedDataRef = useRef<MappedData | null>(null);
 		const shouldFetchRef = useRef<ShouldFetch>(options.shouldFetch ?? true);
@@ -242,7 +243,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					return Promise.resolve(r as Data);
 				})();
 
-				if (!promise) {
+				if (isNil(promise)) {
 					setState(state => {
 						return {
 							...state,
