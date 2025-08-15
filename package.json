@@ -41,9 +41,9 @@
 	},
 	"scripts": {
 		"build": "rm -rf dist && yarn lint && tsc -p tsconfig.json",
-		"lint": "prettier --write . && tsc && yarn lint-only",
-		"lint-only": "eslint . --report-unused-disable-directives --max-warnings 0",
-		"npm-publish": "yarn test --run && yarn build && yarn version --patch --no-git-tag-version && yarn publish --non-interactive",
+		"lint": "prettier --write . && tsc && yarn lint:only",
+		"lint:only": "eslint . --report-unused-disable-directives --max-warnings 0",
+		"npm:publish": "yarn test --run && yarn build && yarn version --patch --no-git-tag-version && yarn publish --non-interactive",
 		"test": "vitest",
 		"test:coverage": "vitest --coverage"
 	},
