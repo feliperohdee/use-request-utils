@@ -2,10 +2,7 @@ import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch
 
 import fetch, { Fetch } from './fetch';
 
-type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (
-	fetch: Fetch.Http,
-	...args: FetchFnArgs
-) => Data | Promise<Data> | null | undefined;
+type UseFetchHttpFn<Data, FetchFnArgs extends any[] = any[]> = (fetch: Fetch.Http, ...args: FetchFnArgs) => Data | Promise<Data> | null;
 
 const useFetchHttp = () => {
 	const fetchHook = fetchHookFactory(() => {

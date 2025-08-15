@@ -153,10 +153,10 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 	const useFetchHook = <
 		Data,
 		MappedData = Data,
-		FetchFn extends (client: Client, ...args: any[]) => Data | Promise<Data> | null | undefined = (
+		FetchFn extends (client: Client, ...args: any[]) => Data | Promise<Data> | null = (
 			client: Client,
 			...args: any[]
-		) => Data | Promise<Data> | null | undefined
+		) => Data | Promise<Data> | null
 	>(
 		fetchFn: FetchFn,
 		options: UseFetchOptions<Client, Data, MappedData> = {}
