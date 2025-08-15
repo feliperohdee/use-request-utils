@@ -2042,37 +2042,25 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-good-hooks@^1.0.29:
-  version "1.0.29"
-  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.29.tgz#45a1f2a1c5bbbd48ce5c66ba29134bc7db1c2b0f"
-  integrity sha512-xzs0jo75w07Ju35kzN5+SoUqx4QmVDE6qF3FUgcII8zdcf+PwVLDX4PljRX8CPwDnTBTtmaBIMWzhMmnOZ+8Aw==
-  dependencies:
-    use-json "^1.0.1"
-    use-qs "^1.0.4"
+use-good-hooks@^1.0.30:
+  version "1.0.30"
+  resolved "https://registry.yarnpkg.com/use-good-hooks/-/use-good-hooks-1.0.30.tgz#cb222de1f3c13dd555f16ce3785699349b4ba9ad"
+  integrity sha512-uoTA57SFN0sTCMwVGpKgf0o0wAJhDcjtGYRjwADIjKzV8ZuR5AISqy8ihYuB9qU9EKQuGpkr9q+sUIWPUUtbcg==
 
 use-http-error@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/use-http-error/-/use-http-error-1.0.6.tgz#5877e038ab0ae1fec417769b77b2e41031189406"
   integrity sha512-uZf/uFhn1lLlZAyj3HZwjGCENZFPZYGJgkU0ABg7t/+vR8UEKcUDLy7Ws7erw3OT/iIZ26HVL7gszurJq0w3KA==
 
-use-infer@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/use-infer/-/use-infer-1.0.8.tgz#93162b5636c22188d4954b8ce9936b446e485b99"
-  integrity sha512-k+bC/Njdz/tvZWdJRK+rjR5Zecu3KlqXZMXbsOUaKUWSXjQTIgt9lULijeHI5cLxmeXfXiKKFO+8ft7CKcOkrQ==
-  dependencies:
-    lodash "^4.17.21"
+use-infer@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/use-infer/-/use-infer-1.0.9.tgz#4103b4749ca3068cdbd1db1a1777f39bea1a4062"
+  integrity sha512-A1YIt7XKKjkxWbetW4SFNzIvXCdjEJ9adyj2KmmKSvfIsfnGwJrPsqyhzmUjLJrp62l7pIXNNe0QNUGV8O9GUg==
 
 use-json@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/use-json/-/use-json-1.0.1.tgz#c0e6bc5a18976467f96061ab5209c5af08c4111e"
   integrity sha512-wEhCjimTeHeaoMEjU4cmjB44R/fRCajazRKnk19Lw1tiN7TMpdplYvT2orIvVOoYL3gKUQxAHG9eYKzY0R5PxA==
-
-use-qs@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/use-qs/-/use-qs-1.0.4.tgz#8800c04fdbd00abc158b012b23f7925cb57d377c"
-  integrity sha512-LslJ6OEyFJ9/g5su1Bc850iByA6JG4HbXKN9TNM/KyBmWn7Vb6JDYBGe9DlFCZ5YkHuo5uMU84aNVhssOz5y6g==
-  dependencies:
-    lodash "^4.17.21"
 
 vite-node@3.2.0:
   version "3.2.0"
