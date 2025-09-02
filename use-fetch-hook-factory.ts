@@ -242,17 +242,6 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					return Promise.resolve(r as Data);
 				})();
 
-				if (isUndefined(promise)) {
-					setState(state => {
-						return {
-							...state,
-							loading: false
-						};
-					});
-
-					return null;
-				}
-
 				const currentPromise = currentPromiseRef.current || null;
 				const currentPromiseUniqueKey = getUniqueKey(currentPromise);
 				const promiseUniqueKey = getUniqueKey(promise);
