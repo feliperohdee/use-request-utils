@@ -2,7 +2,6 @@ import get from 'lodash/get';
 import isArray from 'lodash/isArray';
 import isBoolean from 'lodash/isBoolean';
 import isFunction from 'lodash/isFunction';
-import isNil from 'lodash/isNil';
 import isNumber from 'lodash/isNumber';
 import isObject from 'lodash/isObject';
 import isUndefined from 'lodash/isUndefined';
@@ -243,7 +242,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					return Promise.resolve(r as Data);
 				})();
 
-				if (isNil(promise)) {
+				if (isUndefined(promise)) {
 					setState(state => {
 						return {
 							...state,
@@ -274,6 +273,13 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				const data = await promise;
 
 				if (isUndefined(data)) {
+					setState(state => {
+						return {
+							...state,
+							loading: false
+						};
+					});
+
 					return null;
 				}
 
