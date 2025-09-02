@@ -272,6 +272,11 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				}
 
 				const data = await promise;
+
+				if (isUndefined(data)) {
+					return null;
+				}
+
 				const mappedData = await map({
 					client: client.current,
 					data,
