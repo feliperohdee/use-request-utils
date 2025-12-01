@@ -2869,8 +2869,26 @@ The `useFetchHttp()` hook returns an object with the following methods:
       - `triggerDeps`: Array of dependencies to trigger the fetch.
       - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
       - `triggerInterval`: Number of milliseconds to trigger the fetch.
-    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
-      - `data`, `error`, `fetchTimes`, `lastFetchDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
+    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods:
+      - **State Fields:**
+        - `data` (`Mapped | null`): The fetched and mapped data.
+        - `error` (`HttpError | null`): Any error that occurred during fetching.
+        - `fetchTimes` (`number`): The number of times a fetch has been initiated.
+        - `lastFetchDuration` (`number`): The duration in milliseconds of the last fetch operation.
+        - `loaded` (`boolean`): Whether data has been successfully loaded at least once.
+        - `loadedTimes` (`number`): The number of times data has been successfully loaded.
+        - `loading` (`boolean`): Whether a fetch is currently in progress.
+        - `resetted` (`boolean`): Whether the state has been reset.
+        - `runningInterval` (`number`): The current interval in milliseconds (0 if no interval is running).
+        - `settled` (`boolean`): Whether `setData()` has been called at least once.
+        - `settledTimes` (`number`): The number of times `setData()` has been called.
+      - **Control Methods:**
+        - `abort()`: Aborts the current fetch operation.
+        - `fetch(...args)`: Manually triggers a fetch with optional arguments.
+        - `reset()`: Resets all state to initial values.
+        - `setData(update)`: Updates the data directly (sets `settled` to `true` and increments `settledTimes`).
+        - `startInterval(interval?)`: Starts interval polling.
+        - `stopInterval()`: Stops interval polling.
 
 2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
@@ -3070,8 +3088,26 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
       - `triggerDeps`: Array of dependencies to trigger the fetch.
       - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
       - `triggerInterval`: Number of milliseconds to trigger the fetch.
-    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods (See details below in Examples/Previous description):
-      - `data`, `error`, `fetchTimes`, `lastFetchDuration`, `loaded`, `loadedTimes`, `loading`, `resetted`, `runningInterval`, `abort()`, `fetch()`, `reset()`, `setData()`, `startInterval()`, `stopInterval()`.
+    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods:
+      - **State Fields:**
+        - `data` (`Mapped | null`): The fetched and mapped data.
+        - `error` (`HttpError | null`): Any error that occurred during fetching.
+        - `fetchTimes` (`number`): The number of times a fetch has been initiated.
+        - `lastFetchDuration` (`number`): The duration in milliseconds of the last fetch operation.
+        - `loaded` (`boolean`): Whether data has been successfully loaded at least once.
+        - `loadedTimes` (`number`): The number of times data has been successfully loaded.
+        - `loading` (`boolean`): Whether a fetch is currently in progress.
+        - `resetted` (`boolean`): Whether the state has been reset.
+        - `runningInterval` (`number`): The current interval in milliseconds (0 if no interval is running).
+        - `settled` (`boolean`): Whether `setData()` has been called at least once.
+        - `settledTimes` (`number`): The number of times `setData()` has been called.
+      - **Control Methods:**
+        - `abort()`: Aborts the current fetch operation.
+        - `fetch(...args)`: Manually triggers a fetch with optional arguments.
+        - `reset()`: Resets all state to initial values.
+        - `setData(update)`: Updates the data directly (sets `settled` to `true` and increments `settledTimes`).
+        - `startInterval(interval?)`: Starts interval polling.
+        - `stopInterval()`: Stops interval polling.
 
 2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**.
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.

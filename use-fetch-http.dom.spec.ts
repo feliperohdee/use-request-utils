@@ -865,6 +865,100 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
+	it('should track settled and settledTimes when setData is called', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher);
+		});
+
+		expect(result.current.settled).toBeFalsy();
+		expect(result.current.settledTimes).toEqual(0);
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		expect(result.current.settled).toBeFalsy();
+		expect(result.current.settledTimes).toEqual(0);
+
+		result.current.setData({ a: 2, args: [] });
+
+		await waitFor(() => {
+			expect(result.current.settled).toBeTruthy();
+			expect(result.current.settledTimes).toEqual(1);
+		});
+
+		result.current.setData(data => {
+			return { ...data!, a: 3 };
+		});
+
+		await waitFor(() => {
+			expect(result.current.settled).toBeTruthy();
+			expect(result.current.settledTimes).toEqual(2);
+		});
+
+		result.current.setData(null);
+
+		await waitFor(() => {
+			expect(result.current.settled).toBeTruthy();
+			expect(result.current.settledTimes).toEqual(3);
+		});
+	});
+
+	it('should not update settled or settledTimes on fetch completion', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher);
+		});
+
+		expect(result.current.settled).toBeFalsy();
+		expect(result.current.settledTimes).toEqual(0);
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		const settledBefore = result.current.settled;
+		const settledTimesBefore = result.current.settledTimes;
+
+		await result.current.fetch();
+
+		await waitFor(() => {
+			expect(result.current.loading).toBeFalsy();
+		});
+
+		expect(result.current.settled).toEqual(settledBefore);
+		expect(result.current.settledTimes).toEqual(settledTimesBefore);
+	});
+
+	it('should reset settled and settledTimes on reset', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher);
+		});
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+
+		result.current.setData({ a: 2, args: [] });
+
+		await waitFor(() => {
+			expect(result.current.settled).toBeTruthy();
+			expect(result.current.settledTimes).toEqual(1);
+		});
+
+		result.current.reset();
+
+		await waitFor(() => {
+			expect(result.current.settled).toBeFalsy();
+			expect(result.current.settledTimes).toEqual(0);
+		});
+	});
+
 	it('should fetch data at specified interval', async () => {
 		vi.useFakeTimers();
 

@@ -57,6 +57,8 @@ type UseFetchState<MappedData> = {
 	loading: boolean;
 	resetted: boolean;
 	runningInterval: number;
+	settled: boolean;
+	settledTimes: number;
 };
 
 type UseFetchOptions<Client, Data, MappedData> = {
@@ -192,7 +194,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			loadedTimes: 0,
 			loading: false,
 			resetted: false,
-			runningInterval: 0
+			runningInterval: 0,
+			settled: false,
+			settledTimes: 0
 		});
 
 		const client = useRef<Client>(null!);
@@ -368,7 +372,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				loadedTimes: 0,
 				loading: false,
 				resetted: true,
-				runningInterval: 0
+				runningInterval: 0,
+				settled: false,
+				settledTimes: 0
 			});
 		}, [abort]);
 
@@ -376,7 +382,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			setState(state => {
 				return {
 					...state,
-					data: isFunction(update) ? update(state.data!) : update
+					data: isFunction(update) ? update(state.data!) : update,
+					settled: true,
+					settledTimes: state.settledTimes + 1
 				};
 			});
 		}, []);
