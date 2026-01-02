@@ -647,8 +647,10 @@ describe('/use-fetch-rpc', () => {
 		const res2 = await promise2;
 		const res3 = await promise3;
 
-		expect(res2).toBeNull();
-		expect(res3).toEqual({ a: 3 });
+		expect(res2.data).toBeNull();
+		expect(res2.error).toBeNull();
+		expect(res3.data).toEqual({ a: 3 });
+		expect(res3.error).toBeNull();
 
 		expect(mock.fn).toHaveBeenCalledTimes(3);
 		expect(mock.abort).toHaveBeenCalledOnce();
@@ -701,8 +703,10 @@ describe('/use-fetch-rpc', () => {
 		const res2 = await promise2;
 		const res3 = await promise3;
 
-		expect(res2).toEqual({ a: 2 });
-		expect(res3).toEqual({ a: 3 });
+		expect(res2.data).toEqual({ a: 2 });
+		expect(res2.error).toBeNull();
+		expect(res3.data).toEqual({ a: 3 });
+		expect(res3.error).toBeNull();
 
 		expect(mock.fn).toHaveBeenCalledTimes(3);
 		expect(mock.abort).not.toHaveBeenCalled();

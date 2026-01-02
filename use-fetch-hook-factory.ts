@@ -40,7 +40,7 @@ type MapperFn<Client, Data, MappedData> = ({
 type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
 type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
 	abort: () => void;
-	fetch: (...args: FetchArgs<FetchFn>) => Promise<MappedData | null>;
+	fetch: (...args: FetchArgs<FetchFn>) => Promise<{ data: MappedData | null; error: HttpError | null }>;
 	reset: () => void;
 	setData: (update: MappedData | null | ((data: MappedData) => MappedData | null)) => void;
 	stopInterval: () => void;
@@ -204,7 +204,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			client.current = clientFactory();
 		}
 
-		const fetchRef = useRef(async (...args: any[]): Promise<MappedData | null> => {
+		const fetchRef = useRef(async (...args: any[]): Promise<{ data: MappedData | null; error: HttpError | null }> => {
 			const shouldFetch = () => {
 				if (isBoolean(shouldFetchRef.current)) {
 					return shouldFetchRef.current;
@@ -221,7 +221,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			};
 
 			if (!shouldFetch()) {
-				return null;
+				return { data: null, error: null };
 			}
 
 			startTimeRef.current = Date.now();
@@ -273,7 +273,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 						};
 					});
 
-					return null;
+					return { data: null, error: null };
 				}
 
 				const mappedData = await map({
@@ -309,7 +309,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 				prevDataRef.current = data;
 				prevMappedDataRef.current = mappedData;
 
-				return mappedData;
+				return { data: mappedData, error: null };
 			} catch (err) {
 				const duration = Math.max(1, Date.now() - startTimeRef.current);
 				const httpError = HttpError.wrap(err as Error);
@@ -322,6 +322,8 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 							loading: false
 						};
 					});
+
+					return { data: null, error: null };
 				} else {
 					currentPromiseRef.current = null;
 
@@ -342,9 +344,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 							resetted: false
 						};
 					});
-				}
 
-				return null;
+					return { data: null, error: httpError };
+				}
 			}
 		});
 
