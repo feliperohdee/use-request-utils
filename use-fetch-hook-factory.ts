@@ -81,6 +81,19 @@ type UseFetchOptions<Client, Data, MappedData> = {
 	triggerInterval?: number;
 };
 
+const INITIAL_STATE: UseFetchState<any> = {
+	data: null,
+	error: null,
+	fetchTimes: 0,
+	lastFetchDuration: 0,
+	loaded: false,
+	loadedTimes: 0,
+	loading: false,
+	resetted: false,
+	runningInterval: 0,
+	settled: false,
+	settledTimes: 0
+};
 const STABLE_ARRAY: any[] = [];
 
 const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Client, Data, MappedData>): void => {
@@ -179,6 +192,9 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			throw new Error('failed to start due to invalid options: ' + (err as Error).message);
 		}
 
+		const [state, setState] = useState<UseFetchState<MappedData>>(INITIAL_STATE);
+
+		const client = useRef<Client>(null!);
 		const currentPromiseRef = useRef<Promise<Data> | null>(null);
 		const effectRef = useRef<EffectFn<Client, MappedData> | null>(options.effect ?? null);
 		const fetchFnRef = useRef<FetchFn>(fetchFn);
@@ -189,30 +205,16 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const prevMappedDataRef = useRef<MappedData | null>(null);
 		const shouldFetchRef = useRef<ShouldFetch<MappedData>>(options.shouldFetch ?? true);
 		const startTimeRef = useRef<number>(0);
+		const stateRef = useRef<UseFetchState<MappedData>>(state);
+
+		if (client.current === null) {
+			client.current = clientFactory();
+		}
 
 		const triggerDeps = useDistinct(options.triggerDeps ?? STABLE_ARRAY, {
 			debounce: Math.max(50, options.triggerDepsDebounce ?? 0),
 			deep: true
 		});
-
-		const [state, setState] = useState<UseFetchState<MappedData>>({
-			data: null,
-			error: null,
-			fetchTimes: 0,
-			lastFetchDuration: 0,
-			loaded: false,
-			loadedTimes: 0,
-			loading: false,
-			resetted: false,
-			runningInterval: 0,
-			settled: false,
-			settledTimes: 0
-		});
-
-		const client = useRef<Client>(null!);
-		if (client.current === null) {
-			client.current = clientFactory();
-		}
 
 		const fetchRef = useRef(async (...args: any[]): Promise<{ data: MappedData | null; error: HttpError | null }> => {
 			const shouldFetch = () => {
@@ -220,12 +222,12 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					return shouldFetchRef.current;
 				} else if (isFunction(shouldFetchRef.current)) {
 					return shouldFetchRef.current({
-						data: state.data ?? null,
+						data: stateRef.current.data,
 						initial: !initRef.current,
-						loaded: state.loaded,
-						loadedTimes: state.loadedTimes,
-						loading: state.loading,
-						prevData: prevMappedDataRef.current ?? null
+						loaded: stateRef.current.loaded,
+						loadedTimes: stateRef.current.loadedTimes,
+						loading: stateRef.current.loading,
+						prevData: prevMappedDataRef.current
 					});
 				}
 
@@ -378,17 +380,8 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const reset = useCallback(() => {
 			abort();
 			setState({
-				data: null,
-				error: null,
-				fetchTimes: 0,
-				lastFetchDuration: 0,
-				loaded: false,
-				loadedTimes: 0,
-				loading: false,
-				resetted: true,
-				runningInterval: 0,
-				settled: false,
-				settledTimes: 0
+				...INITIAL_STATE,
+				resetted: true
 			});
 		}, [abort]);
 
@@ -445,6 +438,11 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			}
 		}, [options.effect]);
 
+		// update fetch fn ref
+		useEffect(() => {
+			fetchFnRef.current = fetchFn;
+		}, [fetchFn]);
+
 		// update mapper ref
 		useEffect(() => {
 			if (!isUndefined(options.mapper)) {
@@ -459,10 +457,10 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			}
 		}, [options.shouldFetch]);
 
-		// update fetch fn ref
+		// update state ref
 		useEffect(() => {
-			fetchFnRef.current = fetchFn;
-		}, [fetchFn]);
+			stateRef.current = state;
+		}, [state]);
 
 		// trigger based on triggerDeps
 		useEffect(() => {
