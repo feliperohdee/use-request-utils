@@ -37,7 +37,17 @@ type MapperFn<Client, Data, MappedData> = ({
 	prevData: Data | null;
 }) => MappedData | null | Promise<MappedData | null>;
 
-type ShouldFetch = boolean | ((args: { initial: boolean; loaded: boolean; loadedTimes: number; loading: boolean }) => boolean);
+type ShouldFetch<MappedData> =
+	| boolean
+	| ((args: {
+			data: MappedData | null;
+			initial: boolean;
+			loaded: boolean;
+			loadedTimes: number;
+			loading: boolean;
+			prevData: MappedData | null;
+	  }) => boolean);
+
 type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
 	abort: () => void;
 	fetch: (...args: FetchArgs<FetchFn>) => Promise<{ data: MappedData | null; error: HttpError | null }>;
@@ -65,7 +75,7 @@ type UseFetchOptions<Client, Data, MappedData> = {
 	effect?: EffectFn<Client, MappedData>;
 	ignoreAbort?: boolean;
 	mapper?: MapperFn<Client, Data, MappedData>;
-	shouldFetch?: ShouldFetch;
+	shouldFetch?: ShouldFetch<MappedData>;
 	triggerDeps?: any[];
 	triggerDepsDebounce?: number;
 	triggerInterval?: number;
@@ -177,7 +187,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const mapperRef = useRef<MapperFn<Client, Data, MappedData> | null>(options.mapper ?? null);
 		const prevDataRef = useRef<Data | null>(null);
 		const prevMappedDataRef = useRef<MappedData | null>(null);
-		const shouldFetchRef = useRef<ShouldFetch>(options.shouldFetch ?? true);
+		const shouldFetchRef = useRef<ShouldFetch<MappedData>>(options.shouldFetch ?? true);
 		const startTimeRef = useRef<number>(0);
 
 		const triggerDeps = useDistinct(options.triggerDeps ?? STABLE_ARRAY, {
@@ -210,10 +220,12 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 					return shouldFetchRef.current;
 				} else if (isFunction(shouldFetchRef.current)) {
 					return shouldFetchRef.current({
+						data: state.data ?? null,
 						initial: !initRef.current,
 						loaded: state.loaded,
 						loadedTimes: state.loadedTimes,
-						loading: state.loading
+						loading: state.loading,
+						prevData: prevMappedDataRef.current ?? null
 					});
 				}
 

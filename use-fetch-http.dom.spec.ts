@@ -549,10 +549,12 @@ describe('/use-fetch-http', () => {
 
 		expect(mock).not.toHaveBeenCalled();
 		expect(shouldFetch).toHaveBeenCalledWith({
+			data: null,
 			initial: true,
 			loaded: false,
 			loadedTimes: 0,
-			loading: false
+			loading: false,
+			prevData: null
 		});
 
 		expect(result.current.data).toBeNull();
