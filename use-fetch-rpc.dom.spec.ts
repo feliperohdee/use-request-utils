@@ -140,7 +140,7 @@ describe('/use-fetch-rpc', () => {
 			throw new Error('Expected to throw');
 		} catch (err) {
 			expect((err as Error).message).toEqual(
-				'failed to start due to invalid options: The "triggerInterval" property must be a number greater than 500'
+				'failed to start due to invalid options: The "triggerInterval" property must be a number equal to or greater than 500, or 0 to disable'
 			);
 		}
 	});
@@ -156,9 +156,69 @@ describe('/use-fetch-rpc', () => {
 			throw new Error('Expected to throw');
 		} catch (err) {
 			expect((err as Error).message).toEqual(
-				'failed to start due to invalid options: The "triggerInterval" property must be a number greater than 500'
+				'failed to start due to invalid options: The "triggerInterval" property must be a number equal to or greater than 500, or 0 to disable'
 			);
 		}
+	});
+
+	it('should not throw if options.triggerInterval is 0', async () => {
+		vi.useFakeTimers();
+
+		const mock = vi.fn();
+		const { result } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(
+				(rpc, ...args: any[]) => {
+					mock();
+					return rpc.test(...args);
+				},
+				{ triggerInterval: 0 }
+			);
+		});
+
+		expect(mock).toHaveBeenCalledOnce();
+
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
+		expect(mock).toHaveBeenCalledOnce();
+
+		vi.useRealTimers();
+
+		await waitFor(() => {
+			expect(result.current.runningInterval).toEqual(0);
+		});
+	});
+
+	it('should not throw if options.triggerInterval is negative', async () => {
+		vi.useFakeTimers();
+
+		const mock = vi.fn();
+		const { result } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(
+				(rpc, ...args: any[]) => {
+					mock();
+					return rpc.test(...args);
+				},
+				{ triggerInterval: -1 }
+			);
+		});
+
+		expect(mock).toHaveBeenCalledOnce();
+
+		act(() => {
+			vi.advanceTimersByTime(1000);
+		});
+		expect(mock).toHaveBeenCalledOnce();
+
+		vi.useRealTimers();
+
+		await waitFor(() => {
+			expect(result.current.runningInterval).toEqual(0);
+		});
 	});
 
 	it('should works', async () => {

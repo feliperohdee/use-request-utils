@@ -132,8 +132,8 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 	}
 
 	if ('triggerInterval' in options && !isUndefined(options.triggerInterval)) {
-		if (!isNumber(options.triggerInterval) || options.triggerInterval < 500) {
-			throw new Error('The "triggerInterval" property must be a number greater than 500');
+		if (!isNumber(options.triggerInterval) || (options.triggerInterval > 0 && options.triggerInterval < 500)) {
+			throw new Error('The "triggerInterval" property must be a number equal to or greater than 500, or 0 to disable');
 		}
 	}
 };
