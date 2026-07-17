@@ -127,15 +127,14 @@ class AuthJwt {
 		let headers = new Headers();
 
 		if (this.options.cookie) {
-			if (isString(this.options.cookie)) {
-				headers = cookies.set(headers, this.options.cookie, '', { expires: new Date(0), maxAge: 0, path: '/' });
-			} else if (this.options.cookie.secret) {
-				headers = await cookies.setSigned(headers, this.options.cookie.name, '', this.options.cookie.secret, {
-					...this.options.cookie.options,
-					expires: new Date(0),
-					maxAge: 0
-				});
-			}
+			const name = isString(this.options.cookie) ? this.options.cookie : this.options.cookie.name;
+			const options = isString(this.options.cookie) ? { path: '/' } : this.options.cookie.options;
+
+			headers = cookies.set(headers, name, '', {
+				...options,
+				expires: new Date(0),
+				maxAge: 0
+			});
 		}
 
 		return { headers, payload: {} };

@@ -395,6 +395,46 @@ describe('/authJwt', () => {
 			expect(headers.get('set-cookie')).toEqual('token=; Max-Age=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 			expect(payload).toEqual({});
 		});
+
+		it('should clear an object cookie without a secret, preserving its attributes', async () => {
+			auth = new AuthJwt({
+				cookie: {
+					name: 'token',
+					options: { httpOnly: true, path: '/', sameSite: 'strict', secure: true }
+				},
+				secret: 'secret'
+			});
+
+			const { headers, payload } = await auth.destroy();
+			const cookie = headers.get('set-cookie') || '';
+
+			expect(cookie).toContain('token=;');
+			expect(cookie).toContain('Max-Age=0');
+			expect(cookie).toContain('Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+			expect(cookie).toContain('HttpOnly');
+			expect(cookie).toContain('Secure');
+			expect(cookie).toContain('SameSite=Strict');
+			expect(payload).toEqual({});
+		});
+
+		it('should clear an object cookie with a secret', async () => {
+			auth = new AuthJwt({
+				cookie: {
+					name: 'token',
+					options: { path: '/' },
+					secret: 'cookie-secret'
+				},
+				secret: 'secret'
+			});
+
+			const { headers, payload } = await auth.destroy();
+			const cookie = headers.get('set-cookie') || '';
+
+			expect(cookie).toContain('token=;');
+			expect(cookie).toContain('Max-Age=0');
+			expect(cookie).toContain('Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+			expect(payload).toEqual({});
+		});
 	});
 
 	describe('sign', () => {
