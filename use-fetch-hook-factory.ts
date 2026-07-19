@@ -48,14 +48,26 @@ type ShouldFetch<MappedData> =
 			prevData: MappedData | null;
 	  }) => boolean);
 
-type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> & {
+type UseFetchActions<MappedData, FetchFn extends (...args: any[]) => any> = {
 	abort: () => void;
 	fetch: (...args: FetchArgs<FetchFn>) => Promise<{ data: MappedData | null; error: HttpError | null }>;
 	reset: () => void;
 	setData: (update: MappedData | null | ((data: MappedData) => MappedData | null)) => void;
-	stopInterval: () => void;
 	startInterval: (interval?: number) => void;
+	stopInterval: () => void;
 };
+
+type UseFetchResponse<MappedData, FetchFn extends (...args: any[]) => any> = UseFetchState<MappedData> &
+	UseFetchActions<MappedData, FetchFn>;
+
+type UseFetchTupleResponse<MappedData, FetchFn extends (...args: any[]) => any> = [
+	UseFetchState<MappedData>,
+	UseFetchActions<MappedData, FetchFn>
+];
+
+type UseFetchReturn<Options, MappedData, FetchFn extends (...args: any[]) => any> = Options extends { tuple: true }
+	? UseFetchTupleResponse<MappedData, FetchFn>
+	: UseFetchResponse<MappedData, FetchFn>;
 
 type UseFetchState<MappedData> = {
 	data: MappedData | null;
@@ -79,6 +91,7 @@ type UseFetchOptions<Client, Data, MappedData> = {
 	triggerDeps?: any[];
 	triggerDepsDebounce?: number;
 	triggerInterval?: number;
+	tuple?: boolean;
 };
 
 const INITIAL_STATE: UseFetchState<any> = {
@@ -136,6 +149,12 @@ const validateOptions = <Client, Data, MappedData>(options: UseFetchOptions<Clie
 			throw new Error('The "triggerInterval" property must be a number equal to or greater than 500, or 0 to disable');
 		}
 	}
+
+	if ('tuple' in options && !isUndefined(options.tuple)) {
+		if (!isBoolean(options.tuple)) {
+			throw new Error('The "tuple" property must be a boolean');
+		}
+	}
 };
 
 const effect = async <Client, MappedData>({
@@ -181,11 +200,12 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		FetchFn extends (client: Client, ...args: any[]) => Data | Promise<Data> | null = (
 			client: Client,
 			...args: any[]
-		) => Data | Promise<Data> | null
+		) => Data | Promise<Data> | null,
+		Options extends UseFetchOptions<Client, Data, MappedData> = UseFetchOptions<Client, Data, MappedData>
 	>(
 		fetchFn: FetchFn,
-		options: UseFetchOptions<Client, Data, MappedData> = {}
-	): UseFetchResponse<MappedData, FetchFn> => {
+		options: Options = {} as Options
+	): UseFetchReturn<Options, MappedData, FetchFn> => {
 		try {
 			validateOptions<Client, Data, MappedData>(options);
 		} catch (err) {
@@ -511,19 +531,28 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			return fetchRef.current;
 		}, []);
 
-		return {
-			...state,
-			abort,
-			fetch: stableFetch,
-			reset,
-			setData,
-			stopInterval,
-			startInterval
-		};
+		const actions = useMemo(() => {
+			const value: UseFetchActions<MappedData, FetchFn> = {
+				abort,
+				fetch: stableFetch,
+				reset,
+				setData,
+				startInterval,
+				stopInterval
+			};
+
+			return value;
+		}, [abort, reset, setData, stableFetch, startInterval, stopInterval]);
+
+		const response: UseFetchReturn<Options, MappedData, FetchFn> = (
+			options.tuple ? [state, actions] : { ...state, ...actions }
+		) as UseFetchReturn<Options, MappedData, FetchFn>;
+
+		return response;
 	};
 
 	return useFetchHook;
 };
 
-export type { UseFetchResponse, UseFetchOptions };
+export type { UseFetchActions, UseFetchOptions, UseFetchResponse, UseFetchReturn, UseFetchTupleResponse };
 export default fetchHookFactory;

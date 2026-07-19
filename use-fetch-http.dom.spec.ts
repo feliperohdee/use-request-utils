@@ -218,6 +218,21 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
+	it('should throw if options.tuple is not a boolean', () => {
+		try {
+			renderHook(() => {
+				const { fetchHttp } = useFetchHttp();
+
+				// @ts-expect-error
+				fetchHttp(() => null, { tuple: 'not-a-boolean' });
+			});
+
+			throw new Error('Expected to throw');
+		} catch (err) {
+			expect((err as Error).message).toEqual('failed to start due to invalid options: The "tuple" property must be a boolean');
+		}
+	});
+
 	it('should works', async () => {
 		const { result } = renderHook(() => {
 			const { fetchHttp } = useFetchHttp();
@@ -885,6 +900,31 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
+	it('should return a tuple from lazyFetchHttp when options.tuple is true', async () => {
+		const { result } = renderHook(() => {
+			const { lazyFetchHttp } = useFetchHttp();
+
+			return lazyFetchHttp(
+				(fetch: Fetch.Http, arg1: string, arg2: string) => {
+					return fetcher(fetch, arg1, arg2);
+				},
+				{ tuple: true }
+			);
+		});
+
+		expect(result.current).toBeInstanceOf(Array);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].loading).toBeFalsy();
+		expect(result.current[1].fetch).toBeTypeOf('function');
+
+		await result.current[1].fetch('test1', 'test2');
+
+		await waitFor(() => {
+			expect(result.current[0].data).toEqual({ a: 1, args: ['test1', 'test2'] });
+			expect(result.current[0].loaded).toBeTruthy();
+		});
+	});
+
 	it('should works with setData', async () => {
 		const { result } = renderHook(() => {
 			const { fetchHttp } = useFetchHttp();
@@ -1099,5 +1139,92 @@ describe('/use-fetch-http', () => {
 		await waitFor(() => {
 			expect(result.current.runningInterval).toEqual(0);
 		});
+	});
+
+	it('should return an object (not a tuple) by default', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher);
+		});
+
+		expect(result.current).not.toBeInstanceOf(Array);
+		expect(result.current.data).toBeNull();
+		expect(result.current.fetch).toBeTypeOf('function');
+
+		await waitFor(() => {
+			expect(result.current.data).toEqual({ a: 1, args: [] });
+		});
+	});
+
+	it('should return a tuple when options.tuple is true', async () => {
+		const { result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher, { tuple: true });
+		});
+
+		expect(result.current).toBeInstanceOf(Array);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].loading).toBeTruthy();
+		// @ts-expect-error fetch lives on actions (index 1), never on the state slice (index 0)
+		expect(result.current[0].fetch).toBeUndefined();
+		expect(result.current[1].abort).toBeTypeOf('function');
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[1].setData).toBeTypeOf('function');
+		expect(result.current[1].startInterval).toBeTypeOf('function');
+		expect(result.current[1].stopInterval).toBeTypeOf('function');
+
+		await waitFor(() => {
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loading).toBeFalsy();
+		});
+	});
+
+	it('should keep tuple actions stable across renders', async () => {
+		const { rerender, result } = renderHook(() => {
+			const { fetchHttp } = useFetchHttp();
+
+			return fetchHttp(fetcher, { tuple: true });
+		});
+
+		const firstActions = result.current[1];
+		const firstFetch = result.current[1].fetch;
+
+		await waitFor(() => {
+			expect(result.current[0].loaded).toBeTruthy();
+		});
+
+		rerender();
+
+		expect(result.current[1]).toBe(firstActions);
+		expect(result.current[1].fetch).toBe(firstFetch);
+	});
+
+	it('should recreate tuple actions when triggerInterval changes while keeping fetch stable', async () => {
+		const { rerender, result } = renderHook(
+			({ triggerInterval }) => {
+				const { fetchHttp } = useFetchHttp();
+
+				return fetchHttp(fetcher, { triggerInterval, tuple: true });
+			},
+			{ initialProps: { triggerInterval: 0 } }
+		);
+
+		const firstActions = result.current[1];
+		const firstFetch = result.current[1].fetch;
+
+		await waitFor(() => {
+			expect(result.current[0].loaded).toBeTruthy();
+		});
+
+		// changing triggerInterval recreates startInterval (its dependency), so the actions
+		// object re-identifies — but the memoized fetch reference stays stable
+		rerender({ triggerInterval: -1 });
+
+		expect(result.current[1]).not.toBe(firstActions);
+		expect(result.current[1].fetch).toBe(firstFetch);
 	});
 });

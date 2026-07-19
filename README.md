@@ -2893,11 +2893,28 @@ The `useFetchHttp()` hook returns an object with the following methods:
 2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
     - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchHttpfetch`.
-    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'>`, optional)**:
       - `effect`: Function to execute when the data is fetched. Receives the `fetch.http` instance and the fetched data.
       - `ignoreAbort`: Whether to ignore the abort signal.
       - `mapper`: Function to map the fetched data. Receives the `fetch.http` instance and the fetched data.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
+
+#### Optional tuple return (`{ tuple: true }`)
+
+By default the fetch functions return a single object mixing state and actions. Pass `{ tuple: true }` to get a `[state, actions]` tuple instead — the state object holds only data/flags, and `actions` is a stable object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`). This mirrors the `useState` ergonomics and lets you name both sides:
+
+```tsx
+const { fetchHttp, lazyFetchHttp } = useFetchHttp();
+
+// default (object) — unchanged, fully backward compatible:
+const { data, fetch, loading } = fetchHttp(getUser);
+
+// tuple:
+const [user, userActions] = fetchHttp(getUser, { tuple: true });
+const [{ data }, { fetch }] = lazyFetchHttp(searchUsers, { tuple: true });
+```
+
+The `actions` object is memoized, so it (and every function on it) is stable across renders — as long as `triggerInterval` doesn't change — and safe to list in `useEffect` / `useCallback` dependency arrays. Pass `{ tuple: true }` inline at the call site (not via a pre-declared variable) so TypeScript infers the tuple return type.
 
 #### Usage Examples
 
@@ -3112,11 +3129,28 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
 2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**.
     - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
     - **`fn` (`(rpc: RpcInstance, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchRpc`.
-    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'>`, optional)**:
       - `effect`: Function to execute when the data is fetched. Receives the `rpcProxy` instance and the fetched data.
       - `ignoreAbort`: Whether to ignore the abort signal.
       - `mapper`: Function to map the fetched data. Receives the `rpcProxy` instance and the fetched data.
     - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
+
+#### Optional tuple return (`{ tuple: true }`)
+
+Pass `{ tuple: true }` to `fetchRpc` / `lazyFetchRpc` to receive a `[state, actions]` tuple instead of the default object. `state` holds only data/flags; `actions` is a stable, memoized object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`).
+
+```tsx
+const { fetchRpc, lazyFetchRpc } = useFetchRpc<MyRpcService>();
+
+// default (object) — unchanged:
+const { data, fetch } = fetchRpc(rpc => rpc.getUser());
+
+// tuple:
+const [users, usersActions] = fetchRpc(rpc => rpc.listUsers(), { tuple: true });
+const [{ data }, { fetch }] = lazyFetchRpc((rpc, id: string) => rpc.getUser(id), { tuple: true });
+```
+
+The `actions` object is memoized and stable across renders (as long as `triggerInterval` doesn't change). Pass `{ tuple: true }` inline at the call site so TypeScript infers the tuple return type.
 
 #### Usage Examples
 

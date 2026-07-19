@@ -1,4 +1,4 @@
-import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch-hook-factory';
+import fetchHookFactory, { UseFetchOptions, UseFetchReturn } from './use-fetch-hook-factory';
 
 import fetch, { Fetch } from './fetch';
 
@@ -9,26 +9,42 @@ const useFetchHttp = () => {
 		return fetch.http;
 	});
 
-	const fetchHttp = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+	const fetchHttp = <
+		Data,
+		MappedData = Data,
+		FetchFnArgs extends any[] = any[],
+		const Options extends UseFetchOptions<Fetch.Http, Data, MappedData> = UseFetchOptions<Fetch.Http, Data, MappedData>
+	>(
 		fn: UseFetchHttpFn<Data, FetchFnArgs>,
-		options: UseFetchOptions<Fetch.Http, Data, MappedData> = {}
-	): UseFetchResponse<MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
-		return fetchHook(fn, options);
+		options: Options = {} as Options
+	): UseFetchReturn<Options, MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
+		return fetchHook<Data, MappedData, UseFetchHttpFn<Data, FetchFnArgs>, Options>(fn, options);
 	};
 
-	const lazyFetchHttp = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
+	const lazyFetchHttp = <
+		Data,
+		MappedData = Data,
+		FetchFnArgs extends any[] = any[],
+		const Options extends Pick<UseFetchOptions<Fetch.Http, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'> = Pick<
+			UseFetchOptions<Fetch.Http, Data, MappedData>,
+			'effect' | 'ignoreAbort' | 'mapper' | 'tuple'
+		>
+	>(
 		fn: UseFetchHttpFn<Data, FetchFnArgs>,
-		options?: Pick<UseFetchOptions<Fetch.Http, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper'>
-	): UseFetchResponse<MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
-		return fetchHttp(fn, {
+		options?: Options
+	): UseFetchReturn<Options, MappedData, UseFetchHttpFn<Data, FetchFnArgs>> => {
+		const response: UseFetchReturn<Options, MappedData, UseFetchHttpFn<Data, FetchFnArgs>> = fetchHttp<Data, MappedData, FetchFnArgs>(fn, {
 			effect: options?.effect,
 			ignoreAbort: options?.ignoreAbort || false,
 			mapper: options?.mapper,
 			shouldFetch: ({ initial }) => {
 				return !initial;
 			},
-			triggerDeps: []
-		});
+			triggerDeps: [],
+			tuple: options?.tuple
+		}) as UseFetchReturn<Options, MappedData, UseFetchHttpFn<Data, FetchFnArgs>>;
+
+		return response;
 	};
 
 	return { fetchHttp, lazyFetchHttp };
