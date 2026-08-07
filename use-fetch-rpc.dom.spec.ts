@@ -187,7 +187,7 @@ describe('/use-fetch-rpc', () => {
 		vi.useRealTimers();
 
 		await waitFor(() => {
-			expect(result.current.runningInterval).toEqual(0);
+			expect(result.current[0].runningInterval).toEqual(0);
 		});
 	});
 
@@ -217,23 +217,8 @@ describe('/use-fetch-rpc', () => {
 		vi.useRealTimers();
 
 		await waitFor(() => {
-			expect(result.current.runningInterval).toEqual(0);
+			expect(result.current[0].runningInterval).toEqual(0);
 		});
-	});
-
-	it('should throw if options.tuple is not a boolean', () => {
-		try {
-			renderHook(() => {
-				const { fetchRpc } = useFetchRpc<TestRpc>();
-
-				// @ts-expect-error
-				fetchRpc(() => null, { tuple: 'not-a-boolean' });
-			});
-
-			throw new Error('Expected to throw');
-		} catch (err) {
-			expect((err as Error).message).toEqual('failed to start due to invalid options: The "tuple" property must be a boolean');
-		}
 	});
 
 	it('should works', async () => {
@@ -245,25 +230,25 @@ describe('/use-fetch-rpc', () => {
 			});
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -293,7 +278,7 @@ describe('/use-fetch-rpc', () => {
 				);
 
 				const stableFetch1 = useMemo(() => {
-					return hook.fetch;
+					return hook[1].fetch;
 				}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 				const stableFetch2 = useCallback(() => {
@@ -314,7 +299,7 @@ describe('/use-fetch-rpc', () => {
 		);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual([1, 2]);
+			expect(result.current[0].data).toEqual([1, 2]);
 			expect(mockDeps).toHaveBeenCalledWith('fetch', [1, 2]);
 			expect(mockDeps).toHaveBeenCalledWith('effect', [1, 2]);
 			expect(mockDeps).toHaveBeenCalledWith('mapper', [1, 2]);
@@ -325,7 +310,7 @@ describe('/use-fetch-rpc', () => {
 		rerender({ deps: [3, 4] });
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual([3, 4]);
+			expect(result.current[0].data).toEqual([3, 4]);
 			expect(mockDeps).toHaveBeenCalledWith('fetch', [3, 4]);
 			expect(mockDeps).toHaveBeenCalledWith('effect', [3, 4]);
 			expect(mockDeps).toHaveBeenCalledWith('mapper', [3, 4]);
@@ -431,25 +416,25 @@ describe('/use-fetch-rpc', () => {
 			);
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, a1: 1, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1, a1: 1, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -470,25 +455,25 @@ describe('/use-fetch-rpc', () => {
 			);
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, a1: 1, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1, a1: 1, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -529,25 +514,25 @@ describe('/use-fetch-rpc', () => {
 		expect(mock).toHaveBeenCalledTimes(2);
 		vi.useRealTimers();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(2);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(2);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 2, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(2);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 2, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(2);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(2);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -597,25 +582,25 @@ describe('/use-fetch-rpc', () => {
 		expect(mock).toHaveBeenCalledTimes(2);
 		vi.useRealTimers();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(2);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(2);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 2, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(2);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(2);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 2, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(2);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(2);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -637,15 +622,15 @@ describe('/use-fetch-rpc', () => {
 
 		expect(mock).not.toHaveBeenCalled();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(0);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(0);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 	});
 
 	it('should works with options.shouldFetch = () => false', async () => {
@@ -675,16 +660,16 @@ describe('/use-fetch-rpc', () => {
 			prevData: null
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(0);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeFalsy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(0);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeFalsy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 	});
 
 	it('should abort previous promises on subsequent calls with different promises', async () => {
@@ -698,29 +683,29 @@ describe('/use-fetch-rpc', () => {
 		expect(mock.fn).toHaveBeenCalledOnce();
 		expect(mock.abort).not.toHaveBeenCalled();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 
-		const promise2 = result.current.fetch(2);
-		const promise3 = result.current.fetch(3);
+		const promise2 = result.current[1].fetch(2);
+		const promise3 = result.current[1].fetch(3);
 		const res2 = await promise2;
 		const res3 = await promise3;
 
@@ -733,13 +718,13 @@ describe('/use-fetch-rpc', () => {
 		expect(mock.abort).toHaveBeenCalledOnce();
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 3 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(3);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(2);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 3 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(3);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(2);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -754,29 +739,29 @@ describe('/use-fetch-rpc', () => {
 		expect(mock.fn).toHaveBeenCalledOnce();
 		expect(mock.abort).not.toHaveBeenCalled();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 
-		const promise2 = result.current.fetch(2);
-		const promise3 = result.current.fetch(3);
+		const promise2 = result.current[1].fetch(2);
+		const promise3 = result.current[1].fetch(3);
 		const res2 = await promise2;
 		const res3 = await promise3;
 
@@ -789,13 +774,13 @@ describe('/use-fetch-rpc', () => {
 		expect(mock.abort).not.toHaveBeenCalled();
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 3 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(3);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(3);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 3 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(3);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(3);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -810,40 +795,40 @@ describe('/use-fetch-rpc', () => {
 		expect(mock.fn).toHaveBeenCalledOnce();
 		expect(mock.abort).not.toHaveBeenCalled();
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 
-		result.current.fetch(2);
-		result.current.abort();
+		result.current[1].fetch(2);
+		result.current[1].abort();
 
 		expect(mock.abort).toHaveBeenCalledOnce();
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1 });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toEqual({ a: 1 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -857,27 +842,27 @@ describe('/use-fetch-rpc', () => {
 		});
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
-			expect(result.current.runningInterval).toEqual(0);
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
+			expect(result.current[0].runningInterval).toEqual(0);
 		});
 
-		result.current.reset();
+		result.current[1].reset();
 
 		await waitFor(() => {
-			expect(result.current.data).toBeNull();
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(0);
-			expect(result.current.lastFetchDuration).toEqual(0);
-			expect(result.current.loaded).toBeFalsy();
-			expect(result.current.loadedTimes).toEqual(0);
-			expect(result.current.loading).toBeFalsy();
-			expect(result.current.runningInterval).toEqual(0);
+			expect(result.current[0].data).toBeNull();
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(0);
+			expect(result.current[0].lastFetchDuration).toEqual(0);
+			expect(result.current[0].loaded).toBeFalsy();
+			expect(result.current[0].loadedTimes).toEqual(0);
+			expect(result.current[0].loading).toBeFalsy();
+			expect(result.current[0].runningInterval).toEqual(0);
 		});
 	});
 
@@ -890,25 +875,25 @@ describe('/use-fetch-rpc', () => {
 			});
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(1);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeTruthy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
+		expect(result.current[0].data).toBeNull();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(1);
+		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeTruthy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toBeNull();
-			expect(result.current.error).toBeInstanceOf(HttpError);
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeFalsy();
-			expect(result.current.loadedTimes).toEqual(0);
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].data).toBeNull();
+			expect(result.current[0].error).toBeInstanceOf(HttpError);
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
+			expect(result.current[0].loaded).toBeFalsy();
+			expect(result.current[0].loadedTimes).toEqual(0);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -921,52 +906,27 @@ describe('/use-fetch-rpc', () => {
 			});
 		});
 
-		expect(result.current.data).toBeNull();
-		expect(result.current.error).toBeNull();
-		expect(result.current.fetchTimes).toEqual(0);
-		expect(result.current.fetch).toBeTypeOf('function');
-		expect(result.current.lastFetchDuration).toEqual(0);
-		expect(result.current.loaded).toBeFalsy();
-		expect(result.current.loadedTimes).toEqual(0);
-		expect(result.current.loading).toBeFalsy();
-		expect(result.current.reset).toBeTypeOf('function');
-		expect(result.current.runningInterval).toEqual(0);
-
-		await result.current.fetch('test1', 'test2');
-
-		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: ['test1', 'test2'] });
-			expect(result.current.error).toBeNull();
-			expect(result.current.fetchTimes).toEqual(1);
-			expect(result.current.lastFetchDuration).toBeGreaterThan(0);
-			expect(result.current.loaded).toBeTruthy();
-			expect(result.current.loadedTimes).toEqual(1);
-			expect(result.current.loading).toBeFalsy();
-		});
-	});
-
-	it('should return a tuple from lazyFetchRpc when options.tuple is true', async () => {
-		const { result } = renderHook(() => {
-			const { lazyFetchRpc } = useFetchRpc<TestRpc>();
-
-			return lazyFetchRpc(
-				(rpc, arg1: string, arg2: string) => {
-					return rpc.test(arg1, arg2);
-				},
-				{ tuple: true }
-			);
-		});
-
-		expect(result.current).toBeInstanceOf(Array);
 		expect(result.current[0].data).toBeNull();
-		expect(result.current[0].loading).toBeFalsy();
+		expect(result.current[0].error).toBeNull();
+		expect(result.current[0].fetchTimes).toEqual(0);
 		expect(result.current[1].fetch).toBeTypeOf('function');
+		expect(result.current[0].lastFetchDuration).toEqual(0);
+		expect(result.current[0].loaded).toBeFalsy();
+		expect(result.current[0].loadedTimes).toEqual(0);
+		expect(result.current[0].loading).toBeFalsy();
+		expect(result.current[1].reset).toBeTypeOf('function');
+		expect(result.current[0].runningInterval).toEqual(0);
 
 		await result.current[1].fetch('test1', 'test2');
 
 		await waitFor(() => {
 			expect(result.current[0].data).toEqual({ a: 1, args: ['test1', 'test2'] });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].fetchTimes).toEqual(1);
+			expect(result.current[0].lastFetchDuration).toBeGreaterThan(0);
 			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loadedTimes).toEqual(1);
+			expect(result.current[0].loading).toBeFalsy();
 		});
 	});
 
@@ -980,23 +940,23 @@ describe('/use-fetch-rpc', () => {
 		});
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
 		});
 
-		result.current.setData({ a: 2, args: [] });
+		result.current[1].setData({ a: 2, args: [] });
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 2, args: [] });
+			expect(result.current[0].data).toEqual({ a: 2, args: [] });
 		});
 
-		result.current.setData(data => {
+		result.current[1].setData(data => {
 			data.a += 1;
 
 			return data;
 		});
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 3, args: [] });
+			expect(result.current[0].data).toEqual({ a: 3, args: [] });
 		});
 	});
 
@@ -1010,13 +970,13 @@ describe('/use-fetch-rpc', () => {
 		});
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
 		});
 
-		result.current.setData(null);
+		result.current[1].setData(null);
 
 		await waitFor(() => {
-			expect(result.current.data).toBeNull();
+			expect(result.current[0].data).toBeNull();
 		});
 	});
 
@@ -1029,37 +989,37 @@ describe('/use-fetch-rpc', () => {
 			});
 		});
 
-		expect(result.current.settled).toBeFalsy();
-		expect(result.current.settledTimes).toEqual(0);
+		expect(result.current[0].settled).toBeFalsy();
+		expect(result.current[0].settledTimes).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
 		});
 
-		expect(result.current.settled).toBeFalsy();
-		expect(result.current.settledTimes).toEqual(0);
+		expect(result.current[0].settled).toBeFalsy();
+		expect(result.current[0].settledTimes).toEqual(0);
 
-		result.current.setData({ a: 2, args: [] });
+		result.current[1].setData({ a: 2, args: [] });
 
 		await waitFor(() => {
-			expect(result.current.settled).toBeTruthy();
-			expect(result.current.settledTimes).toEqual(1);
+			expect(result.current[0].settled).toBeTruthy();
+			expect(result.current[0].settledTimes).toEqual(1);
 		});
 
-		result.current.setData(data => {
+		result.current[1].setData(data => {
 			return { ...data!, a: 3 };
 		});
 
 		await waitFor(() => {
-			expect(result.current.settled).toBeTruthy();
-			expect(result.current.settledTimes).toEqual(2);
+			expect(result.current[0].settled).toBeTruthy();
+			expect(result.current[0].settledTimes).toEqual(2);
 		});
 
-		result.current.setData(null);
+		result.current[1].setData(null);
 
 		await waitFor(() => {
-			expect(result.current.settled).toBeTruthy();
-			expect(result.current.settledTimes).toEqual(3);
+			expect(result.current[0].settled).toBeTruthy();
+			expect(result.current[0].settledTimes).toEqual(3);
 		});
 	});
 
@@ -1072,24 +1032,24 @@ describe('/use-fetch-rpc', () => {
 			});
 		});
 
-		expect(result.current.settled).toBeFalsy();
-		expect(result.current.settledTimes).toEqual(0);
+		expect(result.current[0].settled).toBeFalsy();
+		expect(result.current[0].settledTimes).toEqual(0);
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
 		});
 
-		const settledBefore = result.current.settled;
-		const settledTimesBefore = result.current.settledTimes;
+		const settledBefore = result.current[0].settled;
+		const settledTimesBefore = result.current[0].settledTimes;
 
-		await result.current.fetch();
+		await result.current[1].fetch();
 
 		await waitFor(() => {
-			expect(result.current.loading).toBeFalsy();
+			expect(result.current[0].loading).toBeFalsy();
 		});
 
-		expect(result.current.settled).toEqual(settledBefore);
-		expect(result.current.settledTimes).toEqual(settledTimesBefore);
+		expect(result.current[0].settled).toEqual(settledBefore);
+		expect(result.current[0].settledTimes).toEqual(settledTimesBefore);
 	});
 
 	it('should reset settled and settledTimes on reset', async () => {
@@ -1102,21 +1062,21 @@ describe('/use-fetch-rpc', () => {
 		});
 
 		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
+			expect(result.current[0].data).toEqual({ a: 1, args: [] });
 		});
 
-		result.current.setData({ a: 2, args: [] });
+		result.current[1].setData({ a: 2, args: [] });
 
 		await waitFor(() => {
-			expect(result.current.settled).toBeTruthy();
-			expect(result.current.settledTimes).toEqual(1);
+			expect(result.current[0].settled).toBeTruthy();
+			expect(result.current[0].settledTimes).toEqual(1);
 		});
 
-		result.current.reset();
+		result.current[1].reset();
 
 		await waitFor(() => {
-			expect(result.current.settled).toBeFalsy();
-			expect(result.current.settledTimes).toEqual(0);
+			expect(result.current[0].settled).toBeFalsy();
+			expect(result.current[0].settledTimes).toEqual(0);
 		});
 	});
 
@@ -1151,7 +1111,7 @@ describe('/use-fetch-rpc', () => {
 		vi.useRealTimers();
 
 		await waitFor(() => {
-			expect(result.current.runningInterval).toEqual(600);
+			expect(result.current[0].runningInterval).toEqual(600);
 		});
 	});
 
@@ -1173,7 +1133,7 @@ describe('/use-fetch-rpc', () => {
 			);
 		});
 
-		result.current.startInterval(600);
+		result.current[1].startInterval(600);
 
 		act(() => {
 			vi.advanceTimersByTime(600);
@@ -1188,44 +1148,23 @@ describe('/use-fetch-rpc', () => {
 		vi.useRealTimers();
 
 		await waitFor(() => {
-			expect(result.current.runningInterval).toEqual(600);
+			expect(result.current[0].runningInterval).toEqual(600);
 		});
 
-		result.current.stopInterval();
+		result.current[1].stopInterval();
 
 		await waitFor(() => {
-			expect(result.current.runningInterval).toEqual(0);
+			expect(result.current[0].runningInterval).toEqual(0);
 		});
 	});
 
-	it('should return an object (not a tuple) by default', async () => {
+	it('should return a [state, actions] tuple', async () => {
 		const { result } = renderHook(() => {
 			const { fetchRpc } = useFetchRpc<TestRpc>();
 
 			return fetchRpc((rpc, ...args: any[]) => {
 				return rpc.test(...args);
 			});
-		});
-
-		expect(result.current).not.toBeInstanceOf(Array);
-		expect(result.current.data).toBeNull();
-		expect(result.current.fetch).toBeTypeOf('function');
-
-		await waitFor(() => {
-			expect(result.current.data).toEqual({ a: 1, args: [] });
-		});
-	});
-
-	it('should return a tuple when options.tuple is true', async () => {
-		const { result } = renderHook(() => {
-			const { fetchRpc } = useFetchRpc<TestRpc>();
-
-			return fetchRpc(
-				(rpc, ...args: any[]) => {
-					return rpc.test(...args);
-				},
-				{ tuple: true }
-			);
 		});
 
 		expect(result.current).toBeInstanceOf(Array);
@@ -1251,12 +1190,9 @@ describe('/use-fetch-rpc', () => {
 		const { rerender, result } = renderHook(() => {
 			const { fetchRpc } = useFetchRpc<TestRpc>();
 
-			return fetchRpc(
-				(rpc, ...args: any[]) => {
-					return rpc.test(...args);
-				},
-				{ tuple: true }
-			);
+			return fetchRpc((rpc, ...args: any[]) => {
+				return rpc.test(...args);
+			});
 		});
 
 		const firstActions = result.current[1];
@@ -1281,7 +1217,7 @@ describe('/use-fetch-rpc', () => {
 					(rpc, ...args: any[]) => {
 						return rpc.test(...args);
 					},
-					{ triggerInterval, tuple: true }
+					{ triggerInterval }
 				);
 			},
 			{ initialProps: { triggerInterval: 0 } }

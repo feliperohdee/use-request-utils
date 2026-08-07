@@ -6,6 +6,8 @@ A lightweight, [browser, cloudflare workers, node, deno, etc.] compatible collec
 [![Vitest](https://img.shields.io/badge/-Vitest-729B1B?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+> **Breaking change (v2)**: `fetchHttp` / `lazyFetchHttp` / `fetchRpc` / `lazyFetchRpc` now always return a `[state, actions]` tuple. The previous single-object return (state and actions merged) and the `tuple` option were removed. Migrate by destructuring the tuple: `const { data, fetch } = fetchHttp(fn)` becomes `const [{ data }, { fetch }] = fetchHttp(fn)`.
+
 ## Index
 
 - [Installation](#installation)
@@ -2844,10 +2846,10 @@ function MyComponent() {
 	const { fetchHttp, lazyFetchHttp } = useFetchHttp();
 
 	// --- Automatic/Eager Fetching with fetchHttp ---
-	const { data: user, loading: userLoading } = fetchHttp(/* ... fn, options ... */);
+	const [{ data: user, loading: userLoading }] = fetchHttp(/* ... fn, options ... */);
 
-	// --- Manual/Lazy Fetching with  throw if options.triggerInterval is not a num ---
-	const { fetch: triggerSearch, data: searchResults, loading: searchLoading } = lazyFetchHttp(/* ... fn, options ... */);
+	// --- Manual/Lazy Fetching with lazyFetchHttp ---
+	const [{ data: searchResults, loading: searchLoading }, { fetch: triggerSearch }] = lazyFetchHttp(/* ... fn, options ... */);
 
 	// Call triggerSearch() when needed
 }
@@ -2869,7 +2871,7 @@ The `useFetchHttp()` hook returns an object with the following methods:
       - `triggerDeps`: Array of dependencies to trigger the fetch.
       - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
       - `triggerInterval`: Number of milliseconds to trigger the fetch.
-    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods:
+    - **Returns**: `UseFetchResponse<Mapped>` — a `[state, actions]` tuple:
       - **State Fields:**
         - `data` (`Mapped | null`): The fetched and mapped data.
         - `error` (`HttpError | null`): Any error that occurred during fetching.
@@ -2891,30 +2893,31 @@ The `useFetchHttp()` hook returns an object with the following methods:
         - `stopInterval()`: Stops interval polling.
 
 2.  **`lazyFetchHttp<T, Mapped = T>(fn, options?)`**
-    - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
+    - Prepares a data fetch but **does not** run it automatically. Use the returned `fetch` action to trigger the request manually.
     - **`fn` (`(fetch: Fetch.Http, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchHttpfetch`.
-    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'>`, optional)**:
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
       - `effect`: Function to execute when the data is fetched. Receives the `fetch.http` instance and the fetched data.
       - `ignoreAbort`: Whether to ignore the abort signal.
       - `mapper`: Function to map the fetched data. Receives the `fetch.http` instance and the fetched data.
-    - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
+    - **Returns**: `UseFetchResponse<Mapped>` — a `[state, actions]` tuple. Call the `fetch(...)` action to execute the request.
 
-#### Optional tuple return (`{ tuple: true }`)
+#### `[state, actions]` tuple return
 
-By default the fetch functions return a single object mixing state and actions. Pass `{ tuple: true }` to get a `[state, actions]` tuple instead — the state object holds only data/flags, and `actions` is a stable object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`). This mirrors the `useState` ergonomics and lets you name both sides:
+> **Breaking change (v2)**: the fetch functions now always return a `[state, actions]` tuple. The previous single-object return (state and actions merged) and the `tuple` option were removed.
+
+The fetch functions return a `[state, actions]` tuple — the state object holds only data/flags, and `actions` is a stable object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`). This mirrors the `useState` ergonomics and lets you name both sides:
 
 ```tsx
 const { fetchHttp, lazyFetchHttp } = useFetchHttp();
 
-// default (object) — unchanged, fully backward compatible:
-const { data, fetch, loading } = fetchHttp(getUser);
+const [user, userActions] = fetchHttp(getUser);
+const [{ data }, { fetch }] = lazyFetchHttp(searchUsers);
 
-// tuple:
-const [user, userActions] = fetchHttp(getUser, { tuple: true });
-const [{ data }, { fetch }] = lazyFetchHttp(searchUsers, { tuple: true });
+// before (v1): const { data, fetch, loading } = fetchHttp(getUser);
+// after (v2): const [{ data, loading }, { fetch }] = fetchHttp(getUser);
 ```
 
-The `actions` object is memoized, so it (and every function on it) is stable across renders — as long as `triggerInterval` doesn't change — and safe to list in `useEffect` / `useCallback` dependency arrays. Pass `{ tuple: true }` inline at the call site (not via a pre-declared variable) so TypeScript infers the tuple return type.
+The `actions` object is memoized, so it (and every function on it) is stable across renders — as long as `triggerInterval` doesn't change — and safe to list in `useEffect` / `useCallback` dependency arrays.
 
 #### Usage Examples
 
@@ -2939,7 +2942,7 @@ function UserProfile({ userId }) {
   }, []);
 
   // Use http.fetch for automatic fetching based on triggerDeps
-  const { data: user, loading, error, loaded, reset, loadedTimes, fetch: manualFetch } = fetchHttp(
+  const [{ data: user, loading, error, loaded, loadedTimes }, { fetch: manualFetch, reset }] = fetchHttp(
     fetchUser,
     {
 	  shouldFetch: !!userId && userId > 0,
@@ -2980,7 +2983,7 @@ function SearchUsers() {
   }, []);
 
   // Use lazyFetchHttp for manual triggering
-  const { data: searchResult, loading, error, fetch: triggerSearch } = lazyFetchHttp(
+  const [{ data: searchResult, loading, error }, { fetch: triggerSearch }] = lazyFetchHttp(
     searchUsersFn,
     {
       mapper: ({ data }) => (data?.status === 200 ? data.body.results : [])
@@ -3028,7 +3031,7 @@ function LiveStatus() {
     }, []);
 
     // Use fetchHttp with triggerInterval option
-    const { data: response, loading, error, runningInterval, stopInterval, startInterval } = fetchHttp(
+    const [{ data: response, loading, error, runningInterval }, { startInterval, stopInterval }] = fetchHttp(
         fetchStatus,
         {
             triggerInterval: 5000 // Poll every 5 seconds
@@ -3078,10 +3081,10 @@ function MyRpcComponent() {
 	const { fetchRpc, lazyFetchRpc } = useFetchRpc<MyRpcService>();
 
 	// --- Automatic/Eager Fetching with fetchRpc ---
-	const { data: userData, loading: userLoading } = fetchRpc(/* ... fn, options ... */);
+	const [{ data: userData, loading: userLoading }] = fetchRpc(/* ... fn, options ... */);
 
 	// --- Manual/Lazy Fetching with lazyFetchRpc ---
-	const { fetch: triggerAction, data: actionResult, loading: actionLoading } = lazyFetchRpc(/* ... fn, options ... */);
+	const [{ data: actionResult, loading: actionLoading }, { fetch: triggerAction }] = lazyFetchRpc(/* ... fn, options ... */);
 
 	// Call triggerAction() when needed
 }
@@ -3105,7 +3108,7 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
       - `triggerDeps`: Array of dependencies to trigger the fetch.
       - `triggerDepsDebounce`: Number of milliseconds to debounce the fetch.
       - `triggerInterval`: Number of milliseconds to trigger the fetch.
-    - **Returns**: `UseFetchResponse<Mapped>`. An object containing fetching state and control methods:
+    - **Returns**: `UseFetchResponse<Mapped>` — a `[state, actions]` tuple:
       - **State Fields:**
         - `data` (`Mapped | null`): The fetched and mapped data.
         - `error` (`HttpError | null`): Any error that occurred during fetching.
@@ -3127,30 +3130,31 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
         - `stopInterval()`: Stops interval polling.
 
 2.  **`lazyFetchRpc<T, Mapped = T>(fn, options?)`**.
-    - Prepares a data fetch but **does not** run it automatically. Use the `fetch` function returned in the `UseFetchResponse` object to trigger the request manually.
+    - Prepares a data fetch but **does not** run it automatically. Use the returned `fetch` action to trigger the request manually.
     - **`fn` (`(rpc: RpcInstance, ...args: any[]) => Promise<T> | null`)**: Same fetch function definition as for `fetchRpc`.
-    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'>`, optional)**:
+    - **`options` (`Pick<UseFetchOptions<T, Mapped>, 'effect' | 'ignoreAbort' | 'mapper'>`, optional)**:
       - `effect`: Function to execute when the data is fetched. Receives the `rpcProxy` instance and the fetched data.
       - `ignoreAbort`: Whether to ignore the abort signal.
       - `mapper`: Function to map the fetched data. Receives the `rpcProxy` instance and the fetched data.
-    - **Returns**: `UseFetchResponse<Mapped>`. Call the included `fetch(...)` function to execute the request.
+    - **Returns**: `UseFetchResponse<Mapped>` — a `[state, actions]` tuple. Call the `fetch(...)` action to execute the request.
 
-#### Optional tuple return (`{ tuple: true }`)
+#### `[state, actions]` tuple return
 
-Pass `{ tuple: true }` to `fetchRpc` / `lazyFetchRpc` to receive a `[state, actions]` tuple instead of the default object. `state` holds only data/flags; `actions` is a stable, memoized object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`).
+> **Breaking change (v2)**: `fetchRpc` / `lazyFetchRpc` now always return a `[state, actions]` tuple. The previous single-object return (state and actions merged) and the `tuple` option were removed.
+
+`fetchRpc` / `lazyFetchRpc` return a `[state, actions]` tuple. `state` holds only data/flags; `actions` is a stable, memoized object (`{ abort, fetch, reset, setData, startInterval, stopInterval }`):
 
 ```tsx
 const { fetchRpc, lazyFetchRpc } = useFetchRpc<MyRpcService>();
 
-// default (object) — unchanged:
-const { data, fetch } = fetchRpc(rpc => rpc.getUser());
+const [users, usersActions] = fetchRpc(rpc => rpc.listUsers());
+const [{ data }, { fetch }] = lazyFetchRpc((rpc, id: string) => rpc.getUser(id));
 
-// tuple:
-const [users, usersActions] = fetchRpc(rpc => rpc.listUsers(), { tuple: true });
-const [{ data }, { fetch }] = lazyFetchRpc((rpc, id: string) => rpc.getUser(id), { tuple: true });
+// before (v1): const { data, fetch } = fetchRpc(rpc => rpc.getUser());
+// after (v2): const [{ data }, { fetch }] = fetchRpc(rpc => rpc.getUser());
 ```
 
-The `actions` object is memoized and stable across renders (as long as `triggerInterval` doesn't change). Pass `{ tuple: true }` inline at the call site so TypeScript infers the tuple return type.
+The `actions` object is memoized and stable across renders (as long as `triggerInterval` doesn't change).
 
 #### Usage Examples
 
@@ -3170,7 +3174,7 @@ function UserDetails({ userId }) {
   }, []);
 
   // Use fetchRpc for automatic execution based on triggerDeps
-  const { data: user, loading, error, loadedTimes, reset, fetch: manualFetch } = fetchRpc(
+  const [{ data: user, loading, error, loadedTimes }, { fetch: manualFetch, reset }] = fetchRpc(
     fetchUserData,
     {
       triggerDeps: [userId],
@@ -3207,7 +3211,7 @@ function CreateUserForm() {
   }, []);
 
   // Use lazyFetchRpc for manual triggering
-  const { data: createdUser, loading, error, fetch: submitCreateUser, reset } = lazyFetchRpc(
+  const [{ data: createdUser, loading, error }, { fetch: submitCreateUser, reset }] = lazyFetchRpc(
     createUserFn
   );
 
@@ -3245,7 +3249,7 @@ function DashboardData() {
     }, []);
 
     // Use fetchRpc for automatic execution + interval
-    const { data, loading, error } = fetchRpc(fetchDashboardData, {
+    const [{ data, loading, error }] = fetchRpc(fetchDashboardData, {
         triggerInterval: 30000 // Refresh every 30s
     });
 

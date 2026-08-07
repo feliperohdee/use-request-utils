@@ -1,4 +1,4 @@
-import fetchHookFactory, { UseFetchOptions, UseFetchReturn } from './use-fetch-hook-factory';
+import fetchHookFactory, { UseFetchOptions, UseFetchResponse } from './use-fetch-hook-factory';
 
 import type Rpc from './rpc';
 import useRpc, { UseRpc } from './use-rpc';
@@ -14,45 +14,26 @@ const useFetchRpc = <Client extends Rpc>(requestOptions?: { headers?: Headers; p
 		return rpc;
 	});
 
-	const fetchRpc = <
-		Data,
-		MappedData = Data,
-		FetchFnArgs extends any[] = any[],
-		const Options extends UseFetchOptions<UseRpc<Client>, Data, MappedData> = UseFetchOptions<UseRpc<Client>, Data, MappedData>
-	>(
+	const fetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
 		fetchFn: UseFetchRpcFn<Client, Data, FetchFnArgs>,
-		options: Options = {} as Options
-	): UseFetchReturn<Options, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
-		return fetchHook<Data, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>, Options>(fetchFn, options);
+		options: UseFetchOptions<UseRpc<Client>, Data, MappedData> = {}
+	): UseFetchResponse<MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
+		return fetchHook<Data, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>>(fetchFn, options);
 	};
 
-	const lazyFetchRpc = <
-		Data,
-		MappedData = Data,
-		FetchFnArgs extends any[] = any[],
-		const Options extends Pick<UseFetchOptions<UseRpc<Client>, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper' | 'tuple'> = Pick<
-			UseFetchOptions<UseRpc<Client>, Data, MappedData>,
-			'effect' | 'ignoreAbort' | 'mapper' | 'tuple'
-		>
-	>(
+	const lazyFetchRpc = <Data, MappedData = Data, FetchFnArgs extends any[] = any[]>(
 		fn: UseFetchRpcFn<Client, Data, FetchFnArgs>,
-		options?: Options
-	): UseFetchReturn<Options, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
-		const response: UseFetchReturn<Options, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> = fetchRpc<Data, MappedData, FetchFnArgs>(
-			fn,
-			{
-				effect: options?.effect,
-				ignoreAbort: options?.ignoreAbort || false,
-				mapper: options?.mapper,
-				shouldFetch: ({ initial }) => {
-					return !initial;
-				},
-				triggerDeps: [],
-				tuple: options?.tuple
-			}
-		) as UseFetchReturn<Options, MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>>;
-
-		return response;
+		options?: Pick<UseFetchOptions<UseRpc<Client>, Data, MappedData>, 'effect' | 'ignoreAbort' | 'mapper'>
+	): UseFetchResponse<MappedData, UseFetchRpcFn<Client, Data, FetchFnArgs>> => {
+		return fetchRpc<Data, MappedData, FetchFnArgs>(fn, {
+			effect: options?.effect,
+			ignoreAbort: options?.ignoreAbort || false,
+			mapper: options?.mapper,
+			shouldFetch: ({ initial }) => {
+				return !initial;
+			},
+			triggerDeps: []
+		});
 	};
 
 	return { fetchRpc, lazyFetchRpc };
