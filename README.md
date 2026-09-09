@@ -3071,6 +3071,7 @@ React hook for declaratively calling methods on an RPC service defined using the
 
 - `fetchRpc`: Executes RPC calls automatically based on dependencies, intervals, etc.
 - `lazyFetchRpc`: Prepares an RPC call that must be triggered manually.
+- `rpc`: The typed RPC proxy both fetchers call through, for imperative calls outside the fetch state (the same proxy `useRpc` returns, built once with the same `requestOptions`).
 
 ```typescript
 import useFetchRpc from 'use-request-utils/use-fetch-rpc';
@@ -3078,7 +3079,7 @@ import type { MyRpcService } from './my-rpc-service'; // Import your Rpc service
 
 function MyRpcComponent() {
 	// 1. Get the rpc fetcher instance, specifying the Rpc service type
-	const { fetchRpc, lazyFetchRpc } = useFetchRpc<MyRpcService>();
+	const { fetchRpc, lazyFetchRpc, rpc } = useFetchRpc<MyRpcService>();
 
 	// --- Automatic/Eager Fetching with fetchRpc ---
 	const [{ data: userData, loading: userLoading }] = fetchRpc(/* ... fn, options ... */);
@@ -3087,6 +3088,9 @@ function MyRpcComponent() {
 	const [{ data: actionResult, loading: actionLoading }, { fetch: triggerAction }] = lazyFetchRpc(/* ... fn, options ... */);
 
 	// Call triggerAction() when needed
+
+	// --- Imperative call, no hook state (e.g. a streaming Response) ---
+	// const response = await rpc.someMethod.asResponse(input);
 }
 ```
 
@@ -3139,6 +3143,10 @@ The `useFetchRpc<R extends Rpc>(requestOptions?)` hook returns an object with th
     - **Returns**: `UseFetchResponse<Mapped>` — a `[state, actions]` tuple. Call the `fetch(...)` action to execute the request.
 
 #### `[state, actions]` tuple return
+
+3.  **`rpc`**
+
+    - The `UseRpc<R>` proxy the hook created from `requestOptions`. Use it for calls that must not go through the fetch state, such as reading a streaming `Response` with `rpc.method.asResponse(...)`. It is the same instance the two fetchers use, so headers and pathname match.
 
 > **Breaking change (v2)**: `fetchRpc` / `lazyFetchRpc` now always return a `[state, actions]` tuple. The previous single-object return (state and actions merged) and the `tuple` option were removed.
 

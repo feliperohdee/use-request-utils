@@ -1237,4 +1237,14 @@ describe('/use-fetch-rpc', () => {
 		expect(result.current[1]).not.toBe(firstActions);
 		expect(result.current[1].fetch).toBe(firstFetch);
 	});
+
+	it('should expose the rpc proxy the fetchers call through', async () => {
+		const { result } = renderHook(() => {
+			return useFetchRpc<TestRpc>();
+		});
+
+		const res = await result.current.rpc.test(1);
+
+		expect(res).toEqual({ a: 1, args: [1] });
+	});
 });

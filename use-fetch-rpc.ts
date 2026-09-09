@@ -36,7 +36,7 @@ const useFetchRpc = <Client extends Rpc>(requestOptions?: { headers?: Headers; p
 		});
 	};
 
-	return { fetchRpc, lazyFetchRpc };
+	return { fetchRpc, lazyFetchRpc, rpc };
 };
 
 export default useFetchRpc;
