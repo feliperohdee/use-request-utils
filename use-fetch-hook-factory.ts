@@ -203,6 +203,7 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 		const currentPromiseRef = useRef<Promise<Data> | null>(null);
 		const effectRef = useRef<EffectFn<Client, MappedData> | null>(options.effect ?? null);
 		const fetchFnRef = useRef<FetchFn>(fetchFn);
+		const ignoreAbortRef = useRef(options.ignoreAbort ?? false);
 		const initRef = useRef(false);
 		const intervalRef = useRef<NodeJS.Timeout | null>(null);
 		const mapperRef = useRef<MapperFn<Client, Data, MappedData> | null>(options.mapper ?? null);
@@ -448,6 +449,13 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 			fetchFnRef.current = fetchFn;
 		}, [fetchFn]);
 
+		// update ignoreAbort ref
+		useEffect(() => {
+			if (!isUndefined(options.ignoreAbort)) {
+				ignoreAbortRef.current = options.ignoreAbort;
+			}
+		}, [options.ignoreAbort]);
+
 		// update mapper ref
 		useEffect(() => {
 			if (!isUndefined(options.mapper)) {
@@ -510,6 +518,15 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 
 			return stopInterval;
 		}, [options.triggerInterval, startInterval, stopInterval]);
+
+		// abort in-flight request on unmount unless ignoreAbort
+		useEffect(() => {
+			return () => {
+				if (!ignoreAbortRef.current) {
+					abort();
+				}
+			};
+		}, [abort]);
 
 		// create a stable fetch function to avoid re-creating the fetch function on every render
 		const stableFetch = useMemo(() => {

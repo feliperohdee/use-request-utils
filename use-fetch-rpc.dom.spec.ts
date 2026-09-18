@@ -832,6 +832,38 @@ describe('/use-fetch-rpc', () => {
 		});
 	});
 
+	it('should abort in-flight request on unmount', () => {
+		const mock = createAbortableMock('', 1000);
+		const { unmount } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(mock.fn);
+		});
+
+		expect(mock.fn).toHaveBeenCalledOnce();
+		expect(mock.abort).not.toHaveBeenCalled();
+
+		unmount();
+
+		expect(mock.abort).toHaveBeenCalledOnce();
+	});
+
+	it('should not abort in-flight request on unmount when ignoreAbort is true', () => {
+		const mock = createAbortableMock('', 1000);
+		const { unmount } = renderHook(() => {
+			const { fetchRpc } = useFetchRpc<TestRpc>();
+
+			return fetchRpc(mock.fn, { ignoreAbort: true });
+		});
+
+		expect(mock.fn).toHaveBeenCalledOnce();
+		expect(mock.abort).not.toHaveBeenCalled();
+
+		unmount();
+
+		expect(mock.abort).not.toHaveBeenCalled();
+	});
+
 	it('should works with reset', async () => {
 		const { result } = renderHook(() => {
 			const { fetchRpc } = useFetchRpc<TestRpc>();
