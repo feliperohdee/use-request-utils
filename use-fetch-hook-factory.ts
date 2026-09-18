@@ -9,6 +9,7 @@ import isUndefined from 'lodash/isUndefined';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import HttpError from 'use-http-error';
 import useDistinct from 'use-good-hooks/use-distinct';
+import useUnmount from 'use-good-hooks/use-unmount';
 
 const isPromise = <T>(value: any): value is Promise<T> => {
 	return value && typeof value.then === 'function';
@@ -437,6 +438,15 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 
 		const declaredTriggerDeps = !isUndefined(options.triggerDeps);
 
+		// abort in-flight request on unmount unless ignoreAbort
+		useUnmount(() => {
+			if (ignoreAbortRef.current) {
+				return;
+			}
+
+			abort();
+		});
+
 		// update effect ref
 		useEffect(() => {
 			if (!isUndefined(options.effect)) {
@@ -518,15 +528,6 @@ const fetchHookFactory = <Client>(clientFactory: () => Client) => {
 
 			return stopInterval;
 		}, [options.triggerInterval, startInterval, stopInterval]);
-
-		// abort in-flight request on unmount unless ignoreAbort
-		useEffect(() => {
-			return () => {
-				if (!ignoreAbortRef.current) {
-					abort();
-				}
-			};
-		}, [abort]);
 
 		// create a stable fetch function to avoid re-creating the fetch function on every render
 		const stableFetch = useMemo(() => {

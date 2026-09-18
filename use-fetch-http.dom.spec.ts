@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useCallback, useEffect, useMemo } from 'react';
+import { StrictMode, useCallback, useEffect, useMemo } from 'react';
 import HttpError from 'use-http-error';
 
 import { Fetch } from './fetch';
@@ -789,7 +789,7 @@ describe('/use-fetch-http', () => {
 		});
 	});
 
-	it('should abort in-flight request on unmount', () => {
+	it('should abort in-flight request on unmount', async () => {
 		const mock = createAbortableMock('', 1000);
 		const { unmount } = renderHook(() => {
 			const { fetchHttp } = useFetchHttp();
@@ -802,10 +802,12 @@ describe('/use-fetch-http', () => {
 
 		unmount();
 
-		expect(mock.abort).toHaveBeenCalledOnce();
+		await waitFor(() => {
+			expect(mock.abort).toHaveBeenCalledOnce();
+		});
 	});
 
-	it('should not abort in-flight request on unmount when ignoreAbort is true', () => {
+	it('should not abort in-flight request on unmount when ignoreAbort is true', async () => {
 		const mock = createAbortableMock('', 1000);
 		const { unmount } = renderHook(() => {
 			const { fetchHttp } = useFetchHttp();
@@ -817,8 +819,28 @@ describe('/use-fetch-http', () => {
 		expect(mock.abort).not.toHaveBeenCalled();
 
 		unmount();
+		await Promise.resolve();
 
 		expect(mock.abort).not.toHaveBeenCalled();
+	});
+
+	it('should fetch after Strict Mode remount', async () => {
+		const mock = createAbortableMock('', 50);
+		const { result } = renderHook(
+			() => {
+				const { fetchHttp } = useFetchHttp();
+
+				return fetchHttp(mock.fn);
+			},
+			{ wrapper: StrictMode }
+		);
+
+		await waitFor(() => {
+			expect(result.current[0].data).toEqual({ a: 1 });
+			expect(result.current[0].error).toBeNull();
+			expect(result.current[0].loaded).toBeTruthy();
+			expect(result.current[0].loading).toBeFalsy();
+		});
 	});
 
 	it('should works with reset', async () => {
