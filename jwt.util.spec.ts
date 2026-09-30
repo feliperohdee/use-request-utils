@@ -31,11 +31,11 @@ describe('/jwt-util', () => {
 		});
 
 		it('base64StringToArrayBuffer', () => {
-			expect(util.base64StringToArrayBuffer(testBase64String)).toEqual(testArrayBuffer);
+			expect(new Uint8Array(util.base64StringToArrayBuffer(testBase64String))).toStrictEqual(testUint8Array);
 		});
 
 		it('base64UrlToArrayBuffer', () => {
-			expect(util.base64UrlToArrayBuffer(testBase64String)).toEqual(testArrayBuffer);
+			expect(new Uint8Array(util.base64UrlToArrayBuffer(testBase64String))).toStrictEqual(testUint8Array);
 		});
 
 		it('base64UrlToText', () => {
@@ -51,7 +51,7 @@ describe('/jwt-util', () => {
 		});
 
 		it('textToArrayBuffer', () => {
-			expect(util.textToArrayBuffer(testString)).toEqual(testUint8Array.buffer);
+			expect(new Uint8Array(util.textToArrayBuffer(testString))).toStrictEqual(testUint8Array);
 		});
 
 		it('textToBase64Url', () => {
@@ -59,7 +59,9 @@ describe('/jwt-util', () => {
 		});
 
 		it('pemToBinary', () => {
-			expect(util.pemToBinary(`-----BEGIN PUBLIC KEY-----\n${testBase64String}\n-----END PUBLIC KEY-----`)).toEqual(testArrayBuffer);
+			expect(new Uint8Array(util.pemToBinary(`-----BEGIN PUBLIC KEY-----\n${testBase64String}\n-----END PUBLIC KEY-----`))).toStrictEqual(
+				testUint8Array
+			);
 		});
 	});
 
