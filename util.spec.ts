@@ -48,6 +48,21 @@ describe('/util', () => {
 			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), 'Hello,');
 			expect(onRead).toHaveBeenCalledWith(expect.any(Uint8Array), ' world!');
 		});
+
+		it('should keep a multibyte character split across chunks', async () => {
+			const bytes = new TextEncoder().encode('inglês');
+			const stream = new ReadableStream<Uint8Array>({
+				start(controller) {
+					controller.enqueue(bytes.subarray(0, 5));
+					controller.enqueue(bytes.subarray(5));
+					controller.close();
+				}
+			});
+
+			const res = await util.readStream(stream);
+
+			expect(res).toEqual('inglês');
+		});
 	});
 
 	describe('readStreamToArrayBuffer', () => {

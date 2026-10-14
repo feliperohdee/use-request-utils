@@ -52,10 +52,11 @@ const readStream = async (stream: ReadableStream | null, onRead?: (chunk: Uint8A
 		const { done, value } = await reader.read();
 
 		if (done) {
+			result += textDecoder.decode();
 			return result;
 		}
 
-		const decoded = textDecoder.decode(value);
+		const decoded = textDecoder.decode(value, { stream: true });
 
 		if (onRead) {
 			onRead(value, decoded);
